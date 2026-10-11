@@ -73,3 +73,10 @@ describe('validateVehicleForm', () => {
     expect(result).toEqual({ ok: false, errors: { year: 'required', odometerKm: 'required' } });
   });
 });
+
+describe('validateVehicleForm in miles', () => {
+  it('converts the odometer to kilometres', () => {
+    const result = validateVehicleForm({ ...valid, odometerKm: '10,000' }, 2026, 'mi');
+    expect(result).toMatchObject({ ok: true, value: { odometerKm: 16_093 } });
+  });
+});

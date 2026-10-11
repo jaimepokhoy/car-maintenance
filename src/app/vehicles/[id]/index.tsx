@@ -7,31 +7,34 @@ import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
 import { DueStatusRow } from '@/components/due-status-row';
+import { SegmentedControl } from '@/components/segmented-control';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { deleteServiceRecord, listServiceRecords, logService } from '@/db/service-records';
 import type { Db } from '@/db/types';
-import { deleteVehicle, getVehicle } from '@/db/vehicles';
+import { deleteVehicle, getVehicle, updateTireSet } from '@/db/vehicles';
 import {
   computeVehicleDueStatuses,
-  formatDate,
-  formatDistance,
-  formatMoney,
+  nextTireReminder,
   resolveSchedule,
+  TIRE_SETS,
   toIsoDate,
   type MaintenanceItemId,
   type ServiceRecord,
+  type TireSet,
 } from '@/domain';
 import { useDbQuery } from '@/hooks/use-db-query';
-import { useLocale } from '@/hooks/use-locale';
+import { useFormat } from '@/hooks/use-format';
+import { usePreferences } from '@/hooks/use-preferences';
 import { useTheme } from '@/hooks/use-theme';
 import { refreshReminders } from '@/lib/reminders';
 
 export default function VehicleScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
-  const locale = useLocale();
+  const format = useFormat();
+  const { province } = usePreferences().preferences;
   const theme = useTheme();
   const db = useSQLiteContext();
   const load = useCallback(
@@ -79,6 +82,15 @@ export default function VehicleScreen() {
     reload();
   }
 
+  async function changeTires(tireSet: TireSet) {
+    await updateTireSet(db, vehicle.id, tireSet, new Date());
+    refreshReminders(db);
+    reload();
+  }
+
+  const tireReminder =
+    province && vehicle.tireSet ? nextTireReminder(toIsoDate(new Date()), province, vehicle.tireSet) : null;
+
   function confirmDeleteService(record: ServiceRecord) {
     Alert.alert(t('vehicle.deleteServiceTitle'), undefined, [
       { text: t('vehicle.cancel'), style: 'cancel' },
@@ -119,7 +131,7 @@ export default function VehicleScreen() {
           </ThemedText>
           <View style={styles.row}>
             <ThemedText type="small">
-              {`${t('vehicle.odometer')}: ${formatDistance(vehicle.odometerKm, 'km', locale)}`}
+              {`${t('vehicle.odometer')}: ${format.distance(vehicle.odometerKm)}`}
             </ThemedText>
             <Link href={{ pathname: '/vehicles/[id]/odometer', params: { id: vehicle.id } }} asChild>
               <Pressable accessibilityRole="button" hitSlop={Spacing.two}>
@@ -134,6 +146,31 @@ export default function VehicleScreen() {
         <Link href={{ pathname: '/vehicles/[id]/log', params: { id: vehicle.id } }} asChild>
           <Button title={t('vehicle.logService')} />
         </Link>
+
+        <ThemedView type="backgroundElement" style={styles.card}>
+          <SegmentedControl
+            label={t('tires.label')}
+            value={vehicle.tireSet ?? ('' as TireSet)}
+            onChange={changeTires}
+            options={TIRE_SETS.map((set) => ({ value: set, label: t(`tires.${set}`) }))}
+          />
+          {tireReminder ? (
+            <ThemedText type="small" themeColor="textSecondary">
+              {[
+                t(`tires.${tireReminder.action}`, { date: format.date(tireReminder.remindOn) }),
+                tireReminder.legalDeadline && tireReminder.action === 'install_winter'
+                  ? t('tires.legal', { date: format.date(tireReminder.legalDeadline) })
+                  : null,
+              ]
+                .filter(Boolean)
+                .join(' ')}
+            </ThemedText>
+          ) : vehicle.tireSet && !province ? (
+            <ThemedText type="small" themeColor="textSecondary">
+              {t('tires.setProvince')}
+            </ThemedText>
+          ) : null}
+        </ThemedView>
 
         <ThemedText type="smallBold" accessibilityRole="header">
           {t('vehicle.maintenance')}
@@ -177,10 +214,10 @@ export default function VehicleScreen() {
                 onLongPress={() => confirmDeleteService(record)}
                 style={styles.history}>
                 <View style={styles.row}>
-                  <ThemedText type="smallBold">{formatDate(record.performedOn, locale)}</ThemedText>
+                  <ThemedText type="smallBold">{format.date(record.performedOn)}</ThemedText>
                   {record.costCents !== undefined ? (
                     <ThemedText type="small">
-                      {formatMoney(record.costCents, record.currency ?? 'CAD', locale)}
+                      {format.money(record.costCents, record.currency)}
                     </ThemedText>
                   ) : null}
                 </View>
@@ -188,7 +225,7 @@ export default function VehicleScreen() {
                   {record.itemIds.map((itemId) => t(`items.${itemId}`)).join(', ')}
                 </ThemedText>
                 <ThemedText type="small" themeColor="textSecondary">
-                  {[formatDistance(record.odometerKm, 'km', locale), record.notes].filter(Boolean).join(' · ')}
+                  {[format.distance(record.odometerKm), record.notes].filter(Boolean).join(' · ')}
                 </ThemedText>
               </Pressable>
             ))

@@ -60,3 +60,10 @@ describe('validateServiceForm', () => {
     });
   });
 });
+
+describe('validateServiceForm in miles', () => {
+  it('converts the odometer to kilometres', () => {
+    const result = validateServiceForm({ ...valid, odometerKm: '1000' }, '2026-10-11', 'mi');
+    expect(result).toMatchObject({ ok: true, value: { odometerKm: 1_609 } });
+  });
+});

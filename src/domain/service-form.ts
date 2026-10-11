@@ -1,5 +1,6 @@
 import { parseWholeNumber } from './vehicle-form';
-import type { IsoDate, MaintenanceItemId } from './types';
+import type { DistanceUnit, IsoDate, MaintenanceItemId } from './types';
+import { displayToKm } from './units';
 
 export interface ServiceFormValues {
   itemIds: MaintenanceItemId[];
@@ -42,13 +43,19 @@ export function parseMoneyToCents(input: string): number | null {
   return Math.round(Number(normalized) * 100);
 }
 
-export function validateServiceForm(values: ServiceFormValues, today: IsoDate): ServiceFormResult {
+/** `odometerKm` is entered in the owner's unit and returned in kilometres. */
+export function validateServiceForm(
+  values: ServiceFormValues,
+  today: IsoDate,
+  unit: DistanceUnit = 'km',
+): ServiceFormResult {
   const errors: Partial<Record<keyof ServiceFormValues, ServiceFormError>> = {};
 
   if (values.itemIds.length === 0) errors.itemIds = 'noItems';
   if (values.performedOn > today) errors.performedOn = 'futureDate';
 
-  const odometerKm = parseWholeNumber(values.odometerKm);
+  const entered = parseWholeNumber(values.odometerKm);
+  const odometerKm = entered === null ? null : Math.round(displayToKm(entered, unit));
   if (!values.odometerKm.trim()) errors.odometerKm = 'required';
   else if (odometerKm === null || odometerKm > MAX_ODOMETER_KM) errors.odometerKm = 'invalidOdometer';
 

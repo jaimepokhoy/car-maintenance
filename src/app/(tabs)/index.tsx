@@ -13,14 +13,13 @@ import type { Db } from '@/db/types';
 import { listVehicles } from '@/db/vehicles';
 import {
   computeVehicleDueStatuses,
-  formatDistance,
   resolveSchedule,
   toIsoDate,
   type DueStatus,
   type Vehicle,
 } from '@/domain';
 import { useDbQuery } from '@/hooks/use-db-query';
-import { useLocale } from '@/hooks/use-locale';
+import { useFormat } from '@/hooks/use-format';
 
 interface GarageEntry {
   vehicle: Vehicle;
@@ -63,7 +62,7 @@ export default function GarageScreen() {
 
 function VehicleCard({ entry: { vehicle, next } }: { entry: GarageEntry }) {
   const { t } = useTranslation();
-  const locale = useLocale();
+  const format = useFormat();
   const nextColor = useDueStateColor(next?.state ?? 'ok');
 
   return (
@@ -73,7 +72,7 @@ function VehicleCard({ entry: { vehicle, next } }: { entry: GarageEntry }) {
           <ThemedText type="smallBold">{vehicle.nickname}</ThemedText>
           <ThemedText type="small" themeColor="textSecondary">
             {`${vehicle.year} ${vehicle.make} ${vehicle.model} · ${t('garage.odometer', {
-              distance: formatDistance(vehicle.odometerKm, 'km', locale),
+              distance: format.distance(vehicle.odometerKm),
             })}`}
           </ThemedText>
           <ThemedText type="small" style={{ color: nextColor }}>

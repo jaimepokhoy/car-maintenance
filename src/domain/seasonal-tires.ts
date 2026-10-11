@@ -1,9 +1,14 @@
 import type { IsoDate } from './types';
 
-export type Province =
-  | 'AB' | 'BC' | 'MB' | 'NB' | 'NL' | 'NS' | 'NT' | 'NU' | 'ON' | 'PE' | 'QC' | 'SK' | 'YT';
+export const PROVINCES = [
+  'AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT',
+] as const;
 
-export type TireSet = 'winter' | 'all_season' | 'summer';
+export type Province = (typeof PROVINCES)[number];
+
+export const TIRE_SETS = ['winter', 'all_season', 'summer'] as const;
+
+export type TireSet = (typeof TIRE_SETS)[number];
 
 export interface TireReminder {
   action: 'install_winter' | 'remove_winter';

@@ -4,6 +4,8 @@
  * Calendar dates are ISO date strings (`YYYY-MM-DD`) with no time zone.
  */
 
+import type { TireSet } from './seasonal-tires';
+
 export type Powertrain = 'gas' | 'hybrid' | 'ev';
 
 export type DistanceUnit = 'km' | 'mi';
@@ -37,6 +39,8 @@ export interface Vehicle {
   /** Last odometer reading the owner reported. */
   odometerKm: number;
   odometerUpdatedOn: IsoDate;
+  /** Which tires are on now, for seasonal changeover reminders. */
+  tireSet?: TireSet;
 }
 
 /** How often an item is due. Whichever limit is reached first wins. */

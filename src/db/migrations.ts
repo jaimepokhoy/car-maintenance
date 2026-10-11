@@ -69,6 +69,12 @@ export const MIGRATIONS: string[] = [
 
   CREATE INDEX service_records_vehicle_idx ON service_records (vehicle_id, performed_on DESC);
   `,
+  `
+  CREATE TABLE settings (
+    key TEXT PRIMARY KEY NOT NULL,
+    value TEXT NOT NULL
+  );
+  `,
 ];
 
 export async function migrate(db: Db): Promise<void> {

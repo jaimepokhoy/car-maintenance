@@ -1,4 +1,5 @@
-import type { Powertrain } from './types';
+import type { DistanceUnit, Powertrain } from './types';
+import { displayToKm } from './units';
 import { isValidVin, normalizeVin } from './vin';
 
 export interface VehicleFormValues {
@@ -39,7 +40,12 @@ export function parseWholeNumber(input: string): number | null {
   return /^\d+$/.test(digits) ? Number(digits) : null;
 }
 
-export function validateVehicleForm(values: VehicleFormValues, currentYear: number): VehicleFormResult {
+/** `odometerKm` is entered in the owner's unit and returned in kilometres. */
+export function validateVehicleForm(
+  values: VehicleFormValues,
+  currentYear: number,
+  unit: DistanceUnit = 'km',
+): VehicleFormResult {
   const errors: Partial<Record<keyof VehicleFormValues, VehicleFormError>> = {};
   const make = values.make.trim();
   const model = values.model.trim();
@@ -51,7 +57,8 @@ export function validateVehicleForm(values: VehicleFormValues, currentYear: numb
   if (!make) errors.make = 'required';
   if (!model) errors.model = 'required';
 
-  const odometerKm = parseWholeNumber(values.odometerKm);
+  const entered = parseWholeNumber(values.odometerKm);
+  const odometerKm = entered === null ? null : Math.round(displayToKm(entered, unit));
   if (!values.odometerKm.trim()) errors.odometerKm = 'required';
   else if (odometerKm === null || odometerKm > MAX_ODOMETER_KM) errors.odometerKm = 'invalidOdometer';
 

@@ -105,3 +105,33 @@ describe('planReminders', () => {
     expect(plan.some((r) => r.kind === 'odometer')).toBe(true);
   });
 });
+
+describe('planReminders: seasonal tires', () => {
+  it('needs both a province and a tire set', () => {
+    const noTires = planReminders([{ vehicle, statuses: [], records: [] }], today, 'ON');
+    expect(noTires.some((r) => r.kind === 'tires')).toBe(false);
+    const noProvince = planReminders(
+      [{ vehicle: { ...vehicle, tireSet: 'all_season' }, statuses: [], records: [] }],
+      today,
+    );
+    expect(noProvince.some((r) => r.kind === 'tires')).toBe(false);
+  });
+
+  it('reminds on the changeover date, or soon if it has passed', () => {
+    const before = planReminders(
+      [{ vehicle: { ...vehicle, tireSet: 'all_season' }, statuses: [], records: [] }],
+      '2026-09-01',
+      'QC',
+    );
+    expect(before.find((r) => r.kind === 'tires')).toMatchObject({
+      fireOn: '2026-10-15',
+      tires: { action: 'install_winter', legalDeadline: '2026-12-01' },
+    });
+    const after = planReminders(
+      [{ vehicle: { ...vehicle, tireSet: 'all_season' }, statuses: [], records: [] }],
+      '2026-11-20',
+      'ON',
+    );
+    expect(after.find((r) => r.kind === 'tires')?.fireOn).toBe('2026-11-23');
+  });
+});

@@ -2,6 +2,7 @@ import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
 import { listServiceRecords } from '@/db/service-records';
+import { getPreferences } from '@/db/settings';
 import type { Db } from '@/db/types';
 import { listVehicles } from '@/db/vehicles';
 import {
@@ -11,6 +12,7 @@ import {
   planReminders,
   resolveSchedule,
   toIsoDate,
+  type DistanceUnit,
   type IsoDate,
   type PlannedReminder,
   type Vehicle,
@@ -45,7 +47,11 @@ function atReminderTime(date: IsoDate): Date {
   return new Date(year, month - 1, day, REMINDER_HOUR);
 }
 
-function content(reminder: PlannedReminder, vehicle: Vehicle): Notifications.NotificationContentInput {
+function content(
+  reminder: PlannedReminder,
+  vehicle: Vehicle,
+  unit: DistanceUnit,
+): Notifications.NotificationContentInput {
   const t = i18n.t.bind(i18n);
   const locale = formattingLocale(i18n.language === 'fr' ? 'fr' : 'en');
   const url = `/vehicles/${vehicle.id}`;
@@ -58,10 +64,23 @@ function content(reminder: PlannedReminder, vehicle: Vehicle): Notifications.Not
     };
   }
 
+  if (reminder.kind === 'tires') {
+    const { tires } = reminder;
+    const install = tires.action === 'install_winter';
+    return {
+      title: t(install ? 'reminders.tiresInstallTitle' : 'reminders.tiresRemoveTitle', { vehicle: vehicle.nickname }),
+      body:
+        install && tires.legalDeadline
+          ? t('reminders.tiresLegalBody', { date: formatDate(tires.legalDeadline, locale) })
+          : t('reminders.tiresBody'),
+      data: { url },
+    };
+  }
+
   const { status } = reminder;
   const limits = [
     status.dueOn ? formatDate(status.dueOn, locale) : null,
-    status.dueAtKm !== undefined ? formatDistance(status.dueAtKm, 'km', locale) : null,
+    status.dueAtKm !== undefined ? formatDistance(status.dueAtKm, unit, locale) : null,
   ]
     .filter(Boolean)
     .join(t('due.or'));
@@ -88,6 +107,7 @@ export async function syncReminders(db: Db): Promise<void> {
   }
 
   const today = toIsoDate(new Date());
+  const preferences = await getPreferences(db);
   const vehicles = await listVehicles(db);
   const inputs = await Promise.all(
     vehicles.map(async (vehicle) => {
@@ -99,9 +119,9 @@ export async function syncReminders(db: Db): Promise<void> {
   const byId = new Map(vehicles.map((vehicle) => [vehicle.id, vehicle]));
 
   await Notifications.cancelAllScheduledNotificationsAsync();
-  for (const reminder of planReminders(inputs, today)) {
+  for (const reminder of planReminders(inputs, today, preferences.province)) {
     await Notifications.scheduleNotificationAsync({
-      content: content(reminder, byId.get(reminder.vehicleId)!),
+      content: content(reminder, byId.get(reminder.vehicleId)!, preferences.distanceUnit),
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.DATE,
         date: atReminderTime(reminder.fireOn),
