@@ -20,6 +20,7 @@ import {
   nextTireReminder,
   resolveSchedule,
   TIRE_SETS,
+  summarizeCosts,
   toIsoDate,
   type MaintenanceItemId,
   type ServiceRecord,
@@ -65,6 +66,7 @@ export default function VehicleScreen() {
   }
 
   const { vehicle, statuses, records } = data;
+  const costs = summarizeCosts(records, toIsoDate(new Date()));
 
   async function doneToday(itemId: MaintenanceItemId) {
     const now = new Date();
@@ -197,6 +199,34 @@ export default function VehicleScreen() {
             />
           ))}
         </ThemedView>
+
+        {costs.pricedCount > 0 ? (
+          <>
+            <ThemedText type="smallBold" accessibilityRole="header">
+              {t('costs.title')}
+            </ThemedText>
+            <ThemedView type="backgroundElement" style={styles.card}>
+              {(
+                [
+                  ['costs.thisYear', costs.thisYearCents],
+                  ['costs.last12Months', costs.last12MonthsCents],
+                  ['costs.monthlyAverage', costs.monthlyAverageCents],
+                  ['costs.allTime', costs.totalCents],
+                ] as const
+              ).map(([label, cents]) => (
+                <View key={label} style={styles.row}>
+                  <ThemedText type="small">{t(label)}</ThemedText>
+                  <ThemedText type="smallBold">{format.money(cents, 'CAD')}</ThemedText>
+                </View>
+              ))}
+              {costs.unpricedCount > 0 ? (
+                <ThemedText type="small" themeColor="textSecondary">
+                  {t('costs.unpriced', { count: costs.unpricedCount })}
+                </ThemedText>
+              ) : null}
+            </ThemedView>
+          </>
+        ) : null}
 
         <ThemedText type="smallBold" accessibilityRole="header">
           {t('vehicle.history')}

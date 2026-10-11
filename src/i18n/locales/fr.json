@@ -248,5 +248,14 @@
     "remove_winter": "Retirer les pneus d'hiver après le {{date}}",
     "legal": "Obligatoires au Québec à partir du {{date}}.",
     "setProvince": "Choisissez votre province dans les réglages pour recevoir des rappels de changement de pneus."
+  },
+  "costs": {
+    "title": "Coûts",
+    "thisYear": "Cette année",
+    "last12Months": "12 derniers mois",
+    "monthlyAverage": "Moyenne mensuelle",
+    "allTime": "Depuis le début",
+    "unpriced_one": "{{count}} entretien n'a pas de coût inscrit; les totaux sont partiels.",
+    "unpriced_other": "{{count}} entretiens n'ont pas de coût inscrit; les totaux sont partiels."
   }
 }

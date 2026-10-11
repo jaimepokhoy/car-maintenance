@@ -248,5 +248,14 @@
     "remove_winter": "Switch off winter tires after {{date}}",
     "legal": "Required in Quebec from {{date}}.",
     "setProvince": "Set your province in Settings to get changeover reminders."
+  },
+  "costs": {
+    "title": "Costs",
+    "thisYear": "This year",
+    "last12Months": "Last 12 months",
+    "monthlyAverage": "Monthly average",
+    "allTime": "All time",
+    "unpriced_one": "{{count}} service has no cost logged, so totals are partial.",
+    "unpriced_other": "{{count}} services have no cost logged, so totals are partial."
   }
 }
