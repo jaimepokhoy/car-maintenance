@@ -13,6 +13,8 @@ import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { insertVehicle } from '@/db/vehicles';
 import {
+  isValidVin,
+  normalizeVin,
   toIsoDate,
   validateVehicleForm,
   type Powertrain,
@@ -21,6 +23,7 @@ import {
 } from '@/domain';
 import { useFormat } from '@/hooks/use-format';
 import { refreshReminders, requestReminderPermission } from '@/lib/reminders';
+import { decodeVin } from '@/lib/vin-decode';
 
 const EMPTY: VehicleFormValues = {
   nickname: '',
@@ -39,11 +42,41 @@ export default function NewVehicleScreen() {
   const [values, setValues] = useState(EMPTY);
   const [errors, setErrors] = useState<Partial<Record<keyof VehicleFormValues, VehicleFormError>>>({});
   const [saving, setSaving] = useState(false);
+  const [decoding, setDecoding] = useState(false);
+  const [decodeMessage, setDecodeMessage] = useState<
+    'vehicleForm.decodeFilled' | 'vehicleForm.decodeNotFound' | 'vehicleForm.decodeFailed' | null
+  >(null);
+  const canDecode = isValidVin(normalizeVin(values.vin));
 
   const set = (field: keyof VehicleFormValues) => (value: string) =>
     setValues((current) => ({ ...current, [field]: value }));
   const errorFor = (field: keyof VehicleFormValues) =>
     errors[field] ? t(`vehicleForm.errors.${errors[field]}`) : undefined;
+
+  async function fillFromVin() {
+    setDecoding(true);
+    setDecodeMessage(null);
+    try {
+      const decoded = await decodeVin(normalizeVin(values.vin));
+      if (!decoded) {
+        setDecodeMessage('vehicleForm.decodeNotFound');
+        return;
+      }
+      setValues((current) => ({
+        ...current,
+        year: decoded.year ?? current.year,
+        make: decoded.make ?? current.make,
+        model: decoded.model ?? current.model,
+        powertrain: decoded.powertrain ?? current.powertrain,
+      }));
+      setDecodeMessage('vehicleForm.decodeFilled');
+    } catch (error) {
+      console.warn('VIN lookup failed', error);
+      setDecodeMessage('vehicleForm.decodeFailed');
+    } finally {
+      setDecoding(false);
+    }
+  }
 
   async function save() {
     const now = new Date();
@@ -70,6 +103,30 @@ export default function NewVehicleScreen() {
     <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ThemedView style={styles.flex}>
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+          <TextField
+            label={t('vehicleForm.vin')}
+            value={values.vin}
+            onChangeText={set('vin')}
+            autoCapitalize="characters"
+            autoCorrect={false}
+            maxLength={20}
+            error={errorFor('vin')}
+          />
+          <ThemedText type="small" themeColor="textSecondary">
+            {t('vehicleForm.vinHint')}
+          </ThemedText>
+          {canDecode ? (
+            <Button
+              title={decoding ? t('vehicleForm.decoding') : t('vehicleForm.decode')}
+              onPress={fillFromVin}
+              disabled={decoding}
+            />
+          ) : null}
+          {decodeMessage ? (
+            <ThemedText type="small" themeColor="textSecondary">
+              {t(decodeMessage)}
+            </ThemedText>
+          ) : null}
           <TextField
             label={t('vehicleForm.year')}
             value={values.year}
@@ -111,18 +168,6 @@ export default function NewVehicleScreen() {
             value={values.nickname}
             onChangeText={set('nickname')}
           />
-          <TextField
-            label={t('vehicleForm.vin')}
-            value={values.vin}
-            onChangeText={set('vin')}
-            autoCapitalize="characters"
-            autoCorrect={false}
-            maxLength={20}
-            error={errorFor('vin')}
-          />
-          <ThemedText type="small" themeColor="textSecondary">
-            {t('vehicleForm.vinHint')}
-          </ThemedText>
           <Button title={t('vehicleForm.save')} onPress={save} disabled={saving} />
         </ScrollView>
       </ThemedView>

@@ -85,7 +85,12 @@
       "invalidYear": "Entrez une année entre 1950 et l'an prochain",
       "invalidOdometer": "Entrez la lecture en nombre entier",
       "invalidVin": "Ce NIV semble incorrect. Vérifiez s'il y a une faute de frappe."
-    }
+    },
+    "decode": "Remplir à partir du NIV",
+    "decoding": "Recherche du NIV…",
+    "decodeFilled": "Rempli à partir du NIV. Vérifiez les détails ci-dessous.",
+    "decodeNotFound": "Ce NIV est introuvable. Remplissez les détails vous-même.",
+    "decodeFailed": "La recherche du NIV a échoué. Vérifiez votre connexion ou remplissez les détails vous-même."
   },
   "powertrain": {
     "gas": "Essence",
