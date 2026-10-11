@@ -12,7 +12,6 @@ import type { Db } from '@/db/types';
 export function useDbQuery<T>(query: (db: Db) => Promise<T>): { data: T | undefined; reload: () => void } {
   const db = useSQLiteContext();
   const [data, setData] = useState<T>();
-  const [version, setVersion] = useState(0);
 
   useFocusEffect(
     useCallback(() => {
@@ -23,8 +22,12 @@ export function useDbQuery<T>(query: (db: Db) => Promise<T>): { data: T | undefi
       return () => {
         active = false;
       };
-    }, [db, query, version]),
+    }, [db, query]),
   );
 
-  return { data, reload: useCallback(() => setVersion((v) => v + 1), []) };
+  const reload = useCallback(() => {
+    query(db).then(setData);
+  }, [db, query]);
+
+  return { data, reload };
 }
