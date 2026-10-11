@@ -1,0 +1,47 @@
+{
+  "tabs": {
+    "garage": "Véhicules",
+    "shops": "Garages",
+    "settings": "Réglages"
+  },
+  "garage": {
+    "title": "Mes véhicules",
+    "emptyTitle": "Aucun véhicule",
+    "emptyBody": "Ajoutez votre premier véhicule pour suivre son entretien et recevoir des rappels avant les échéances."
+  },
+  "shops": {
+    "title": "Garages",
+    "comingSoon": "Trouvez des garages bien notés près de chez vous. Bientôt disponible."
+  },
+  "settings": {
+    "title": "Réglages",
+    "language": "Langue",
+    "distanceUnit": "Distance",
+    "currency": "Devise",
+    "version": "Version"
+  },
+  "units": {
+    "km": "Kilomètres",
+    "mi": "Milles"
+  },
+  "dueState": {
+    "overdue": "En retard",
+    "due_soon": "Bientôt dû",
+    "ok": "À jour",
+    "unknown": "Pas encore saisi"
+  },
+  "items": {
+    "oil_change": "Vidange d'huile et filtre",
+    "tire_rotation": "Permutation des pneus",
+    "brake_inspection": "Inspection des freins",
+    "brake_fluid": "Liquide de frein",
+    "engine_air_filter": "Filtre à air du moteur",
+    "cabin_air_filter": "Filtre à air de l'habitacle",
+    "coolant": "Liquide de refroidissement",
+    "transmission_fluid": "Huile de transmission",
+    "spark_plugs": "Bougies d'allumage",
+    "battery_12v": "Test de la batterie 12 V",
+    "hv_battery_check": "Vérification de la batterie haute tension",
+    "wiper_blades": "Balais d'essuie-glace"
+  }
+}
