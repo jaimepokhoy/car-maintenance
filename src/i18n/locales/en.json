@@ -87,7 +87,8 @@
     "history": "Service history",
     "noHistory": "No services logged yet.",
     "deleteService": "Delete",
-    "deleteServiceTitle": "Delete this service?"
+    "deleteServiceTitle": "Delete this service?",
+    "learnMore": "Why it matters"
   },
   "due": {
     "dueBy": "Due by {{limits}}",
@@ -121,5 +122,73 @@
       "required": "Required",
       "invalidOdometer": "Enter the kilometres as a whole number"
     }
+  },
+  "guidance": {
+    "disclaimer": "General guidance for typical driving. Your owner's manual is the final word for your car.",
+    "whatItIs": "What it is",
+    "whyItMatters": "Why it matters",
+    "howOften": "How often",
+    "typicalCost": "Typical cost",
+    "doItYourself": "Do it yourself?",
+    "everyKm": "every {{distance}}",
+    "everyMonths": "every {{months}} months",
+    "free": "Free",
+    "costRange": "{{min}} to {{max}}",
+    "diy": {
+      "easy": "Easy: about 10 minutes with no tools, and you'll save most of the cost.",
+      "moderate": "Possible with basic tools and a safe way to lift the car. Most people use a shop.",
+      "shop": "Best left to a shop."
+    },
+    "items": {
+      "oil_change": {
+        "what": "Draining old engine oil and replacing it and the oil filter.",
+        "why": "Oil keeps the engine's moving parts from grinding against each other. Old oil breaks down and lets wear build up, which leads to expensive engine damage."
+      },
+      "tire_rotation": {
+        "what": "Moving each tire to a different position on the car.",
+        "why": "Front and rear tires wear differently. Rotating them evens out wear so the set lasts longer and the car grips evenly."
+      },
+      "brake_inspection": {
+        "what": "Checking brake pads, rotors and lines for wear or damage.",
+        "why": "Catching thin pads early is cheap. Waiting until they grind can ruin the rotors and double the bill, and worn brakes stop the car later."
+      },
+      "brake_fluid": {
+        "what": "Flushing out old brake fluid and replacing it.",
+        "why": "Brake fluid absorbs moisture over time, which lowers its boiling point and corrodes parts. Old fluid can make the pedal feel soft when braking hard."
+      },
+      "engine_air_filter": {
+        "what": "Replacing the filter that cleans air going into the engine.",
+        "why": "A clogged filter makes the engine work harder and can lower fuel economy and power. Dusty and gravel roads clog it faster."
+      },
+      "cabin_air_filter": {
+        "what": "Replacing the filter that cleans air coming through the vents.",
+        "why": "It traps dust, pollen and smoke. A clogged one makes the heat and A/C weaker and can cause musty smells and foggy windows."
+      },
+      "coolant": {
+        "what": "Draining and replacing the engine or battery coolant.",
+        "why": "Coolant keeps the engine from overheating in summer and freezing in winter. Old coolant loses its protection and can corrode the cooling system."
+      },
+      "transmission_fluid": {
+        "what": "Replacing the fluid that lubricates and cools the transmission.",
+        "why": "Worn fluid can cause rough or slipping shifts. A transmission is one of the most expensive parts to replace, so fresh fluid is cheap insurance."
+      },
+      "spark_plugs": {
+        "what": "Replacing the plugs that ignite fuel in each cylinder.",
+        "why": "Worn plugs cause misfires, rough idling, harder cold starts and worse fuel economy."
+      },
+      "battery_12v": {
+        "what": "Testing the small battery that powers starting, lights and electronics.",
+        "why": "Cold weather is hard on batteries, and most fail without warning. A quick test before winter avoids a no-start on a freezing morning. EVs have one too."
+      },
+      "hv_battery_check": {
+        "what": "A health check of the large battery that powers an EV or hybrid.",
+        "why": "It shows how much capacity the battery has kept and catches cooling or cell problems early, while they may still be covered by warranty."
+      },
+      "wiper_blades": {
+        "what": "Replacing the rubber wiper blades.",
+        "why": "Streaky wipers are a real safety issue in rain, snow and slush. Ice and road salt wear them out quickly in Canadian winters."
+      }
+    },
+    "whicheverFirst": "{{limits}}, whichever comes first"
   }
 }

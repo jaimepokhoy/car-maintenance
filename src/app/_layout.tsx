@@ -37,6 +37,7 @@ export default function RootLayout() {
             name="vehicles/[id]/odometer"
             options={{ presentation: 'modal', title: t('odometerForm.title') }}
           />
+          <Stack.Screen name="guide/[item]" options={{ presentation: 'modal', title: '' }} />
         </Stack>
       </ThemeProvider>
     </SQLiteProvider>

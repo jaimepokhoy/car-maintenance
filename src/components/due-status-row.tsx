@@ -21,10 +21,12 @@ export function DueStatusRow({
   status,
   onDoneToday,
   onLog,
+  onLearnMore,
 }: {
   status: DueStatus;
   onDoneToday?: () => void;
   onLog?: () => void;
+  onLearnMore?: () => void;
 }) {
   const { t } = useTranslation();
   const locale = useLocale();
@@ -49,14 +51,20 @@ export function DueStatusRow({
 
   return (
     <View style={styles.row}>
-      <View style={styles.header} accessible>
+      <Pressable
+        style={styles.header}
+        onPress={onLearnMore}
+        disabled={!onLearnMore}
+        accessibilityRole={onLearnMore ? 'button' : undefined}
+        accessibilityHint={onLearnMore ? t('vehicle.learnMore') : undefined}>
         <ThemedText type="smallBold" style={styles.name}>
           {t(`items.${status.itemId}`)}
+          {onLearnMore ? <ThemedText type="small" style={{ color: theme.tint }}>{'  ⓘ'}</ThemedText> : null}
         </ThemedText>
         <ThemedText type="small" style={{ color }}>
           {t(`dueState.${status.state}`)}
         </ThemedText>
-      </View>
+      </Pressable>
       <View style={styles.footer}>
         <ThemedText type="small" themeColor="textSecondary" style={styles.detail}>
           {detail}

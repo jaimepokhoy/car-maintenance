@@ -33,3 +33,14 @@ describe('maintenance item labels', () => {
     }
   });
 });
+
+describe('guidance', () => {
+  it('has an explanation for every maintenance item in both languages', () => {
+    for (const itemId of Object.keys(en.items) as (keyof typeof en.items)[]) {
+      for (const locale of [en, fr]) {
+        expect(locale.guidance.items[itemId].what).toBeTruthy();
+        expect(locale.guidance.items[itemId].why).toBeTruthy();
+      }
+    }
+  });
+});
