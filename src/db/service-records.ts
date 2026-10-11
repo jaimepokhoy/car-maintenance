@@ -39,6 +39,17 @@ export async function listServiceRecords(db: Db, vehicleId: string): Promise<Ser
   return rows.map(toServiceRecord);
 }
 
+/** Every live service record across all vehicles, for export. */
+export async function listAllServiceRecords(db: Db): Promise<ServiceRecord[]> {
+  const rows = await db.getAllAsync<ServiceRecordRow>(
+    `SELECT id, vehicle_id, item_ids, performed_on, odometer_km, cost_cents, currency, shop_id, notes
+     FROM service_records
+     WHERE deleted_at IS NULL
+     ORDER BY performed_on DESC, odometer_km DESC`,
+  );
+  return rows.map(toServiceRecord);
+}
+
 export async function insertServiceRecord(db: Db, record: ServiceRecord, now: Date): Promise<void> {
   const timestamp = now.toISOString();
   await db.runAsync(

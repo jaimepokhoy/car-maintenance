@@ -262,5 +262,20 @@
     "allTime": "Depuis le début",
     "unpriced_one": "{{count}} entretien n'a pas de coût inscrit; les totaux sont partiels.",
     "unpriced_other": "{{count}} entretiens n'ont pas de coût inscrit; les totaux sont partiels."
+  },
+  "export": {
+    "title": "Vos données",
+    "hint": "Exportez tous vos entretiens dans un tableur (CSV) pour les conserver, les imprimer ou les remettre à un acheteur.",
+    "button": "Exporter l'historique",
+    "vehicle": "Véhicule",
+    "date": "Date",
+    "services": "Entretiens",
+    "odometer": "Odomètre ({{unit}})",
+    "cost": "Coût",
+    "currency": "Devise",
+    "shop": "Garage",
+    "notes": "Notes",
+    "unavailable": "Le partage de fichiers n'est pas offert sur cet appareil.",
+    "failed": "Impossible d'exporter l'historique. Réessayez."
   }
 }

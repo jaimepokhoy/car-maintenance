@@ -1,7 +1,10 @@
 import Constants from 'expo-constants';
+import { useSQLiteContext } from 'expo-sqlite';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 
+import { Button } from '@/components/button';
 import { Chip } from '@/components/chip';
 import { Screen } from '@/components/screen';
 import { SegmentedControl } from '@/components/segmented-control';
@@ -10,10 +13,43 @@ import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { PROVINCES } from '@/domain';
 import { usePreferences } from '@/hooks/use-preferences';
+import { shareServiceHistory } from '@/lib/export';
 
 export default function SettingsScreen() {
   const { t } = useTranslation();
   const { preferences, update } = usePreferences();
+  const db = useSQLiteContext();
+  const [exporting, setExporting] = useState(false);
+
+  async function exportHistory() {
+    setExporting(true);
+    try {
+      const shared = await shareServiceHistory(
+        db,
+        {
+          unit: preferences.distanceUnit,
+          headers: {
+            vehicle: t('export.vehicle'),
+            date: t('export.date'),
+            services: t('export.services'),
+            odometer: t('export.odometer', { unit: preferences.distanceUnit }),
+            cost: t('export.cost'),
+            currency: t('export.currency'),
+            shop: t('export.shop'),
+            notes: t('export.notes'),
+          },
+          itemLabel: (itemId) => t(`items.${itemId}`),
+        },
+        t('export.button'),
+      );
+      if (!shared) Alert.alert(t('export.unavailable'));
+    } catch (error) {
+      console.warn('Export failed', error);
+      Alert.alert(t('export.failed'));
+    } finally {
+      setExporting(false);
+    }
+  }
 
   return (
     <Screen title={t('settings.title')}>
@@ -56,6 +92,14 @@ export default function SettingsScreen() {
         <ThemedText type="small" themeColor="textSecondary">
           {t('settings.provinceHint')}
         </ThemedText>
+      </ThemedView>
+
+      <ThemedView type="backgroundElement" style={styles.card}>
+        <ThemedText type="small">{t('export.title')}</ThemedText>
+        <ThemedText type="small" themeColor="textSecondary">
+          {t('export.hint')}
+        </ThemedText>
+        <Button title={t('export.button')} onPress={exportHistory} disabled={exporting} />
       </ThemedView>
 
       <View style={styles.row}>
