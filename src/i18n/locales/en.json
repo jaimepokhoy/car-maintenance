@@ -79,12 +79,47 @@
     "delete": "Delete vehicle",
     "deleteConfirmTitle": "Delete this vehicle?",
     "deleteConfirmBody": "Its service history will be deleted too.",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "update": "Update",
+    "logService": "Log a service",
+    "doneToday": "Done today",
+    "logIt": "Log it",
+    "history": "Service history",
+    "noHistory": "No services logged yet.",
+    "deleteService": "Delete",
+    "deleteServiceTitle": "Delete this service?"
   },
   "due": {
     "dueBy": "Due by {{limits}}",
     "wasDueBy": "Was due by {{limits}}",
     "or": " or ",
     "unknown": "Log the last time this was done to start tracking it."
+  },
+  "serviceForm": {
+    "title": "Log a service",
+    "items": "What was done",
+    "date": "Date",
+    "odometer": "Odometer (km)",
+    "cost": "Cost (optional, CAD)",
+    "notes": "Notes (optional)",
+    "notesPlaceholder": "Shop, parts, anything worth remembering",
+    "save": "Save service",
+    "errors": {
+      "noItems": "Pick at least one item",
+      "futureDate": "The date can't be in the future",
+      "required": "Required",
+      "invalidOdometer": "Enter the kilometres as a whole number",
+      "invalidCost": "Enter an amount like 89.99"
+    }
+  },
+  "odometerForm": {
+    "title": "Update odometer",
+    "current": "Current reading (km)",
+    "hint": "Keeping this up to date makes kilometre-based reminders accurate.",
+    "save": "Save",
+    "errors": {
+      "required": "Required",
+      "invalidOdometer": "Enter the kilometres as a whole number"
+    }
   }
 }

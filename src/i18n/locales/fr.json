@@ -79,12 +79,47 @@
     "delete": "Supprimer le véhicule",
     "deleteConfirmTitle": "Supprimer ce véhicule?",
     "deleteConfirmBody": "Son historique d'entretien sera aussi supprimé.",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "update": "Mettre à jour",
+    "logService": "Ajouter un entretien",
+    "doneToday": "Fait aujourd'hui",
+    "logIt": "L'ajouter",
+    "history": "Historique d'entretien",
+    "noHistory": "Aucun entretien enregistré.",
+    "deleteService": "Supprimer",
+    "deleteServiceTitle": "Supprimer cet entretien?"
   },
   "due": {
     "dueBy": "À faire d'ici {{limits}}",
     "wasDueBy": "Était dû d'ici {{limits}}",
     "or": " ou ",
     "unknown": "Indiquez la dernière fois que ça a été fait pour commencer le suivi."
+  },
+  "serviceForm": {
+    "title": "Ajouter un entretien",
+    "items": "Ce qui a été fait",
+    "date": "Date",
+    "odometer": "Odomètre (km)",
+    "cost": "Coût (facultatif, $ CA)",
+    "notes": "Notes (facultatif)",
+    "notesPlaceholder": "Garage, pièces, tout ce qui vaut la peine d'être noté",
+    "save": "Enregistrer l'entretien",
+    "errors": {
+      "noItems": "Choisissez au moins un élément",
+      "futureDate": "La date ne peut pas être dans le futur",
+      "required": "Obligatoire",
+      "invalidOdometer": "Entrez les kilomètres en nombre entier",
+      "invalidCost": "Entrez un montant comme 89,99"
+    }
+  },
+  "odometerForm": {
+    "title": "Mettre à jour l'odomètre",
+    "current": "Lecture actuelle (km)",
+    "hint": "Une lecture à jour rend les rappels basés sur le kilométrage plus précis.",
+    "save": "Enregistrer",
+    "errors": {
+      "required": "Obligatoire",
+      "invalidOdometer": "Entrez les kilomètres en nombre entier"
+    }
   }
 }

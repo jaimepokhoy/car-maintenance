@@ -6,11 +6,13 @@ import type { Db } from '@/db/types';
 
 /**
  * Runs a local database query and re-runs it whenever the screen regains
- * focus, so lists reflect changes made on other screens.
+ * focus, so lists reflect changes made on other screens. Call `reload` after
+ * changing data in place on the same screen.
  */
-export function useDbQuery<T>(query: (db: Db) => Promise<T>): T | undefined {
+export function useDbQuery<T>(query: (db: Db) => Promise<T>): { data: T | undefined; reload: () => void } {
   const db = useSQLiteContext();
   const [data, setData] = useState<T>();
+  const [version, setVersion] = useState(0);
 
   useFocusEffect(
     useCallback(() => {
@@ -21,8 +23,8 @@ export function useDbQuery<T>(query: (db: Db) => Promise<T>): T | undefined {
       return () => {
         active = false;
       };
-    }, [db, query]),
+    }, [db, query, version]),
   );
 
-  return data;
+  return { data, reload: useCallback(() => setVersion((v) => v + 1), []) };
 }
