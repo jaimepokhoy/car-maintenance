@@ -1,5 +1,5 @@
 import type { PropsWithChildren } from 'react';
-import { Platform, ScrollView, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -35,8 +35,7 @@ const styles = StyleSheet.create({
   content: {
     gap: Spacing.three,
     paddingHorizontal: Spacing.four,
-    // On web the tab bar floats over the top of the page.
-    paddingTop: Platform.OS === 'web' ? Spacing.six + Spacing.three : Spacing.three,
+    paddingTop: Spacing.three,
     paddingBottom: BottomTabInset + Spacing.three,
   },
 });

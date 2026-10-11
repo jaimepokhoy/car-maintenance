@@ -7,7 +7,11 @@
   "garage": {
     "title": "Mes véhicules",
     "emptyTitle": "Aucun véhicule",
-    "emptyBody": "Ajoutez votre premier véhicule pour suivre son entretien et recevoir des rappels avant les échéances."
+    "emptyBody": "Ajoutez votre premier véhicule pour suivre son entretien et recevoir des rappels avant les échéances.",
+    "add": "Ajouter un véhicule",
+    "odometer": "{{distance}} à l'odomètre",
+    "nextUp": "Prochain : {{item}} ({{state}})",
+    "allClear": "Rien à faire pour l'instant"
   },
   "shops": {
     "title": "Garages",
@@ -43,5 +47,44 @@
     "battery_12v": "Test de la batterie 12 V",
     "hv_battery_check": "Vérification de la batterie haute tension",
     "wiper_blades": "Balais d'essuie-glace"
+  },
+  "vehicleForm": {
+    "title": "Ajouter un véhicule",
+    "nickname": "Surnom (facultatif)",
+    "nicknamePlaceholder": "p. ex. Auto de tous les jours",
+    "year": "Année",
+    "make": "Marque",
+    "model": "Modèle",
+    "powertrain": "Type",
+    "odometer": "Odomètre (km)",
+    "vin": "NIV (facultatif)",
+    "vinHint": "17 caractères, sur le tableau de bord côté conducteur ou le cadre de porte",
+    "save": "Enregistrer le véhicule",
+    "errors": {
+      "required": "Obligatoire",
+      "invalidYear": "Entrez une année entre 1950 et l'an prochain",
+      "invalidOdometer": "Entrez les kilomètres en nombre entier",
+      "invalidVin": "Ce NIV semble incorrect. Vérifiez s'il y a une faute de frappe."
+    }
+  },
+  "powertrain": {
+    "gas": "Essence",
+    "hybrid": "Hybride",
+    "ev": "Électrique"
+  },
+  "vehicle": {
+    "notFound": "Ce véhicule n'existe plus.",
+    "odometer": "Odomètre",
+    "maintenance": "Entretien",
+    "delete": "Supprimer le véhicule",
+    "deleteConfirmTitle": "Supprimer ce véhicule?",
+    "deleteConfirmBody": "Son historique d'entretien sera aussi supprimé.",
+    "cancel": "Annuler"
+  },
+  "due": {
+    "dueBy": "À faire d'ici {{limits}}",
+    "wasDueBy": "Était dû d'ici {{limits}}",
+    "or": " ou ",
+    "unknown": "Indiquez la dernière fois que ça a été fait pour commencer le suivi."
   }
 }

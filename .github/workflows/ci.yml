@@ -21,5 +21,5 @@ jobs:
         run: npm run lint
       - name: Test
         run: npm test -- --ci
-      - name: Bundle (Android and web)
-        run: npx expo export --platform android --platform web --output-dir dist
+      - name: Bundle (iOS and Android)
+        run: npx expo export --platform ios --platform android --output-dir dist

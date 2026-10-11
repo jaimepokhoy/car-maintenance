@@ -7,7 +7,11 @@
   "garage": {
     "title": "Garage",
     "emptyTitle": "No vehicles yet",
-    "emptyBody": "Add your first car to start tracking maintenance and get reminders before things are due."
+    "emptyBody": "Add your first car to start tracking maintenance and get reminders before things are due.",
+    "add": "Add a vehicle",
+    "odometer": "{{distance}} on the odometer",
+    "nextUp": "Next: {{item}} ({{state}})",
+    "allClear": "Nothing due yet"
   },
   "shops": {
     "title": "Shops",
@@ -43,5 +47,44 @@
     "battery_12v": "12V battery test",
     "hv_battery_check": "High-voltage battery check",
     "wiper_blades": "Wiper blades"
+  },
+  "vehicleForm": {
+    "title": "Add a vehicle",
+    "nickname": "Nickname (optional)",
+    "nicknamePlaceholder": "e.g. Daily driver",
+    "year": "Year",
+    "make": "Make",
+    "model": "Model",
+    "powertrain": "Type",
+    "odometer": "Odometer (km)",
+    "vin": "VIN (optional)",
+    "vinHint": "17 characters, on the driver's side dashboard or door frame",
+    "save": "Save vehicle",
+    "errors": {
+      "required": "Required",
+      "invalidYear": "Enter a year between 1950 and next year",
+      "invalidOdometer": "Enter the kilometres as a whole number",
+      "invalidVin": "This VIN doesn't look right. Check for typos."
+    }
+  },
+  "powertrain": {
+    "gas": "Gas",
+    "hybrid": "Hybrid",
+    "ev": "Electric"
+  },
+  "vehicle": {
+    "notFound": "This vehicle no longer exists.",
+    "odometer": "Odometer",
+    "maintenance": "Maintenance",
+    "delete": "Delete vehicle",
+    "deleteConfirmTitle": "Delete this vehicle?",
+    "deleteConfirmBody": "Its service history will be deleted too.",
+    "cancel": "Cancel"
+  },
+  "due": {
+    "dueBy": "Due by {{limits}}",
+    "wasDueBy": "Was due by {{limits}}",
+    "or": " or ",
+    "unknown": "Log the last time this was done to start tracking it."
   }
 }
