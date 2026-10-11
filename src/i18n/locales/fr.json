@@ -190,5 +190,12 @@
       }
     },
     "whicheverFirst": "{{limits}}, selon la première échéance"
+  },
+  "reminders": {
+    "channelName": "Rappels d'entretien",
+    "dueSoonTitle": "{{item}} : bientôt dû",
+    "overdueTitle": "{{item}} : en retard",
+    "odometerTitle": "Combien de km sur {{vehicle}}?",
+    "odometerBody": "Mettez l'odomètre à jour pour garder vos rappels précis."
   }
 }

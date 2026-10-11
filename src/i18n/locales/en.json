@@ -190,5 +190,12 @@
       }
     },
     "whicheverFirst": "{{limits}}, whichever comes first"
+  },
+  "reminders": {
+    "channelName": "Maintenance reminders",
+    "dueSoonTitle": "{{item}} due soon",
+    "overdueTitle": "{{item}} is overdue",
+    "odometerTitle": "How many km on {{vehicle}}?",
+    "odometerBody": "Update the odometer to keep your reminders accurate."
   }
 }

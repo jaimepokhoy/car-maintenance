@@ -25,6 +25,7 @@ import {
   type Vehicle,
 } from '@/domain';
 import { useDbQuery } from '@/hooks/use-db-query';
+import { refreshReminders } from '@/lib/reminders';
 
 export default function LogServiceScreen() {
   const { id, item } = useLocalSearchParams<{ id: string; item?: MaintenanceItemId }>();
@@ -73,6 +74,7 @@ function LogServiceForm({ vehicle, initialItem }: { vehicle: Vehicle; initialIte
       { id: randomUUID(), vehicleId: vehicle.id, currency: 'CAD', ...result.value },
       new Date(),
     );
+    refreshReminders(db);
     router.back();
   }
 

@@ -29,3 +29,7 @@ export function daysBetween(from: IsoDate, to: IsoDate): number {
 export function toIsoDate(date: Date): IsoDate {
   return format(new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())));
 }
+
+export function addDays(date: IsoDate, days: number): IsoDate {
+  return format(new Date(parse(date).getTime() + days * 86_400_000));
+}
