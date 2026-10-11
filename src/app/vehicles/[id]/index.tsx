@@ -12,6 +12,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { deleteServiceRecord, listServiceRecords, logService } from '@/db/service-records';
+import { shopNames } from '@/db/shops';
 import type { Db } from '@/db/types';
 import { deleteVehicle, getVehicle, updateTireSet } from '@/db/vehicles';
 import {
@@ -40,7 +41,7 @@ export default function VehicleScreen() {
   const load = useCallback(
     async (db: Db) => {
       const vehicle = await getVehicle(db, id);
-      if (!vehicle) return { vehicle: null, statuses: [], records: [] };
+      if (!vehicle) return { vehicle: null, statuses: [], records: [], shops: new Map<string, string>() };
       const records = await listServiceRecords(db, id);
       const statuses = computeVehicleDueStatuses(
         resolveSchedule(vehicle.powertrain),
@@ -48,7 +49,7 @@ export default function VehicleScreen() {
         records,
         toIsoDate(new Date()),
       );
-      return { vehicle, statuses, records };
+      return { vehicle, statuses, records, shops: await shopNames(db) };
     },
     [id],
   );
@@ -225,7 +226,13 @@ export default function VehicleScreen() {
                   {record.itemIds.map((itemId) => t(`items.${itemId}`)).join(', ')}
                 </ThemedText>
                 <ThemedText type="small" themeColor="textSecondary">
-                  {[format.distance(record.odometerKm), record.notes].filter(Boolean).join(' · ')}
+                  {[
+                    format.distance(record.odometerKm),
+                    record.shopId ? data.shops.get(record.shopId) : undefined,
+                    record.notes,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
                 </ThemedText>
               </Pressable>
             ))

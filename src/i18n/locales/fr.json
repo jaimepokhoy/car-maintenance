@@ -15,7 +15,25 @@
   },
   "shops": {
     "title": "Garages",
-    "comingSoon": "Trouvez des garages bien notés près de chez vous. Bientôt disponible."
+    "mine": "Mes garages",
+    "nearby": "Garages à proximité",
+    "noneSaved": "Enregistrez les garages de confiance pour les retrouver vite et les associer à vos entretiens.",
+    "notConfigured": "La recherche de garages n'est pas encore offerte dans cette version.",
+    "locationNeeded": "Autorisez l'accès à la position pour trouver des garages près de vous.",
+    "allowLocation": "Autoriser la position",
+    "searching": "Recherche de garages à proximité…",
+    "error": "Impossible de charger les garages. Vérifiez votre connexion et réessayez.",
+    "retry": "Réessayer",
+    "empty": "Aucun garage trouvé dans un rayon de 10 km.",
+    "call": "Appeler",
+    "directions": "Itinéraire",
+    "save": "Enregistrer",
+    "saved": "Enregistré",
+    "remove": "Retirer",
+    "openNow": "Ouvert",
+    "closed": "Fermé",
+    "rating": "{{rating}} ★ ({{count}})",
+    "away": "à {{distance}}"
   },
   "settings": {
     "title": "Réglages",
@@ -113,7 +131,9 @@
       "required": "Obligatoire",
       "invalidOdometer": "Entrez la lecture en nombre entier",
       "invalidCost": "Entrez un montant comme 89,99"
-    }
+    },
+    "shop": "Garage (facultatif)",
+    "noShop": "Aucun"
   },
   "odometerForm": {
     "title": "Mettre à jour l'odomètre",

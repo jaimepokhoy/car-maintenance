@@ -13,6 +13,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { logService } from '@/db/service-records';
+import { listSavedShops } from '@/db/shops';
 import type { Db } from '@/db/types';
 import { getVehicle } from '@/db/vehicles';
 import {
@@ -51,6 +52,8 @@ function LogServiceForm({ vehicle, initialItem }: { vehicle: Vehicle; initialIte
   });
   const [errors, setErrors] = useState<Partial<Record<keyof ServiceFormValues, ServiceFormError>>>({});
   const [saving, setSaving] = useState(false);
+  const [shopId, setShopId] = useState<string | undefined>();
+  const { data: shops = [] } = useDbQuery(listSavedShops);
 
   const errorFor = (field: keyof ServiceFormValues) =>
     errors[field] ? t(`serviceForm.errors.${errors[field]}`) : undefined;
@@ -73,7 +76,7 @@ function LogServiceForm({ vehicle, initialItem }: { vehicle: Vehicle; initialIte
     setSaving(true);
     await logService(
       db,
-      { id: randomUUID(), vehicleId: vehicle.id, currency: 'CAD', ...result.value },
+      { id: randomUUID(), vehicleId: vehicle.id, currency: 'CAD', shopId, ...result.value },
       new Date(),
     );
     refreshReminders(db);
@@ -123,6 +126,26 @@ function LogServiceForm({ vehicle, initialItem }: { vehicle: Vehicle; initialIte
             keyboardType="decimal-pad"
             error={errorFor('cost')}
           />
+          {shops.length > 0 ? (
+            <View style={styles.field}>
+              <ThemedText type="small">{t('serviceForm.shop')}</ThemedText>
+              <View style={styles.chips}>
+                <Chip
+                  label={t('serviceForm.noShop')}
+                  selected={shopId === undefined}
+                  onPress={() => setShopId(undefined)}
+                />
+                {shops.map((shop) => (
+                  <Chip
+                    key={shop.id}
+                    label={shop.name}
+                    selected={shopId === shop.id}
+                    onPress={() => setShopId(shop.id)}
+                  />
+                ))}
+              </View>
+            </View>
+          ) : null}
           <TextField
             label={t('serviceForm.notes')}
             placeholder={t('serviceForm.notesPlaceholder')}
