@@ -1,0 +1,47 @@
+{
+  "tabs": {
+    "garage": "Garage",
+    "shops": "Shops",
+    "settings": "Settings"
+  },
+  "garage": {
+    "title": "Garage",
+    "emptyTitle": "No vehicles yet",
+    "emptyBody": "Add your first car to start tracking maintenance and get reminders before things are due."
+  },
+  "shops": {
+    "title": "Shops",
+    "comingSoon": "Find well-rated repair shops near you. Coming soon."
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "distanceUnit": "Distance",
+    "currency": "Currency",
+    "version": "Version"
+  },
+  "units": {
+    "km": "Kilometres",
+    "mi": "Miles"
+  },
+  "dueState": {
+    "overdue": "Overdue",
+    "due_soon": "Due soon",
+    "ok": "Up to date",
+    "unknown": "Not logged yet"
+  },
+  "items": {
+    "oil_change": "Oil and filter change",
+    "tire_rotation": "Tire rotation",
+    "brake_inspection": "Brake inspection",
+    "brake_fluid": "Brake fluid",
+    "engine_air_filter": "Engine air filter",
+    "cabin_air_filter": "Cabin air filter",
+    "coolant": "Coolant",
+    "transmission_fluid": "Transmission fluid",
+    "spark_plugs": "Spark plugs",
+    "battery_12v": "12V battery test",
+    "hv_battery_check": "High-voltage battery check",
+    "wiper_blades": "Wiper blades"
+  }
+}
