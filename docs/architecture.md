@@ -7,6 +7,8 @@ src/app/          Screens (Expo Router: every file is a route)
 src/components/   Shared UI
 src/domain/       Pure business rules: schedules, due status, tires, units, dates
 src/i18n/         English and French strings, language detection
+src/db/           On-device SQLite: migrations and queries
+src/hooks/        Shared hooks (database queries that refresh on focus, locale)
 src/lib/          Integrations (Supabase client)
 supabase/         Database migrations and RLS policies
 ```
@@ -20,7 +22,9 @@ Screens depend on domain and lib; domain depends on nothing. That keeps the rule
 3. Reminders are computed on device from the local data (`computeVehicleDueStatuses`) and scheduled as local notifications, so they fire offline.
 4. Shop search is the one online-only feature: the device calls the places API directly and caches results.
 
-Status: domain rules, i18n, schema and the Supabase client exist. Local SQLite storage, sync, notifications and the shop finder are upcoming slices.
+Status: domain rules, i18n, the Supabase schema and client, and local SQLite storage for vehicles and service records exist. Sync, notifications and the shop finder are upcoming slices.
+
+Data-layer functions in `src/db/` take a `Db` (a subset of expo-sqlite's API) so tests run them against Node's built-in SQLite via `src/test-utils/memory-db.ts`.
 
 ## Reminder rules
 

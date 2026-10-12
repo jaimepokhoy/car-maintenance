@@ -1,24 +1,36 @@
 import '@/i18n';
 
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { SQLiteProvider } from 'expo-sqlite';
+import { useTranslation } from 'react-i18next';
 
-import AppTabs from '@/components/app-tabs';
+import { migrate } from '@/db/migrations';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 SplashScreen.preventAutoHideAsync();
 
+async function initDatabase(db: Parameters<typeof migrate>[0]) {
+  await migrate(db);
+  SplashScreen.hideAsync();
+}
+
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-
-  useEffect(() => {
-    SplashScreen.hideAsync();
-  }, []);
+  const { t } = useTranslation();
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AppTabs />
-    </ThemeProvider>
+    <SQLiteProvider databaseName="car-maintenance.db" onInit={initDatabase}>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="vehicles/new"
+            options={{ presentation: 'modal', title: t('vehicleForm.title') }}
+          />
+          <Stack.Screen name="vehicles/[id]" options={{ title: '' }} />
+        </Stack>
+      </ThemeProvider>
+    </SQLiteProvider>
   );
 }

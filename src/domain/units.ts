@@ -1,4 +1,4 @@
-import type { CurrencyCode, DistanceUnit } from './types';
+import type { CurrencyCode, DistanceUnit, IsoDate } from './types';
 
 const KM_PER_MILE = 1.609344;
 
@@ -17,4 +17,14 @@ export function formatDistance(km: number, unit: DistanceUnit, locale: string): 
 
 export function formatMoney(cents: number, currency: CurrencyCode, locale: string): string {
   return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(cents / 100);
+}
+
+/** Formats an ISO calendar date like "Dec 1, 2026" (en-CA) or "1 déc. 2026" (fr-CA). */
+export function formatDate(date: IsoDate, locale: string): string {
+  return new Intl.DateTimeFormat(locale, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'UTC',
+  }).format(new Date(`${date}T00:00:00Z`));
 }

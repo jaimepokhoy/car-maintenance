@@ -1,4 +1,4 @@
-import { displayToKm, formatDistance, formatMoney, kmToDisplay } from '../units';
+import { displayToKm, formatDate, formatDistance, formatMoney, kmToDisplay } from '../units';
 
 describe('units', () => {
   it('round-trips miles', () => {
@@ -13,5 +13,9 @@ describe('units', () => {
 
   it('formats money from cents', () => {
     expect(formatMoney(8999, 'CAD', 'en-CA')).toBe('$89.99');
+  });
+
+  it('formats calendar dates without shifting the day', () => {
+    expect(formatDate('2026-12-01', 'en-CA')).toBe('Dec 1, 2026');
   });
 });
