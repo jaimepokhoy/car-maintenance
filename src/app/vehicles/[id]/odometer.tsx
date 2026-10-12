@@ -13,6 +13,7 @@ import type { Db } from '@/db/types';
 import { getVehicle, updateOdometer } from '@/db/vehicles';
 import { parseWholeNumber, toIsoDate, type Vehicle } from '@/domain';
 import { useDbQuery } from '@/hooks/use-db-query';
+import { refreshReminders } from '@/lib/reminders';
 
 const MAX_ODOMETER_KM = 2_000_000;
 
@@ -37,6 +38,7 @@ function OdometerForm({ vehicle }: { vehicle: Vehicle }) {
     if (km === null || km > MAX_ODOMETER_KM) return setError('invalidOdometer');
     const now = new Date();
     await updateOdometer(db, vehicle.id, km, now, toIsoDate(now));
+    refreshReminders(db);
     router.back();
   }
 

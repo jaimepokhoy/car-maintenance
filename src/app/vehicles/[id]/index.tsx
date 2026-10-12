@@ -26,6 +26,7 @@ import {
 import { useDbQuery } from '@/hooks/use-db-query';
 import { useLocale } from '@/hooks/use-locale';
 import { useTheme } from '@/hooks/use-theme';
+import { refreshReminders } from '@/lib/reminders';
 
 export default function VehicleScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -74,6 +75,7 @@ export default function VehicleScreen() {
       },
       now,
     );
+    refreshReminders(db);
     reload();
   }
 
@@ -85,6 +87,7 @@ export default function VehicleScreen() {
         style: 'destructive',
         onPress: async () => {
           await deleteServiceRecord(db, record.id, new Date());
+          refreshReminders(db);
           reload();
         },
       },
@@ -99,6 +102,7 @@ export default function VehicleScreen() {
         style: 'destructive',
         onPress: async () => {
           await deleteVehicle(db, vehicle.id, new Date());
+          refreshReminders(db);
           router.back();
         },
       },

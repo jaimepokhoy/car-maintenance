@@ -8,3 +8,4 @@ export * from './vehicle-form';
 export * from './vin';
 export * from './service-form';
 export * from './guidance';
+export * from './reminders';

@@ -19,6 +19,7 @@ import {
   type VehicleFormError,
   type VehicleFormValues,
 } from '@/domain';
+import { refreshReminders, requestReminderPermission } from '@/lib/reminders';
 
 const EMPTY: VehicleFormValues = {
   nickname: '',
@@ -52,6 +53,7 @@ export default function NewVehicleScreen() {
     setSaving(true);
     const id = randomUUID();
     await insertVehicle(db, id, result.value, now, toIsoDate(now));
+    requestReminderPermission().then(() => refreshReminders(db));
     router.dismiss();
     router.push({ pathname: '/vehicles/[id]', params: { id } });
   }
