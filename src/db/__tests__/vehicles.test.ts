@@ -2,6 +2,7 @@ import { migrate, MIGRATIONS } from '../migrations';
 import {
   deleteServiceRecord,
   insertServiceRecord,
+  listAllServiceRecords,
   listServiceRecords,
   logService,
 } from '../service-records';
@@ -67,6 +68,17 @@ describe('vehicles', () => {
 });
 
 describe('service records', () => {
+  it('lists live records across every vehicle', async () => {
+    await insertVehicle(db, 'v1', civic, now, '2026-10-11');
+    await insertVehicle(db, 'v2', { ...civic, nickname: 'Winter beater' }, now, '2026-10-11');
+    const base = { itemIds: ['oil_change' as const], odometerKm: 80_000 };
+    await insertServiceRecord(db, { ...base, id: 's1', vehicleId: 'v1', performedOn: '2026-01-10' }, now);
+    await insertServiceRecord(db, { ...base, id: 's2', vehicleId: 'v2', performedOn: '2026-03-10' }, now);
+    await insertServiceRecord(db, { ...base, id: 's3', vehicleId: 'v2', performedOn: '2026-05-10' }, now);
+    await deleteServiceRecord(db, 's3', now);
+    expect((await listAllServiceRecords(db)).map((r) => r.id)).toEqual(['s2', 's1']);
+  });
+
   it('round-trips records newest first', async () => {
     await insertVehicle(db, 'v1', civic, now, '2026-10-11');
     await insertServiceRecord(

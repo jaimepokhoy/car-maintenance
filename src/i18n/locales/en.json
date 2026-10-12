@@ -262,5 +262,20 @@
     "allTime": "All time",
     "unpriced_one": "{{count}} service has no cost logged, so totals are partial.",
     "unpriced_other": "{{count}} services have no cost logged, so totals are partial."
+  },
+  "export": {
+    "title": "Your data",
+    "hint": "Export every service you've logged as a spreadsheet (CSV) to keep, print or share with a buyer.",
+    "button": "Export service history",
+    "vehicle": "Vehicle",
+    "date": "Date",
+    "services": "Services",
+    "odometer": "Odometer ({{unit}})",
+    "cost": "Cost",
+    "currency": "Currency",
+    "shop": "Shop",
+    "notes": "Notes",
+    "unavailable": "Sharing files isn't available on this device.",
+    "failed": "Couldn't export your history. Try again."
   }
 }
