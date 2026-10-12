@@ -85,7 +85,12 @@
       "invalidYear": "Enter a year between 1950 and next year",
       "invalidOdometer": "Enter the reading as a whole number",
       "invalidVin": "This VIN doesn't look right. Check for typos."
-    }
+    },
+    "decode": "Fill in from VIN",
+    "decoding": "Looking up VIN…",
+    "decodeFilled": "Filled in from the VIN. Check the details below.",
+    "decodeNotFound": "We couldn't find this VIN. Fill in the details yourself.",
+    "decodeFailed": "VIN lookup didn't work. Check your connection or fill in the details yourself."
   },
   "powertrain": {
     "gas": "Gas",
