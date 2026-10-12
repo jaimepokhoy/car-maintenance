@@ -19,6 +19,7 @@ import {
   type VehicleFormError,
   type VehicleFormValues,
 } from '@/domain';
+import { useFormat } from '@/hooks/use-format';
 import { refreshReminders, requestReminderPermission } from '@/lib/reminders';
 
 const EMPTY: VehicleFormValues = {
@@ -34,6 +35,7 @@ const EMPTY: VehicleFormValues = {
 export default function NewVehicleScreen() {
   const { t } = useTranslation();
   const db = useSQLiteContext();
+  const format = useFormat();
   const [values, setValues] = useState(EMPTY);
   const [errors, setErrors] = useState<Partial<Record<keyof VehicleFormValues, VehicleFormError>>>({});
   const [saving, setSaving] = useState(false);
@@ -45,7 +47,7 @@ export default function NewVehicleScreen() {
 
   async function save() {
     const now = new Date();
-    const result = validateVehicleForm(values, now.getFullYear());
+    const result = validateVehicleForm(values, now.getFullYear(), format.distanceUnit);
     if (!result.ok) {
       setErrors(result.errors);
       return;
@@ -97,7 +99,7 @@ export default function NewVehicleScreen() {
             onChange={(powertrain) => setValues((current) => ({ ...current, powertrain }))}
           />
           <TextField
-            label={t('vehicleForm.odometer')}
+            label={t('vehicleForm.odometer', { unit: format.distanceUnit })}
             value={values.odometerKm}
             onChangeText={set('odometerKm')}
             keyboardType="number-pad"

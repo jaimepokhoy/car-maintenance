@@ -11,8 +11,9 @@ import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import type { Db } from '@/db/types';
 import { getVehicle, updateOdometer } from '@/db/vehicles';
-import { parseWholeNumber, toIsoDate, type Vehicle } from '@/domain';
+import { displayToKm, parseWholeNumber, toIsoDate, type Vehicle } from '@/domain';
 import { useDbQuery } from '@/hooks/use-db-query';
+import { useFormat } from '@/hooks/use-format';
 import { refreshReminders } from '@/lib/reminders';
 
 const MAX_ODOMETER_KM = 2_000_000;
@@ -29,11 +30,13 @@ export default function OdometerScreen() {
 function OdometerForm({ vehicle }: { vehicle: Vehicle }) {
   const { t } = useTranslation();
   const db = useSQLiteContext();
-  const [value, setValue] = useState(String(vehicle.odometerKm));
+  const format = useFormat();
+  const [value, setValue] = useState(format.distanceInput(vehicle.odometerKm));
   const [error, setError] = useState<'required' | 'invalidOdometer'>();
 
   async function save() {
-    const km = parseWholeNumber(value);
+    const entered = parseWholeNumber(value);
+    const km = entered === null ? null : Math.round(displayToKm(entered, format.distanceUnit));
     if (!value.trim()) return setError('required');
     if (km === null || km > MAX_ODOMETER_KM) return setError('invalidOdometer');
     const now = new Date();
@@ -45,7 +48,7 @@ function OdometerForm({ vehicle }: { vehicle: Vehicle }) {
   return (
     <ThemedView style={[styles.flex, styles.content]}>
       <TextField
-        label={t('odometerForm.current')}
+        label={t('odometerForm.current', { unit: format.distanceUnit })}
         value={value}
         onChangeText={setValue}
         keyboardType="number-pad"

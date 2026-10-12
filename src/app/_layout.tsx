@@ -11,6 +11,7 @@ import { AppState } from 'react-native';
 import { migrate } from '@/db/migrations';
 import type { Db } from '@/db/types';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { PreferencesProvider } from '@/hooks/use-preferences';
 import { configureNotifications, refreshReminders } from '@/lib/reminders';
 
 SplashScreen.preventAutoHideAsync();
@@ -27,26 +28,28 @@ export default function RootLayout() {
 
   return (
     <SQLiteProvider databaseName="car-maintenance.db" onInit={initDatabase}>
-      <ReminderSync />
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="vehicles/new"
-            options={{ presentation: 'modal', title: t('vehicleForm.title') }}
-          />
-          <Stack.Screen name="vehicles/[id]/index" options={{ title: '' }} />
-          <Stack.Screen
-            name="vehicles/[id]/log"
-            options={{ presentation: 'modal', title: t('serviceForm.title') }}
-          />
-          <Stack.Screen
-            name="vehicles/[id]/odometer"
-            options={{ presentation: 'modal', title: t('odometerForm.title') }}
-          />
-          <Stack.Screen name="guide/[item]" options={{ presentation: 'modal', title: '' }} />
-        </Stack>
-      </ThemeProvider>
+      <PreferencesProvider>
+        <ReminderSync />
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="vehicles/new"
+              options={{ presentation: 'modal', title: t('vehicleForm.title') }}
+            />
+            <Stack.Screen name="vehicles/[id]/index" options={{ title: '' }} />
+            <Stack.Screen
+              name="vehicles/[id]/log"
+              options={{ presentation: 'modal', title: t('serviceForm.title') }}
+            />
+            <Stack.Screen
+              name="vehicles/[id]/odometer"
+              options={{ presentation: 'modal', title: t('odometerForm.title') }}
+            />
+            <Stack.Screen name="guide/[item]" options={{ presentation: 'modal', title: '' }} />
+          </Stack>
+        </ThemeProvider>
+      </PreferencesProvider>
     </SQLiteProvider>
   );
 }

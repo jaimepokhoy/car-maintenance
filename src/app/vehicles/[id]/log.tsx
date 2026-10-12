@@ -25,6 +25,7 @@ import {
   type Vehicle,
 } from '@/domain';
 import { useDbQuery } from '@/hooks/use-db-query';
+import { useFormat } from '@/hooks/use-format';
 import { refreshReminders } from '@/lib/reminders';
 
 export default function LogServiceScreen() {
@@ -39,11 +40,12 @@ export default function LogServiceScreen() {
 function LogServiceForm({ vehicle, initialItem }: { vehicle: Vehicle; initialItem?: MaintenanceItemId }) {
   const { t } = useTranslation();
   const db = useSQLiteContext();
+  const format = useFormat();
   const today = toIsoDate(new Date());
   const [values, setValues] = useState<ServiceFormValues>({
     itemIds: initialItem ? [initialItem] : [],
     performedOn: today,
-    odometerKm: String(vehicle.odometerKm),
+    odometerKm: format.distanceInput(vehicle.odometerKm),
     cost: '',
     notes: '',
   });
@@ -63,7 +65,7 @@ function LogServiceForm({ vehicle, initialItem }: { vehicle: Vehicle; initialIte
     }));
 
   async function save() {
-    const result = validateServiceForm(values, today);
+    const result = validateServiceForm(values, today, format.distanceUnit);
     if (!result.ok) {
       setErrors(result.errors);
       return;
@@ -108,7 +110,7 @@ function LogServiceForm({ vehicle, initialItem }: { vehicle: Vehicle; initialIte
             error={errorFor('performedOn')}
           />
           <TextField
-            label={t('serviceForm.odometer')}
+            label={t('serviceForm.odometer', { unit: format.distanceUnit })}
             value={values.odometerKm}
             onChangeText={set('odometerKm')}
             keyboardType="number-pad"

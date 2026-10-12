@@ -6,14 +6,12 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import {
-  formatDistance,
-  formatMoney,
   GUIDANCE,
   resolveSchedule,
   type MaintenanceItemId,
   type Powertrain,
 } from '@/domain';
-import { useLocale } from '@/hooks/use-locale';
+import { useFormat } from '@/hooks/use-format';
 
 export default function GuideScreen() {
   const { item, powertrain = 'gas' } = useLocalSearchParams<{
@@ -21,14 +19,14 @@ export default function GuideScreen() {
     powertrain?: Powertrain;
   }>();
   const { t } = useTranslation();
-  const locale = useLocale();
+  const format = useFormat();
   const guidance = GUIDANCE[item];
   const interval = resolveSchedule(powertrain).find((i) => i.itemId === item);
   if (!guidance) return <ThemedView style={styles.flex} />;
 
   const limits = [
     interval?.everyKm !== undefined
-      ? t('guidance.everyKm', { distance: formatDistance(interval.everyKm, 'km', locale) })
+      ? t('guidance.everyKm', { distance: format.distance(interval.everyKm) })
       : null,
     interval?.everyMonths !== undefined ? t('guidance.everyMonths', { months: interval.everyMonths }) : null,
   ].filter((limit): limit is string => limit !== null);
@@ -36,7 +34,7 @@ export default function GuideScreen() {
     limits.length > 1 ? t('guidance.whicheverFirst', { limits: limits.join(t('due.or')) }) : limits[0];
 
   const [min, max] = guidance.costCents.map((cents) =>
-    cents === 0 ? t('guidance.free') : formatMoney(cents, 'CAD', locale),
+    cents === 0 ? t('guidance.free') : format.money(cents),
   );
 
   const sections: [string, string | undefined][] = [

@@ -21,8 +21,10 @@
     "title": "Settings",
     "language": "Language",
     "distanceUnit": "Distance",
-    "currency": "Currency",
-    "version": "Version"
+    "version": "Version",
+    "languageSystem": "Phone setting",
+    "province": "Province or territory",
+    "provinceHint": "Used for winter tire reminders, including Quebec's December 1 deadline."
   },
   "units": {
     "km": "Kilometres",
@@ -56,14 +58,14 @@
     "make": "Make",
     "model": "Model",
     "powertrain": "Type",
-    "odometer": "Odometer (km)",
+    "odometer": "Odometer ({{unit}})",
     "vin": "VIN (optional)",
     "vinHint": "17 characters, on the driver's side dashboard or door frame",
     "save": "Save vehicle",
     "errors": {
       "required": "Required",
       "invalidYear": "Enter a year between 1950 and next year",
-      "invalidOdometer": "Enter the kilometres as a whole number",
+      "invalidOdometer": "Enter the reading as a whole number",
       "invalidVin": "This VIN doesn't look right. Check for typos."
     }
   },
@@ -100,7 +102,7 @@
     "title": "Log a service",
     "items": "What was done",
     "date": "Date",
-    "odometer": "Odometer (km)",
+    "odometer": "Odometer ({{unit}})",
     "cost": "Cost (optional, CAD)",
     "notes": "Notes (optional)",
     "notesPlaceholder": "Shop, parts, anything worth remembering",
@@ -109,18 +111,18 @@
       "noItems": "Pick at least one item",
       "futureDate": "The date can't be in the future",
       "required": "Required",
-      "invalidOdometer": "Enter the kilometres as a whole number",
+      "invalidOdometer": "Enter the reading as a whole number",
       "invalidCost": "Enter an amount like 89.99"
     }
   },
   "odometerForm": {
     "title": "Update odometer",
-    "current": "Current reading (km)",
-    "hint": "Keeping this up to date makes kilometre-based reminders accurate.",
+    "current": "Current reading ({{unit}})",
+    "hint": "Keeping this up to date makes distance-based reminders accurate.",
     "save": "Save",
     "errors": {
       "required": "Required",
-      "invalidOdometer": "Enter the kilometres as a whole number"
+      "invalidOdometer": "Enter the reading as a whole number"
     }
   },
   "guidance": {
@@ -196,6 +198,35 @@
     "dueSoonTitle": "{{item}} due soon",
     "overdueTitle": "{{item}} is overdue",
     "odometerTitle": "How many km on {{vehicle}}?",
-    "odometerBody": "Update the odometer to keep your reminders accurate."
+    "odometerBody": "Update the odometer to keep your reminders accurate.",
+    "tiresInstallTitle": "Time for winter tires on {{vehicle}}",
+    "tiresRemoveTitle": "Time to take off winter tires on {{vehicle}}",
+    "tiresBody": "Book your changeover before shops get busy.",
+    "tiresLegalBody": "Winter tires are required in Quebec from {{date}}."
+  },
+  "provinces": {
+    "AB": "Alberta",
+    "BC": "British Columbia",
+    "MB": "Manitoba",
+    "NB": "New Brunswick",
+    "NL": "Newfoundland and Labrador",
+    "NS": "Nova Scotia",
+    "NT": "Northwest Territories",
+    "NU": "Nunavut",
+    "ON": "Ontario",
+    "PE": "Prince Edward Island",
+    "QC": "Quebec",
+    "SK": "Saskatchewan",
+    "YT": "Yukon"
+  },
+  "tires": {
+    "label": "Tires on now",
+    "winter": "Winter",
+    "all_season": "All-season",
+    "summer": "Summer",
+    "install_winter": "Put winter tires on by {{date}}",
+    "remove_winter": "Switch off winter tires after {{date}}",
+    "legal": "Required in Quebec from {{date}}.",
+    "setProvince": "Set your province in Settings to get changeover reminders."
   }
 }

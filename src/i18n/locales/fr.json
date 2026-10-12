@@ -21,8 +21,10 @@
     "title": "Réglages",
     "language": "Langue",
     "distanceUnit": "Distance",
-    "currency": "Devise",
-    "version": "Version"
+    "version": "Version",
+    "languageSystem": "Réglage du téléphone",
+    "province": "Province ou territoire",
+    "provinceHint": "Sert aux rappels de pneus d'hiver, y compris l'échéance du 1er décembre au Québec."
   },
   "units": {
     "km": "Kilomètres",
@@ -56,14 +58,14 @@
     "make": "Marque",
     "model": "Modèle",
     "powertrain": "Type",
-    "odometer": "Odomètre (km)",
+    "odometer": "Odomètre ({{unit}})",
     "vin": "NIV (facultatif)",
     "vinHint": "17 caractères, sur le tableau de bord côté conducteur ou le cadre de porte",
     "save": "Enregistrer le véhicule",
     "errors": {
       "required": "Obligatoire",
       "invalidYear": "Entrez une année entre 1950 et l'an prochain",
-      "invalidOdometer": "Entrez les kilomètres en nombre entier",
+      "invalidOdometer": "Entrez la lecture en nombre entier",
       "invalidVin": "Ce NIV semble incorrect. Vérifiez s'il y a une faute de frappe."
     }
   },
@@ -100,7 +102,7 @@
     "title": "Ajouter un entretien",
     "items": "Ce qui a été fait",
     "date": "Date",
-    "odometer": "Odomètre (km)",
+    "odometer": "Odomètre ({{unit}})",
     "cost": "Coût (facultatif, $ CA)",
     "notes": "Notes (facultatif)",
     "notesPlaceholder": "Garage, pièces, tout ce qui vaut la peine d'être noté",
@@ -109,18 +111,18 @@
       "noItems": "Choisissez au moins un élément",
       "futureDate": "La date ne peut pas être dans le futur",
       "required": "Obligatoire",
-      "invalidOdometer": "Entrez les kilomètres en nombre entier",
+      "invalidOdometer": "Entrez la lecture en nombre entier",
       "invalidCost": "Entrez un montant comme 89,99"
     }
   },
   "odometerForm": {
     "title": "Mettre à jour l'odomètre",
-    "current": "Lecture actuelle (km)",
-    "hint": "Une lecture à jour rend les rappels basés sur le kilométrage plus précis.",
+    "current": "Lecture actuelle ({{unit}})",
+    "hint": "Une lecture à jour rend les rappels basés sur la distance plus précis.",
     "save": "Enregistrer",
     "errors": {
       "required": "Obligatoire",
-      "invalidOdometer": "Entrez les kilomètres en nombre entier"
+      "invalidOdometer": "Entrez la lecture en nombre entier"
     }
   },
   "guidance": {
@@ -196,6 +198,35 @@
     "dueSoonTitle": "{{item}} : bientôt dû",
     "overdueTitle": "{{item}} : en retard",
     "odometerTitle": "Combien de km sur {{vehicle}}?",
-    "odometerBody": "Mettez l'odomètre à jour pour garder vos rappels précis."
+    "odometerBody": "Mettez l'odomètre à jour pour garder vos rappels précis.",
+    "tiresInstallTitle": "C'est le temps des pneus d'hiver pour {{vehicle}}",
+    "tiresRemoveTitle": "C'est le temps de retirer les pneus d'hiver de {{vehicle}}",
+    "tiresBody": "Prenez rendez-vous avant que les garages soient débordés.",
+    "tiresLegalBody": "Les pneus d'hiver sont obligatoires au Québec à partir du {{date}}."
+  },
+  "provinces": {
+    "AB": "Alberta",
+    "BC": "Colombie-Britannique",
+    "MB": "Manitoba",
+    "NB": "Nouveau-Brunswick",
+    "NL": "Terre-Neuve-et-Labrador",
+    "NS": "Nouvelle-Écosse",
+    "NT": "Territoires du Nord-Ouest",
+    "NU": "Nunavut",
+    "ON": "Ontario",
+    "PE": "Île-du-Prince-Édouard",
+    "QC": "Québec",
+    "SK": "Saskatchewan",
+    "YT": "Yukon"
+  },
+  "tires": {
+    "label": "Pneus installés",
+    "winter": "Hiver",
+    "all_season": "Quatre saisons",
+    "summer": "Été",
+    "install_winter": "Installer les pneus d'hiver d'ici le {{date}}",
+    "remove_winter": "Retirer les pneus d'hiver après le {{date}}",
+    "legal": "Obligatoires au Québec à partir du {{date}}.",
+    "setProvince": "Choisissez votre province dans les réglages pour recevoir des rappels de changement de pneus."
   }
 }

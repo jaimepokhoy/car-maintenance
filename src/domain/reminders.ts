@@ -1,5 +1,6 @@
 import { addDays, daysBetween } from './dates';
 import type { DueStatus } from './due-status';
+import { nextTireReminder, type Province, type TireReminder } from './seasonal-tires';
 import type { IsoDate, MaintenanceItemId, ServiceRecord, Vehicle } from './types';
 
 /** Typical Canadian driving: about 15,000 km a year. */
@@ -22,7 +23,8 @@ export type PlannedReminder =
       fireOn: IsoDate;
       status: DueStatus;
     }
-  | { kind: 'odometer'; vehicleId: string; fireOn: IsoDate };
+  | { kind: 'odometer'; vehicleId: string; fireOn: IsoDate }
+  | { kind: 'tires'; vehicleId: string; fireOn: IsoDate; tires: TireReminder };
 
 /**
  * Average km per day for a vehicle, from the oldest logged service to the
@@ -65,11 +67,16 @@ export interface VehicleReminderInput {
 }
 
 /**
- * Decides which local notifications to schedule. The plan is recomputed from
+ * Decides which local notifications to schedule. Seasonal tire reminders
+ * need the owner's province and the vehicle's current tire set. The plan is recomputed from
  * scratch whenever the app opens or data changes, so nudges for items that
  * are already due simply move forward while the owner keeps using the app.
  */
-export function planReminders(vehicles: VehicleReminderInput[], today: IsoDate): PlannedReminder[] {
+export function planReminders(
+  vehicles: VehicleReminderInput[],
+  today: IsoDate,
+  province?: Province,
+): PlannedReminder[] {
   const plan: PlannedReminder[] = [];
 
   for (const { vehicle, statuses, records } of vehicles) {
@@ -90,6 +97,12 @@ export function planReminders(vehicles: VehicleReminderInput[], today: IsoDate):
       vehicleId: vehicle.id,
       fireOn: staleOn > today ? staleOn : addDays(today, REPEAT_NUDGE_DAYS),
     });
+
+    if (province && vehicle.tireSet) {
+      const tires = nextTireReminder(today, province, vehicle.tireSet);
+      const fireOn = tires.remindOn > today ? tires.remindOn : addDays(today, REPEAT_NUDGE_DAYS);
+      plan.push({ kind: 'tires', vehicleId: vehicle.id, fireOn, tires });
+    }
   }
 
   return plan.sort((a, b) => a.fireOn.localeCompare(b.fireOn)).slice(0, MAX_REMINDERS);

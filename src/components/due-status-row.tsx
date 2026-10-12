@@ -3,8 +3,8 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
-import { formatDate, formatDistance, type DueState, type DueStatus } from '@/domain';
-import { useLocale } from '@/hooks/use-locale';
+import type { DueState, DueStatus } from '@/domain';
+import { useFormat } from '@/hooks/use-format';
 import { useTheme } from '@/hooks/use-theme';
 
 export function useDueStateColor(state: DueState): string {
@@ -29,7 +29,7 @@ export function DueStatusRow({
   onLearnMore?: () => void;
 }) {
   const { t } = useTranslation();
-  const locale = useLocale();
+  const format = useFormat();
   const color = useDueStateColor(status.state);
   const theme = useTheme();
   const action =
@@ -38,8 +38,8 @@ export function DueStatusRow({
       : onDoneToday && { label: t('vehicle.doneToday'), onPress: onDoneToday };
 
   const limits = [
-    status.dueOn ? formatDate(status.dueOn, locale) : null,
-    status.dueAtKm !== undefined ? formatDistance(status.dueAtKm, 'km', locale) : null,
+    status.dueOn ? format.date(status.dueOn) : null,
+    status.dueAtKm !== undefined ? format.distance(status.dueAtKm) : null,
   ]
     .filter(Boolean)
     .join(t('due.or'));

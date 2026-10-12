@@ -1,4 +1,4 @@
-import type { IsoDate, Powertrain, Vehicle } from '@/domain';
+import type { IsoDate, Powertrain, TireSet, Vehicle } from '@/domain';
 
 import type { Db } from './types';
 
@@ -22,6 +22,7 @@ interface VehicleRow {
   powertrain: Powertrain;
   odometer_km: number;
   odometer_updated_on: string;
+  tire_set: TireSet | null;
 }
 
 function toVehicle(row: VehicleRow): Vehicle {
@@ -35,10 +36,12 @@ function toVehicle(row: VehicleRow): Vehicle {
     powertrain: row.powertrain,
     odometerKm: row.odometer_km,
     odometerUpdatedOn: row.odometer_updated_on,
+    tireSet: row.tire_set ?? undefined,
   };
 }
 
-const COLUMNS = 'id, nickname, year, make, model, vin, powertrain, odometer_km, odometer_updated_on';
+const COLUMNS =
+  'id, nickname, year, make, model, vin, powertrain, odometer_km, odometer_updated_on, tire_set';
 
 export async function listVehicles(db: Db): Promise<Vehicle[]> {
   const rows = await db.getAllAsync<VehicleRow>(
@@ -94,6 +97,15 @@ export async function updateOdometer(
      WHERE id = ?`,
     odometerKm,
     today,
+    now.toISOString(),
+    id,
+  );
+}
+
+export async function updateTireSet(db: Db, id: string, tireSet: TireSet, now: Date): Promise<void> {
+  await db.runAsync(
+    'UPDATE vehicles SET tire_set = ?, updated_at = ?, dirty = 1 WHERE id = ?',
+    tireSet,
     now.toISOString(),
     id,
   );
