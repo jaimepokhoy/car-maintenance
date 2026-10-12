@@ -140,6 +140,12 @@ export default function VehicleScreen() {
               key={status.itemId}
               status={status}
               onDoneToday={() => doneToday(status.itemId)}
+              onLearnMore={() =>
+                router.push({
+                  pathname: '/guide/[item]',
+                  params: { item: status.itemId, powertrain: vehicle.powertrain },
+                })
+              }
               onLog={() =>
                 router.push({
                   pathname: '/vehicles/[id]/log',

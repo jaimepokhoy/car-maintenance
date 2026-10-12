@@ -87,7 +87,8 @@
     "history": "Historique d'entretien",
     "noHistory": "Aucun entretien enregistré.",
     "deleteService": "Supprimer",
-    "deleteServiceTitle": "Supprimer cet entretien?"
+    "deleteServiceTitle": "Supprimer cet entretien?",
+    "learnMore": "Pourquoi c'est important"
   },
   "due": {
     "dueBy": "À faire d'ici {{limits}}",
@@ -121,5 +122,73 @@
       "required": "Obligatoire",
       "invalidOdometer": "Entrez les kilomètres en nombre entier"
     }
+  },
+  "guidance": {
+    "disclaimer": "Conseils généraux pour une conduite typique. Le manuel du propriétaire a le dernier mot pour votre véhicule.",
+    "whatItIs": "De quoi il s'agit",
+    "whyItMatters": "Pourquoi c'est important",
+    "howOften": "À quelle fréquence",
+    "typicalCost": "Coût habituel",
+    "doItYourself": "Le faire soi-même?",
+    "everyKm": "aux {{distance}}",
+    "everyMonths": "aux {{months}} mois",
+    "free": "Gratuit",
+    "costRange": "{{min}} à {{max}}",
+    "diy": {
+      "easy": "Facile : environ 10 minutes sans outils, et vous économisez la majeure partie du coût.",
+      "moderate": "Faisable avec des outils de base et un moyen sécuritaire de soulever le véhicule. La plupart des gens vont au garage.",
+      "shop": "Mieux vaut confier ça à un garage."
+    },
+    "items": {
+      "oil_change": {
+        "what": "Vidanger l'huile usée du moteur et la remplacer, ainsi que le filtre à huile.",
+        "why": "L'huile empêche les pièces mobiles du moteur de frotter les unes contre les autres. Une huile usée laisse l'usure s'accumuler, ce qui mène à des réparations coûteuses."
+      },
+      "tire_rotation": {
+        "what": "Changer la position de chaque pneu sur le véhicule.",
+        "why": "Les pneus avant et arrière s'usent différemment. Les permuter égalise l'usure pour que le jeu dure plus longtemps et que l'adhérence reste uniforme."
+      },
+      "brake_inspection": {
+        "what": "Vérifier l'usure ou les dommages des plaquettes, des disques et des conduites de frein.",
+        "why": "Remplacer des plaquettes minces tôt coûte peu. Attendre qu'elles grincent peut abîmer les disques et doubler la facture, et des freins usés allongent la distance d'arrêt."
+      },
+      "brake_fluid": {
+        "what": "Purger le vieux liquide de frein et le remplacer.",
+        "why": "Le liquide de frein absorbe l'humidité avec le temps, ce qui abaisse son point d'ébullition et corrode les pièces. Un vieux liquide peut rendre la pédale molle lors d'un freinage brusque."
+      },
+      "engine_air_filter": {
+        "what": "Remplacer le filtre qui nettoie l'air qui entre dans le moteur.",
+        "why": "Un filtre bouché force le moteur et peut réduire la puissance et l'économie de carburant. Les routes poussiéreuses et en gravier le bouchent plus vite."
+      },
+      "cabin_air_filter": {
+        "what": "Remplacer le filtre qui nettoie l'air qui sort des bouches de ventilation.",
+        "why": "Il retient la poussière, le pollen et la fumée. Un filtre bouché affaiblit le chauffage et la climatisation et peut causer des odeurs de moisi et de la buée."
+      },
+      "coolant": {
+        "what": "Vidanger et remplacer le liquide de refroidissement du moteur ou de la batterie.",
+        "why": "Le liquide de refroidissement empêche le moteur de surchauffer l'été et de geler l'hiver. Usé, il protège moins bien et peut corroder le circuit."
+      },
+      "transmission_fluid": {
+        "what": "Remplacer l'huile qui lubrifie et refroidit la transmission.",
+        "why": "Une huile usée peut causer des changements de vitesse brusques ou qui patinent. Une transmission coûte très cher à remplacer : de l'huile fraîche est une assurance peu coûteuse."
+      },
+      "spark_plugs": {
+        "what": "Remplacer les bougies qui allument le carburant dans chaque cylindre.",
+        "why": "Des bougies usées causent des ratés, un ralenti irrégulier, des démarrages difficiles à froid et une plus grande consommation."
+      },
+      "battery_12v": {
+        "what": "Tester la petite batterie qui alimente le démarrage, l'éclairage et l'électronique.",
+        "why": "Le froid est dur pour les batteries, et la plupart lâchent sans avertissement. Un test rapide avant l'hiver évite une panne un matin glacial. Les véhicules électriques en ont une aussi."
+      },
+      "hv_battery_check": {
+        "what": "Un bilan de santé de la grosse batterie d'un véhicule électrique ou hybride.",
+        "why": "Il indique la capacité que la batterie a conservée et détecte tôt les problèmes de refroidissement ou de cellules, pendant qu'ils sont peut-être encore couverts par la garantie."
+      },
+      "wiper_blades": {
+        "what": "Remplacer les balais d'essuie-glace.",
+        "why": "Des essuie-glaces qui laissent des traces sont un vrai danger sous la pluie, la neige et la gadoue. La glace et le sel les usent vite pendant l'hiver canadien."
+      }
+    },
+    "whicheverFirst": "{{limits}}, selon la première échéance"
   }
 }
