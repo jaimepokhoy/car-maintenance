@@ -15,7 +15,25 @@
   },
   "shops": {
     "title": "Shops",
-    "comingSoon": "Find well-rated repair shops near you. Coming soon."
+    "mine": "My shops",
+    "nearby": "Nearby repair shops",
+    "noneSaved": "Save shops you trust to find them fast and link them to services.",
+    "notConfigured": "Shop search isn't available in this version yet.",
+    "locationNeeded": "Allow location access to find shops near you.",
+    "allowLocation": "Allow location",
+    "searching": "Finding shops near you…",
+    "error": "Couldn't load shops. Check your connection and try again.",
+    "retry": "Try again",
+    "empty": "No repair shops found within 10 km.",
+    "call": "Call",
+    "directions": "Directions",
+    "save": "Save",
+    "saved": "Saved",
+    "remove": "Remove",
+    "openNow": "Open now",
+    "closed": "Closed",
+    "rating": "{{rating}} ★ ({{count}})",
+    "away": "{{distance}} away"
   },
   "settings": {
     "title": "Settings",
@@ -113,7 +131,9 @@
       "required": "Required",
       "invalidOdometer": "Enter the reading as a whole number",
       "invalidCost": "Enter an amount like 89.99"
-    }
+    },
+    "shop": "Shop (optional)",
+    "noShop": "None"
   },
   "odometerForm": {
     "title": "Update odometer",

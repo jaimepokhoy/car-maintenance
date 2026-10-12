@@ -33,3 +33,9 @@ Data-layer functions in `src/db/` take a `Db` (a subset of expo-sqlite's API) so
 - Items never logged are `unknown`; the UI asks when they were last done instead of guessing.
 - Default intervals per powertrain are in `src/domain/schedules.ts`; owners can override any of them per vehicle (`maintenance_intervals` table).
 - Seasonal tire reminders: install from October 15, remove from April 15; Quebec adds the December 1 legal deadline.
+
+## Shop finder
+
+- Nearby search uses Google Places API (New) `searchNearby` with type `car_repair`, 10 km around the phone's location (`src/lib/places.ts`). Results are cached in memory for 30 minutes per ~1 km area to keep API costs down; nothing from search is written to disk.
+- Saving a shop stores its place ID plus the name, address and phone the owner chose to keep (`shops` table). Service records link to a saved shop through `shop_id`.
+- Location permission is asked only when the owner taps "Allow location"; the app never reads location in the background.

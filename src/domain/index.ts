@@ -10,3 +10,4 @@ export * from './service-form';
 export * from './guidance';
 export * from './reminders';
 export * from './preferences';
+export * from './geo';

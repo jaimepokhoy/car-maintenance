@@ -28,6 +28,12 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Car Maintenance uses your location to find repair shops near you."
+        }
       ]
     ],
     "experiments": {
