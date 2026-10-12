@@ -28,7 +28,15 @@ export default function RootLayout() {
             name="vehicles/new"
             options={{ presentation: 'modal', title: t('vehicleForm.title') }}
           />
-          <Stack.Screen name="vehicles/[id]" options={{ title: '' }} />
+          <Stack.Screen name="vehicles/[id]/index" options={{ title: '' }} />
+          <Stack.Screen
+            name="vehicles/[id]/log"
+            options={{ presentation: 'modal', title: t('serviceForm.title') }}
+          />
+          <Stack.Screen
+            name="vehicles/[id]/odometer"
+            options={{ presentation: 'modal', title: t('odometerForm.title') }}
+          />
         </Stack>
       </ThemeProvider>
     </SQLiteProvider>

@@ -1,5 +1,10 @@
 import { migrate, MIGRATIONS } from '../migrations';
-import { insertServiceRecord, listServiceRecords } from '../service-records';
+import {
+  deleteServiceRecord,
+  insertServiceRecord,
+  listServiceRecords,
+  logService,
+} from '../service-records';
 import type { Db } from '../types';
 import { deleteVehicle, getVehicle, insertVehicle, listVehicles, updateOdometer } from '../vehicles';
 import { createMemoryDb } from '@/test-utils/memory-db';
@@ -105,5 +110,47 @@ describe('service records', () => {
         now,
       ),
     ).rejects.toThrow(/FOREIGN KEY/);
+  });
+});
+
+describe('logService', () => {
+  beforeEach(async () => {
+    await insertVehicle(db, 'v1', civic, now, '2026-10-01');
+  });
+
+  it('moves the odometer forward when the service reading is higher', async () => {
+    await logService(
+      db,
+      { id: 's1', vehicleId: 'v1', itemIds: ['oil_change'], performedOn: '2026-10-11', odometerKm: 85_600 },
+      now,
+    );
+    expect(await getVehicle(db, 'v1')).toMatchObject({ odometerKm: 85_600, odometerUpdatedOn: '2026-10-11' });
+    expect(await listServiceRecords(db, 'v1')).toHaveLength(1);
+  });
+
+  it('leaves the odometer alone for an older service', async () => {
+    await logService(
+      db,
+      { id: 's1', vehicleId: 'v1', itemIds: ['oil_change'], performedOn: '2026-01-11', odometerKm: 70_000 },
+      now,
+    );
+    expect(await getVehicle(db, 'v1')).toMatchObject({ odometerKm: 85_000, odometerUpdatedOn: '2026-10-01' });
+  });
+
+  it('saves nothing if the insert fails', async () => {
+    const record = { id: 's1', vehicleId: 'v1', itemIds: ['oil_change' as const], performedOn: '2026-10-11', odometerKm: 90_000 };
+    await logService(db, record, now);
+    await expect(logService(db, { ...record, odometerKm: 95_000 }, now)).rejects.toThrow();
+    expect(await getVehicle(db, 'v1')).toMatchObject({ odometerKm: 90_000 });
+  });
+
+  it('hides deleted service records', async () => {
+    await logService(
+      db,
+      { id: 's1', vehicleId: 'v1', itemIds: ['oil_change'], performedOn: '2026-10-11', odometerKm: 85_600 },
+      now,
+    );
+    await deleteServiceRecord(db, 's1', now);
+    expect(await listServiceRecords(db, 'v1')).toEqual([]);
   });
 });

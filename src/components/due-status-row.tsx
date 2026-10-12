@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
@@ -17,10 +17,23 @@ export function useDueStateColor(state: DueState): string {
   }[state];
 }
 
-export function DueStatusRow({ status }: { status: DueStatus }) {
+export function DueStatusRow({
+  status,
+  onDoneToday,
+  onLog,
+}: {
+  status: DueStatus;
+  onDoneToday?: () => void;
+  onLog?: () => void;
+}) {
   const { t } = useTranslation();
   const locale = useLocale();
   const color = useDueStateColor(status.state);
+  const theme = useTheme();
+  const action =
+    status.state === 'unknown'
+      ? onLog && { label: t('vehicle.logIt'), onPress: onLog }
+      : onDoneToday && { label: t('vehicle.doneToday'), onPress: onDoneToday };
 
   const limits = [
     status.dueOn ? formatDate(status.dueOn, locale) : null,
@@ -35,8 +48,8 @@ export function DueStatusRow({ status }: { status: DueStatus }) {
       : t(status.state === 'overdue' ? 'due.wasDueBy' : 'due.dueBy', { limits });
 
   return (
-    <View style={styles.row} accessible>
-      <View style={styles.header}>
+    <View style={styles.row}>
+      <View style={styles.header} accessible>
         <ThemedText type="smallBold" style={styles.name}>
           {t(`items.${status.itemId}`)}
         </ThemedText>
@@ -44,9 +57,18 @@ export function DueStatusRow({ status }: { status: DueStatus }) {
           {t(`dueState.${status.state}`)}
         </ThemedText>
       </View>
-      <ThemedText type="small" themeColor="textSecondary">
-        {detail}
-      </ThemedText>
+      <View style={styles.footer}>
+        <ThemedText type="small" themeColor="textSecondary" style={styles.detail}>
+          {detail}
+        </ThemedText>
+        {action ? (
+          <Pressable accessibilityRole="button" onPress={action.onPress} hitSlop={Spacing.two}>
+            <ThemedText type="smallBold" style={{ color: theme.tint }}>
+              {action.label}
+            </ThemedText>
+          </Pressable>
+        ) : null}
+      </View>
     </View>
   );
 }
@@ -61,6 +83,15 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   name: {
+    flexShrink: 1,
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: Spacing.two,
+  },
+  detail: {
     flexShrink: 1,
   },
 });

@@ -41,7 +41,7 @@ async function loadGarage(db: Db): Promise<GarageEntry[]> {
 
 export default function GarageScreen() {
   const { t } = useTranslation();
-  const garage = useDbQuery(loadGarage);
+  const { data: garage } = useDbQuery(loadGarage);
 
   return (
     <Screen title={t('garage.title')}>

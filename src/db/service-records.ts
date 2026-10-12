@@ -58,3 +58,34 @@ export async function insertServiceRecord(db: Db, record: ServiceRecord, now: Da
     timestamp,
   );
 }
+
+/**
+ * Saves a service and, when it was done at a higher reading than the one on
+ * file, moves the vehicle's odometer forward with it.
+ */
+export async function logService(db: Db, record: ServiceRecord, now: Date): Promise<void> {
+  await db.withTransactionAsync(async () => {
+    await insertServiceRecord(db, record, now);
+    await db.runAsync(
+      `UPDATE vehicles
+       SET odometer_km = ?, odometer_updated_on = ?, updated_at = ?, dirty = 1
+       WHERE id = ? AND odometer_km < ?`,
+      record.odometerKm,
+      record.performedOn,
+      now.toISOString(),
+      record.vehicleId,
+      record.odometerKm,
+    );
+  });
+}
+
+/** Soft delete, so the deletion can sync to other devices. */
+export async function deleteServiceRecord(db: Db, id: string, now: Date): Promise<void> {
+  const timestamp = now.toISOString();
+  await db.runAsync(
+    'UPDATE service_records SET deleted_at = ?, updated_at = ?, dirty = 1 WHERE id = ?',
+    timestamp,
+    timestamp,
+    id,
+  );
+}
