@@ -94,8 +94,8 @@
     "decodeNotFound": "Ce NIV est introuvable. Remplissez les détails vous-même.",
     "decodeFailed": "La recherche du NIV a échoué. Vérifiez votre connexion ou remplissez les détails vous-même.",
     "editTitle": "Modifier le véhicule",
-    "makePlaceholder": "p. ex. Toyota",
-    "modelPlaceholder": "p. ex. RAV4",
+    "makePlaceholder": "Choisir une marque",
+    "modelPlaceholder": "Choisir un modèle",
     "trim": "Version (facultatif)",
     "trimPlaceholder": "p. ex. LE, Sport, Limited",
     "moreDetails": "Autres détails (facultatif)",
@@ -103,7 +103,12 @@
     "tireSize": "Dimension des pneus",
     "tireSizePlaceholder": "p. ex. 225/65R17",
     "tireSizeHint": "Inscrite sur le flanc du pneu. Pratique pour magasiner des pneus d'hiver.",
-    "saveChanges": "Enregistrer les modifications"
+    "saveChanges": "Enregistrer les modifications",
+    "models": {
+      "needsYear": "Entrez l'année et la marque pour voir les modèles. Vous pouvez aussi taper le vôtre.",
+      "failed": "Impossible de charger les modèles. Vérifiez votre connexion ou tapez le vôtre.",
+      "none": "Aucun modèle trouvé pour cette année. Tapez le vôtre."
+    }
   },
   "powertrain": {
     "gas": "Essence",
@@ -295,5 +300,10 @@
     "notes": "Notes",
     "unavailable": "Le partage de fichiers n'est pas offert sur cet appareil.",
     "failed": "Impossible d'exporter l'historique. Réessayez."
+  },
+  "picker": {
+    "search": "Rechercher ou taper",
+    "cancel": "Annuler",
+    "useTyped": "Utiliser « {{value}} »"
   }
 }

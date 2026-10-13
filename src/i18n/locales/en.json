@@ -94,8 +94,8 @@
     "decodeNotFound": "We couldn't find this VIN. Fill in the details yourself.",
     "decodeFailed": "VIN lookup didn't work. Check your connection or fill in the details yourself.",
     "editTitle": "Edit vehicle",
-    "makePlaceholder": "e.g. Toyota",
-    "modelPlaceholder": "e.g. RAV4",
+    "makePlaceholder": "Choose a make",
+    "modelPlaceholder": "Choose a model",
     "trim": "Trim (optional)",
     "trimPlaceholder": "e.g. LE, Sport, Limited",
     "moreDetails": "More details (optional)",
@@ -103,7 +103,12 @@
     "tireSize": "Tire size",
     "tireSizePlaceholder": "e.g. 225/65R17",
     "tireSizeHint": "Printed on the tire sidewall. Handy when you shop for winter tires.",
-    "saveChanges": "Save changes"
+    "saveChanges": "Save changes",
+    "models": {
+      "needsYear": "Enter the year and make to see models. You can also type yours.",
+      "failed": "Couldn't load models. Check your connection, or type yours.",
+      "none": "No models found for this year. Type yours."
+    }
   },
   "powertrain": {
     "gas": "Gas",
@@ -295,5 +300,10 @@
     "notes": "Notes",
     "unavailable": "Sharing files isn't available on this device.",
     "failed": "Couldn't export your history. Try again."
+  },
+  "picker": {
+    "search": "Search or type",
+    "cancel": "Cancel",
+    "useTyped": "Use “{{value}}”"
   }
 }
