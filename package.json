@@ -5,7 +5,7 @@
   "dependencies": {
     "@expo/ui": "~57.0.22",
     "@react-native-community/datetimepicker": "^9.1.0",
-    "@supabase/supabase-js": "^2.117.3",
+    "@supabase/supabase-js": "2.117.2",
     "expo": "~57.0.27",
     "expo-constants": "~57.0.21",
     "expo-crypto": "~57.0.3",
@@ -26,7 +26,7 @@
     "expo-symbols": "~57.0.3",
     "expo-system-ui": "~57.0.4",
     "expo-web-browser": "~57.0.3",
-    "i18next": "^26.4.3",
+    "i18next": "26.4.2",
     "react": "19.2.3",
     "react-i18next": "^17.0.16",
     "react-native": "0.86.3",
@@ -62,5 +62,20 @@
       "/node_modules/",
       "/supabase/"
     ]
+  },
+  "overrides": {
+    "update-browserslist-db": "1.3.3",
+    "node-releases": "2.0.57",
+    "fb-watchman": "2.0.2",
+    "electron-to-chromium": "1.5.447",
+    "caniuse-lite": "1.0.30001814",
+    "baseline-browser-mapping": "2.11.27",
+    "babel-plugin-react-native-web": "0.21.3",
+    "react-native-web": "0.21.3",
+    "@types/node": "26.6.4",
+    "@babel/traverse": "7.29.8",
+    "@babel/helpers": "7.29.7",
+    "@babel/helper-create-regexp-features-plugin": "7.29.7",
+    "@babel/runtime": "7.29.7"
   }
 }
