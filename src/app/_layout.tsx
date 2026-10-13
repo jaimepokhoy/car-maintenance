@@ -43,6 +43,10 @@ export default function RootLayout() {
               options={{ presentation: 'modal', title: t('serviceForm.title') }}
             />
             <Stack.Screen
+              name="vehicles/[id]/edit"
+              options={{ presentation: 'modal', title: t('vehicleForm.editTitle') }}
+            />
+            <Stack.Screen
               name="vehicles/[id]/odometer"
               options={{ presentation: 'modal', title: t('odometerForm.title') }}
             />

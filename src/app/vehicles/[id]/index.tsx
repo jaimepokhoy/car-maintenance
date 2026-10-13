@@ -14,9 +14,10 @@ import { Spacing } from '@/constants/theme';
 import { deleteServiceRecord, listServiceRecords, logService } from '@/db/service-records';
 import { shopNames } from '@/db/shops';
 import type { Db } from '@/db/types';
-import { deleteVehicle, getVehicle, updateTireSet } from '@/db/vehicles';
+import { getVehicle, updateTireSet } from '@/db/vehicles';
 import {
   computeVehicleDueStatuses,
+  describeVehicle,
   nextTireReminder,
   resolveSchedule,
   TIRE_SETS,
@@ -27,6 +28,7 @@ import {
   type TireSet,
 } from '@/domain';
 import { useDbQuery } from '@/hooks/use-db-query';
+import { useDeleteVehicle } from '@/hooks/use-delete-vehicle';
 import { useFormat } from '@/hooks/use-format';
 import { usePreferences } from '@/hooks/use-preferences';
 import { useTheme } from '@/hooks/use-theme';
@@ -39,6 +41,7 @@ export default function VehicleScreen() {
   const { province } = usePreferences().preferences;
   const theme = useTheme();
   const db = useSQLiteContext();
+  const confirmDelete = useDeleteVehicle();
   const load = useCallback(
     async (db: Db) => {
       const vehicle = await getVehicle(db, id);
@@ -109,29 +112,33 @@ export default function VehicleScreen() {
     ]);
   }
 
-  function confirmDeleteVehicle() {
-    Alert.alert(t('vehicle.deleteConfirmTitle'), t('vehicle.deleteConfirmBody'), [
-      { text: t('vehicle.cancel'), style: 'cancel' },
-      {
-        text: t('vehicle.delete'),
-        style: 'destructive',
-        onPress: async () => {
-          await deleteVehicle(db, vehicle.id, new Date());
-          refreshReminders(db);
-          router.back();
-        },
-      },
-    ]);
-  }
-
   return (
     <ThemedView style={styles.flex}>
       <Stack.Screen options={{ title: vehicle.nickname }} />
       <ScrollView contentContainerStyle={styles.content}>
         <ThemedView type="backgroundElement" style={styles.card}>
-          <ThemedText type="small" themeColor="textSecondary">
-            {`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
-          </ThemedText>
+          <View style={styles.row}>
+            <ThemedText type="small" themeColor="textSecondary" style={styles.flex}>
+              {describeVehicle(vehicle)}
+            </ThemedText>
+            <Link href={{ pathname: '/vehicles/[id]/edit', params: { id: vehicle.id } }} asChild>
+              <Pressable accessibilityRole="button" hitSlop={Spacing.two}>
+                <ThemedText type="smallBold" style={{ color: theme.tint }}>
+                  {t('vehicle.edit')}
+                </ThemedText>
+              </Pressable>
+            </Link>
+          </View>
+          {vehicle.licencePlate || vehicle.tireSize ? (
+            <ThemedText type="small" themeColor="textSecondary">
+              {[
+                vehicle.licencePlate ? t('vehicle.plate', { plate: vehicle.licencePlate }) : null,
+                vehicle.tireSize ? t('vehicle.tires', { size: vehicle.tireSize }) : null,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
+            </ThemedText>
+          ) : null}
           <View style={styles.row}>
             <ThemedText type="small">
               {`${t('vehicle.odometer')}: ${format.distance(vehicle.odometerKm)}`}
@@ -269,7 +276,7 @@ export default function VehicleScreen() {
           )}
         </ThemedView>
 
-        <Pressable accessibilityRole="button" onPress={confirmDeleteVehicle} style={styles.delete}>
+        <Pressable accessibilityRole="button" onPress={() => confirmDelete(vehicle, () => router.back())} style={styles.delete}>
           <ThemedText type="small" style={{ color: theme.danger }}>
             {t('vehicle.delete')}
           </ThemedText>

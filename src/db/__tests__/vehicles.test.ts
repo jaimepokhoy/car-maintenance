@@ -7,7 +7,14 @@ import {
   logService,
 } from '../service-records';
 import type { Db } from '../types';
-import { deleteVehicle, getVehicle, insertVehicle, listVehicles, updateOdometer } from '../vehicles';
+import {
+  deleteVehicle,
+  getVehicle,
+  insertVehicle,
+  listVehicles,
+  updateOdometer,
+  updateVehicleDetails,
+} from '../vehicles';
 import { createMemoryDb } from '@/test-utils/memory-db';
 
 const now = new Date('2026-10-11T12:00:00Z');
@@ -52,6 +59,45 @@ describe('vehicles', () => {
     await insertVehicle(db, 'v1', civic, now, '2026-10-11');
     await updateOdometer(db, 'v1', 86_200, now, '2026-11-01');
     expect(await getVehicle(db, 'v1')).toMatchObject({ odometerKm: 86_200, odometerUpdatedOn: '2026-11-01' });
+  });
+
+  it('stores the optional details', async () => {
+    const details = { trim: 'EX', licencePlate: 'CKMT 123', tireSize: '215/55R16' };
+    await insertVehicle(db, 'v1', { ...civic, ...details }, now, '2026-10-11');
+    expect(await getVehicle(db, 'v1')).toMatchObject(details);
+  });
+
+  it('edits details without touching the odometer or tire set', async () => {
+    await insertVehicle(db, 'v1', civic, now, '2026-10-11');
+    await updateOdometer(db, 'v1', 86_200, now, '2026-11-01');
+    const { odometerKm: _, ...rest } = civic;
+    await updateVehicleDetails(
+      db,
+      'v1',
+      { ...rest, nickname: 'Commuter', trim: 'Sport', vin: '1M8GDM9AXKP042788', licencePlate: 'ABC 123' },
+      new Date('2026-11-02T00:00:00Z'),
+    );
+    expect(await getVehicle(db, 'v1')).toMatchObject({
+      nickname: 'Commuter',
+      trim: 'Sport',
+      vin: '1M8GDM9AXKP042788',
+      licencePlate: 'ABC 123',
+      tireSize: undefined,
+      odometerKm: 86_200,
+      odometerUpdatedOn: '2026-11-01',
+    });
+    await updateVehicleDetails(db, 'v1', { ...rest, nickname: 'Commuter' }, now);
+    expect(await getVehicle(db, 'v1')).toMatchObject({ trim: undefined, licencePlate: undefined });
+  });
+
+  it('deletes the service history with the vehicle', async () => {
+    await insertVehicle(db, 'v1', civic, now, '2026-10-11');
+    await insertVehicle(db, 'v2', civic, now, '2026-10-11');
+    const base = { itemIds: ['oil_change' as const], odometerKm: 80_000, performedOn: '2026-01-10' };
+    await insertServiceRecord(db, { ...base, id: 's1', vehicleId: 'v1' }, now);
+    await insertServiceRecord(db, { ...base, id: 's2', vehicleId: 'v2' }, now);
+    await deleteVehicle(db, 'v1', now);
+    expect((await listAllServiceRecords(db)).map((r) => r.id)).toEqual(['s2']);
   });
 
   it('hides deleted vehicles but keeps the row for sync', async () => {

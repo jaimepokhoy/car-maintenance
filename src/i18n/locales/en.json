@@ -11,7 +11,8 @@
     "add": "Add a vehicle",
     "odometer": "{{distance}} on the odometer",
     "nextUp": "Next: {{item}} ({{state}})",
-    "allClear": "Nothing due yet"
+    "allClear": "Nothing due yet",
+    "actionsHint": "Long press to edit or delete"
   },
   "shops": {
     "title": "Shops",
@@ -84,13 +85,30 @@
       "required": "Required",
       "invalidYear": "Enter a year between 1950 and next year",
       "invalidOdometer": "Enter the reading as a whole number",
-      "invalidVin": "This VIN doesn't look right. Check for typos."
+      "invalidVin": "This VIN doesn't look right. Check for typos.",
+      "invalidPlate": "Use letters, numbers and spaces only"
     },
     "decode": "Fill in from VIN",
     "decoding": "Looking up VIN…",
     "decodeFilled": "Filled in from the VIN. Check the details below.",
     "decodeNotFound": "We couldn't find this VIN. Fill in the details yourself.",
-    "decodeFailed": "VIN lookup didn't work. Check your connection or fill in the details yourself."
+    "decodeFailed": "VIN lookup didn't work. Check your connection or fill in the details yourself.",
+    "editTitle": "Edit vehicle",
+    "makePlaceholder": "Choose a make",
+    "modelPlaceholder": "Choose a model",
+    "trim": "Trim (optional)",
+    "trimPlaceholder": "e.g. LE, Sport, Limited",
+    "moreDetails": "More details (optional)",
+    "licencePlate": "Licence plate",
+    "tireSize": "Tire size",
+    "tireSizePlaceholder": "e.g. 225/65R17",
+    "tireSizeHint": "Printed on the tire sidewall. Handy when you shop for winter tires.",
+    "saveChanges": "Save changes",
+    "models": {
+      "needsYear": "Enter the year and make to see models. You can also type yours.",
+      "failed": "Couldn't load models. Check your connection, or type yours.",
+      "none": "No models found for this year. Type yours."
+    }
   },
   "powertrain": {
     "gas": "Gas",
@@ -102,8 +120,7 @@
     "odometer": "Odometer",
     "maintenance": "Maintenance",
     "delete": "Delete vehicle",
-    "deleteConfirmTitle": "Delete this vehicle?",
-    "deleteConfirmBody": "Its service history will be deleted too.",
+    "deleteConfirmTitle": "Delete {{name}}?",
     "cancel": "Cancel",
     "update": "Update",
     "logService": "Log a service",
@@ -113,7 +130,13 @@
     "noHistory": "No services logged yet.",
     "deleteService": "Delete",
     "deleteServiceTitle": "Delete this service?",
-    "learnMore": "Why it matters"
+    "learnMore": "Why it matters",
+    "edit": "Edit",
+    "plate": "Plate {{plate}}",
+    "tires": "Tires {{size}}",
+    "deleteConfirmBody_one": "Its {{count}} logged service and its reminders will be deleted too. This can't be undone.",
+    "deleteConfirmBody_other": "Its {{count}} logged services and its reminders will be deleted too. This can't be undone.",
+    "deleteConfirmBodyEmpty": "Its reminders will stop. This can't be undone."
   },
   "due": {
     "dueBy": "Due by {{limits}}",
@@ -277,5 +300,10 @@
     "notes": "Notes",
     "unavailable": "Sharing files isn't available on this device.",
     "failed": "Couldn't export your history. Try again."
+  },
+  "picker": {
+    "search": "Search or type",
+    "cancel": "Cancel",
+    "useTyped": "Use “{{value}}”"
   }
 }
