@@ -75,6 +75,11 @@ export const MIGRATIONS: string[] = [
     value TEXT NOT NULL
   );
   `,
+  `
+  ALTER TABLE vehicles ADD COLUMN trim_level TEXT;
+  ALTER TABLE vehicles ADD COLUMN licence_plate TEXT;
+  ALTER TABLE vehicles ADD COLUMN tire_size TEXT;
+  `,
 ];
 
 export async function migrate(db: Db): Promise<void> {

@@ -11,7 +11,8 @@
     "add": "Ajouter un véhicule",
     "odometer": "{{distance}} à l'odomètre",
     "nextUp": "Prochain : {{item}} ({{state}})",
-    "allClear": "Rien à faire pour l'instant"
+    "allClear": "Rien à faire pour l'instant",
+    "actionsHint": "Appui long pour modifier ou supprimer"
   },
   "shops": {
     "title": "Garages",
@@ -84,13 +85,25 @@
       "required": "Obligatoire",
       "invalidYear": "Entrez une année entre 1950 et l'an prochain",
       "invalidOdometer": "Entrez la lecture en nombre entier",
-      "invalidVin": "Ce NIV semble incorrect. Vérifiez s'il y a une faute de frappe."
+      "invalidVin": "Ce NIV semble incorrect. Vérifiez s'il y a une faute de frappe.",
+      "invalidPlate": "Lettres, chiffres et espaces seulement"
     },
     "decode": "Remplir à partir du NIV",
     "decoding": "Recherche du NIV…",
     "decodeFilled": "Rempli à partir du NIV. Vérifiez les détails ci-dessous.",
     "decodeNotFound": "Ce NIV est introuvable. Remplissez les détails vous-même.",
-    "decodeFailed": "La recherche du NIV a échoué. Vérifiez votre connexion ou remplissez les détails vous-même."
+    "decodeFailed": "La recherche du NIV a échoué. Vérifiez votre connexion ou remplissez les détails vous-même.",
+    "editTitle": "Modifier le véhicule",
+    "makePlaceholder": "p. ex. Toyota",
+    "modelPlaceholder": "p. ex. RAV4",
+    "trim": "Version (facultatif)",
+    "trimPlaceholder": "p. ex. LE, Sport, Limited",
+    "moreDetails": "Autres détails (facultatif)",
+    "licencePlate": "Plaque d'immatriculation",
+    "tireSize": "Dimension des pneus",
+    "tireSizePlaceholder": "p. ex. 225/65R17",
+    "tireSizeHint": "Inscrite sur le flanc du pneu. Pratique pour magasiner des pneus d'hiver.",
+    "saveChanges": "Enregistrer les modifications"
   },
   "powertrain": {
     "gas": "Essence",
@@ -102,8 +115,7 @@
     "odometer": "Odomètre",
     "maintenance": "Entretien",
     "delete": "Supprimer le véhicule",
-    "deleteConfirmTitle": "Supprimer ce véhicule?",
-    "deleteConfirmBody": "Son historique d'entretien sera aussi supprimé.",
+    "deleteConfirmTitle": "Supprimer {{name}}?",
     "cancel": "Annuler",
     "update": "Mettre à jour",
     "logService": "Ajouter un entretien",
@@ -113,7 +125,13 @@
     "noHistory": "Aucun entretien enregistré.",
     "deleteService": "Supprimer",
     "deleteServiceTitle": "Supprimer cet entretien?",
-    "learnMore": "Pourquoi c'est important"
+    "learnMore": "Pourquoi c'est important",
+    "edit": "Modifier",
+    "plate": "Plaque {{plate}}",
+    "tires": "Pneus {{size}}",
+    "deleteConfirmBody_one": "Son entretien enregistré et ses rappels seront aussi supprimés. C'est irréversible.",
+    "deleteConfirmBody_other": "Ses {{count}} entretiens enregistrés et ses rappels seront aussi supprimés. C'est irréversible.",
+    "deleteConfirmBodyEmpty": "Ses rappels s'arrêteront. C'est irréversible."
   },
   "due": {
     "dueBy": "À faire d'ici {{limits}}",

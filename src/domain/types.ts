@@ -34,8 +34,14 @@ export interface Vehicle {
   year: number;
   make: string;
   model: string;
+  /** Trim or version, e.g. "EX" or "Limited". */
+  trim?: string;
   vin?: string;
   powertrain: Powertrain;
+  /** Shops and parking forms ask for it. */
+  licencePlate?: string;
+  /** As printed on the sidewall, e.g. "225/45R17". Handy when buying winter tires. */
+  tireSize?: string;
   /** Last odometer reading the owner reported. */
   odometerKm: number;
   odometerUpdatedOn: IsoDate;
