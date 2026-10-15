@@ -84,9 +84,46 @@ export function computeVehicleDueStatuses(
   today: IsoDate,
 ): DueStatus[] {
   const own = records.filter((record) => record.vehicleId === vehicle.id);
-  return schedule
-    .map((interval) => computeDueStatus(interval, vehicle, own, today))
-    .sort((a, b) => SEVERITY[a.state] - SEVERITY[b.state] || urgency(a) - urgency(b));
+  return schedule.map((interval) => computeDueStatus(interval, vehicle, own, today)).sort(compareDueStatuses);
+}
+
+/** Most urgent first: by state, then by how soon within the state. */
+export function compareDueStatuses(a: DueStatus, b: DueStatus): number {
+  return SEVERITY[a.state] - SEVERITY[b.state] || urgency(a) - urgency(b);
+}
+
+export interface RemainingLimit {
+  kind: 'km' | 'days';
+  /** Negative when overdue. */
+  value: number;
+}
+
+/**
+ * The limits a status is tracked against, most pressing first, each measured
+ * against its own due-soon threshold so 900 km ranks ahead of 29 days. Empty
+ * for items never logged.
+ */
+export function remainingLimits(status: DueStatus): RemainingLimit[] {
+  const limits: RemainingLimit[] = [];
+  if (status.kmRemaining !== undefined) limits.push({ kind: 'km', value: status.kmRemaining });
+  if (status.daysRemaining !== undefined) limits.push({ kind: 'days', value: status.daysRemaining });
+  const pressure = (limit: RemainingLimit) => limit.value / (limit.kind === 'km' ? DUE_SOON_KM : DUE_SOON_DAYS);
+  return limits.sort((a, b) => pressure(a) - pressure(b));
+}
+
+/**
+ * How much of the interval has been used up on its most pressing limit, from
+ * 0 (just serviced) to 1 (due or overdue). Undefined for items never logged.
+ */
+export function intervalProgress(status: DueStatus): number | undefined {
+  const [limit] = remainingLimits(status);
+  if (!limit || !status.lastService) return undefined;
+  const total =
+    limit.kind === 'km'
+      ? status.dueAtKm! - status.lastService.odometerKm
+      : daysBetween(status.lastService.performedOn, status.dueOn!);
+  if (total <= 0) return 1;
+  return Math.min(1, Math.max(0, (total - limit.value) / total));
 }
 
 /** Rough sort key within a state: fewest days left, treating ~50 km as a day. */

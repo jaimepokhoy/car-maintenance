@@ -17,5 +17,5 @@ Run `npm run check` (typecheck, lint, tests). CI runs the same plus an iOS and A
 - **Defaults are Canadian:** km, CAD, `en-CA` / `fr-CA` formatting.
 - **Data model:** Postgres schema lives in `supabase/migrations/`. Rows are user-owned with RLS, IDs are client-generated UUIDs, `updated_at` drives sync, `deleted_at` is a soft delete. Add a new migration file; never edit an applied one.
 - **Supabase is optional at runtime:** `src/lib/supabase.ts` exports `null` until env vars are set, and the app must work offline without it.
-- **Styling:** use `ThemedText` / `ThemedView`, `Spacing` and `Colors` from `src/constants/theme.ts`; light and dark mode both matter.
+- **Styling:** the visual system is recorded in `docs/DESIGN.md` (product truth in `docs/PRODUCT.md`). Screens compose `src/components/` (`Card`, `Button`, `IconButton`, `Chip`, `SegmentedControl`, `TextField`, `ThemedText`) and read every colour, radius, size and font from `src/constants/theme.ts` via `useTheme()`; no hard-coded values in screens. Light and dark mode both matter, and the owner can force either in Settings.
 - **Small PRs:** one issue, one PR, reviewable in a few minutes. Describe what changed for a user in the PR body.

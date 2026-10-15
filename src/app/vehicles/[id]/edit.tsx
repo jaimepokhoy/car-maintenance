@@ -2,9 +2,9 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 
-import { ThemedText } from '@/components/themed-text';
+import { Button } from '@/components/button';
 import { ThemedView } from '@/components/themed-view';
 import { VehicleForm } from '@/components/vehicle-form';
 import { Spacing } from '@/constants/theme';
@@ -14,7 +14,6 @@ import { validateVehicleDetails, vehicleToFormValues, type Vehicle, type Vehicle
 import { useDbQuery } from '@/hooks/use-db-query';
 import { useDeleteVehicle } from '@/hooks/use-delete-vehicle';
 import { useFormat } from '@/hooks/use-format';
-import { useTheme } from '@/hooks/use-theme';
 import { refreshReminders } from '@/lib/reminders';
 
 export default function EditVehicleScreen() {
@@ -30,7 +29,6 @@ function EditVehicleForm({ vehicle }: { vehicle: Vehicle }) {
   const { t } = useTranslation();
   const db = useSQLiteContext();
   const format = useFormat();
-  const theme = useTheme();
   const confirmDelete = useDeleteVehicle();
 
   async function save(values: VehicleFormValues) {
@@ -49,14 +47,13 @@ function EditVehicleForm({ vehicle }: { vehicle: Vehicle }) {
       submitTitle={t('vehicleForm.saveChanges')}
       onSubmit={save}
       footer={
-        <Pressable
-          accessibilityRole="button"
+        <Button
+          title={t('vehicle.delete')}
+          variant="destructive"
+          size="small"
           onPress={() => confirmDelete(vehicle, () => router.dismissTo('/'))}
-          style={styles.delete}>
-          <ThemedText type="small" style={{ color: theme.danger }}>
-            {t('vehicle.delete')}
-          </ThemedText>
-        </Pressable>
+          style={styles.delete}
+        />
       }
     />
   );
@@ -67,7 +64,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   delete: {
-    alignItems: 'center',
-    paddingVertical: Spacing.three,
+    alignSelf: 'center',
+    marginTop: Spacing.two + Spacing.half,
   },
 });

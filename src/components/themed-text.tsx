@@ -1,73 +1,117 @@
-import { Platform, StyleSheet, Text, type TextProps } from 'react-native';
+import { StyleSheet, Text, type TextProps } from 'react-native';
 
-import { Fonts, ThemeColor } from '@/constants/theme';
+import { Fonts, type ThemeColor } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
+/**
+ * The type scale. Titles, names and numbers use the condensed display face;
+ * everything the owner reads uses Barlow.
+ *
+ * - `display`: screen titles and vehicle names, uppercase.
+ * - `headline`: inline titles on pushed and modal screens, uppercase.
+ * - `numeral` / `numeralLarge`: odometer readings, costs, the hero figure. Tabular.
+ * - `label`: small uppercase section and field labels.
+ * - `body` / `bodyStrong`, `small` / `smallStrong`, `caption`: reading sizes.
+ */
+export type TextType =
+  | 'display'
+  | 'headline'
+  | 'numeral'
+  | 'numeralLarge'
+  | 'numeralCompact'
+  | 'label'
+  | 'body'
+  | 'bodyStrong'
+  | 'small'
+  | 'smallStrong'
+  | 'caption';
+
 export type ThemedTextProps = TextProps & {
-  type?: 'default' | 'title' | 'small' | 'smallBold' | 'subtitle' | 'link' | 'linkPrimary' | 'code';
+  type?: TextType;
   themeColor?: ThemeColor;
 };
 
-export function ThemedText({ style, type = 'default', themeColor, ...rest }: ThemedTextProps) {
+/** Display sizes stop scaling earlier so a hero number never pushes its controls off screen. */
+const DISPLAY_MAX_SCALE = 1.5;
+
+export function ThemedText({ style, type = 'body', themeColor = 'text', ...rest }: ThemedTextProps) {
   const theme = useTheme();
+  const isDisplay =
+    type === 'display' || type === 'headline' || type === 'numeral' || type === 'numeralLarge' || type === 'numeralCompact';
 
   return (
     <Text
-      style={[
-        { color: theme[themeColor ?? 'text'] },
-        type === 'default' && styles.default,
-        type === 'title' && styles.title,
-        type === 'small' && styles.small,
-        type === 'smallBold' && styles.smallBold,
-        type === 'subtitle' && styles.subtitle,
-        type === 'link' && styles.link,
-        type === 'linkPrimary' && styles.linkPrimary,
-        type === 'code' && styles.code,
-        style,
-      ]}
+      maxFontSizeMultiplier={isDisplay ? DISPLAY_MAX_SCALE : undefined}
       {...rest}
+      style={[{ color: theme[themeColor] }, styles[type], style]}
     />
   );
 }
 
 const styles = StyleSheet.create({
-  small: {
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: 500,
+  display: {
+    fontFamily: Fonts.display,
+    fontSize: 32,
+    lineHeight: 36,
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
   },
-  smallBold: {
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: 700,
+  headline: {
+    fontFamily: Fonts.display,
+    fontSize: 20,
+    lineHeight: 24,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
   },
-  default: {
+  numeral: {
+    fontFamily: Fonts.displayBold,
+    fontSize: 26,
+    lineHeight: 30,
+    fontVariant: ['tabular-nums'],
+  },
+  numeralLarge: {
+    fontFamily: Fonts.display,
+    fontSize: 72,
+    lineHeight: 76,
+    fontVariant: ['tabular-nums'],
+  },
+  /** Money and figures inside rows and stat cards. */
+  numeralCompact: {
+    fontFamily: Fonts.displayBold,
+    fontSize: 20,
+    lineHeight: 24,
+    fontVariant: ['tabular-nums'],
+  },
+  label: {
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: 12,
+    lineHeight: 16,
+    letterSpacing: 1.4,
+    textTransform: 'uppercase',
+  },
+  body: {
+    fontFamily: Fonts.body,
     fontSize: 16,
     lineHeight: 24,
-    fontWeight: 500,
   },
-  title: {
-    fontSize: 48,
-    fontWeight: 600,
-    lineHeight: 52,
+  bodyStrong: {
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: 16,
+    lineHeight: 24,
   },
-  subtitle: {
-    fontSize: 32,
-    lineHeight: 44,
-    fontWeight: 600,
-  },
-  link: {
-    lineHeight: 30,
+  small: {
+    fontFamily: Fonts.body,
     fontSize: 14,
+    lineHeight: 20,
   },
-  linkPrimary: {
-    lineHeight: 30,
+  smallStrong: {
+    fontFamily: Fonts.bodySemiBold,
     fontSize: 14,
-    color: '#3c87f7',
+    lineHeight: 20,
   },
-  code: {
-    fontFamily: Fonts.mono,
-    fontWeight: Platform.select({ android: 700 }) ?? 500,
-    fontSize: 12,
+  caption: {
+    fontFamily: Fonts.body,
+    fontSize: 13,
+    lineHeight: 18,
   },
 });

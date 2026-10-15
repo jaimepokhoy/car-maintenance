@@ -5,10 +5,10 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet } from 'react-native';
 
 import { Button } from '@/components/button';
+import { FormScreen } from '@/components/screen';
 import { TextField } from '@/components/text-field';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
 import type { Db } from '@/db/types';
 import { getVehicle, updateOdometer } from '@/db/vehicles';
 import { displayToKm, parseWholeNumber, toIsoDate, type Vehicle } from '@/domain';
@@ -46,30 +46,31 @@ function OdometerForm({ vehicle }: { vehicle: Vehicle }) {
   }
 
   return (
-    <ThemedView style={[styles.flex, styles.content]}>
+    <FormScreen footer={<Button title={t('odometerForm.save')} size="large" onPress={save} />}>
+      <ThemedText type="small" themeColor="textSecondary">
+        {vehicle.nickname}
+      </ThemedText>
       <TextField
-        label={t('odometerForm.current', { unit: format.distanceUnit })}
+        label={t('odometerForm.current')}
         value={value}
-        onChangeText={setValue}
+        onChangeText={(next) => {
+          setValue(next);
+          setError(undefined);
+        }}
         keyboardType="number-pad"
+        size="large"
+        suffix={format.distanceUnit}
         autoFocus
         selectTextOnFocus
+        hint={t('odometerForm.hint')}
         error={error ? t(`odometerForm.errors.${error}`) : undefined}
       />
-      <ThemedText type="small" themeColor="textSecondary">
-        {t('odometerForm.hint')}
-      </ThemedText>
-      <Button title={t('odometerForm.save')} onPress={save} />
-    </ThemedView>
+    </FormScreen>
   );
 }
 
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
-  },
-  content: {
-    gap: Spacing.three,
-    padding: Spacing.four,
   },
 });

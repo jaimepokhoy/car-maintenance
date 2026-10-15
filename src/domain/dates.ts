@@ -33,3 +33,20 @@ export function toIsoDate(date: Date): IsoDate {
 export function addDays(date: IsoDate, days: number): IsoDate {
   return format(new Date(parse(date).getTime() + days * 86_400_000));
 }
+
+export interface Duration {
+  unit: 'day' | 'week' | 'month';
+  count: number;
+}
+
+/**
+ * Rounds a number of days to the unit people say out loud: days under two
+ * weeks, weeks under two months, months beyond. The sign is dropped; callers
+ * already know whether it is remaining or overdue.
+ */
+export function describeDuration(days: number): Duration {
+  const abs = Math.abs(days);
+  if (abs < 14) return { unit: 'day', count: abs };
+  if (abs < 60) return { unit: 'week', count: Math.round(abs / 7) };
+  return { unit: 'month', count: Math.round(abs / 30) };
+}
