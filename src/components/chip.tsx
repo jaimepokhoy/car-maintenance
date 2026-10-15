@@ -1,30 +1,38 @@
 import { Pressable, StyleSheet } from 'react-native';
 
+import { Icon } from '@/components/icon';
 import { ThemedText } from '@/components/themed-text';
-import { Spacing } from '@/constants/theme';
+import { Control, Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
+/** A toggle pill. Selected chips fill with the text colour and gain a check. */
 export function Chip({
   label,
   selected,
   onPress,
+  role = 'checkbox',
 }: {
   label: string;
   selected: boolean;
   onPress: () => void;
+  /** `radio` when exactly one chip in the group can be on. */
+  role?: 'checkbox' | 'radio';
 }) {
   const theme = useTheme();
   return (
     <Pressable
-      accessibilityRole="checkbox"
+      accessibilityRole={role}
       accessibilityState={{ checked: selected }}
       onPress={onPress}
-      style={[
+      style={({ pressed }) => [
         styles.chip,
-        { borderColor: selected ? theme.tint : theme.border },
-        selected && { backgroundColor: theme.tint },
+        selected
+          ? { backgroundColor: theme.inverse, borderColor: theme.inverse }
+          : { backgroundColor: theme.surface, borderColor: theme.borderStrong },
+        pressed && { opacity: 0.7 },
       ]}>
-      <ThemedText type="small" style={selected ? { color: theme.onTint } : undefined}>
+      {selected ? <Icon name="check" size={14} color={theme.onInverse} weight="bold" /> : null}
+      <ThemedText type={selected ? 'smallStrong' : 'small'} style={{ color: selected ? theme.onInverse : theme.text }}>
         {label}
       </ThemedText>
     </Pressable>
@@ -33,9 +41,12 @@ export function Chip({
 
 const styles = StyleSheet.create({
   chip: {
-    paddingVertical: Spacing.two,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two - Spacing.half,
+    minHeight: Control.touch,
     paddingHorizontal: Spacing.three,
-    borderRadius: Spacing.four,
+    borderRadius: Radius.pill,
     borderWidth: 1,
   },
 });

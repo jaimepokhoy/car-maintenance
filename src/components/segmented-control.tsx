@@ -1,9 +1,10 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { Spacing } from '@/constants/theme';
+import { Control, Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
+/** A pick-one control. The selected segment fills with the text colour. */
 export function SegmentedControl<T extends string>({
   label,
   options,
@@ -18,11 +19,13 @@ export function SegmentedControl<T extends string>({
   const theme = useTheme();
   return (
     <View style={styles.field}>
-      <ThemedText type="small">{label}</ThemedText>
+      <ThemedText type="label" themeColor="textSecondary">
+        {label}
+      </ThemedText>
       <View
         accessibilityRole="radiogroup"
         accessibilityLabel={label}
-        style={[styles.track, { backgroundColor: theme.backgroundElement }]}>
+        style={[styles.track, { backgroundColor: theme.surfaceRaised }]}>
         {options.map((option) => {
           const selected = option.value === value;
           return (
@@ -31,8 +34,15 @@ export function SegmentedControl<T extends string>({
               accessibilityRole="radio"
               accessibilityState={{ checked: selected }}
               onPress={() => onChange(option.value)}
-              style={[styles.segment, selected && { backgroundColor: theme.tint }]}>
-              <ThemedText type="small" style={selected ? { color: theme.onTint } : undefined}>
+              style={({ pressed }) => [
+                styles.segment,
+                selected && { backgroundColor: theme.inverse },
+                pressed && !selected && { opacity: 0.7 },
+              ]}>
+              <ThemedText
+                type={selected ? 'smallStrong' : 'small'}
+                numberOfLines={1}
+                style={{ color: selected ? theme.onInverse : theme.text }}>
                 {option.label}
               </ThemedText>
             </Pressable>
@@ -45,17 +55,20 @@ export function SegmentedControl<T extends string>({
 
 const styles = StyleSheet.create({
   field: {
-    gap: Spacing.one,
+    gap: Spacing.two - Spacing.half,
   },
   track: {
     flexDirection: 'row',
-    borderRadius: Spacing.two,
-    padding: Spacing.half,
+    borderRadius: Radius.field + Spacing.half,
+    padding: Spacing.one,
+    gap: Spacing.one,
   },
   segment: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: Spacing.two,
-    borderRadius: Spacing.two - Spacing.half,
+    justifyContent: 'center',
+    minHeight: Control.touch,
+    paddingHorizontal: Spacing.two,
+    borderRadius: Radius.field - Spacing.half,
   },
 });

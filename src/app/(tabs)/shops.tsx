@@ -3,12 +3,15 @@ import * as Location from 'expo-location';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Linking, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Linking, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
-import { Screen } from '@/components/screen';
+import { Card } from '@/components/card';
+import { Chip } from '@/components/chip';
+import { Icon } from '@/components/icon';
+import { IconButton } from '@/components/icon-button';
+import { Screen, SectionLabel } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { listSavedShops, saveShop, unsaveShop, type SavedShop } from '@/db/shops';
 import { useDbQuery } from '@/hooks/use-db-query';
@@ -33,8 +36,17 @@ function directionsUrl(shop: { name: string; placeId?: string; mapsUrl?: string 
 export default function ShopsScreen() {
   const { t, i18n } = useTranslation();
   const db = useSQLiteContext();
+  const theme = useTheme();
   const { data: saved = [], reload } = useDbQuery(listSavedShops);
   const [search, setSearch] = useState<SearchState>({ kind: 'idle' });
+  const [openOnly, setOpenOnly] = useState(false);
+  const [ratedOnly, setRatedOnly] = useState(false);
+  const nearby =
+    search.kind === 'done'
+      ? search.shops.filter(
+          (shop) => (!openOnly || shop.openNow === true) && (!ratedOnly || (shop.rating ?? 0) >= 4),
+        )
+      : [];
 
   const find = useCallback(
     async (askPermission: boolean) => {
@@ -92,13 +104,13 @@ export default function ShopsScreen() {
 
   return (
     <Screen title={t('shops.title')}>
-      <ThemedText type="smallBold" accessibilityRole="header">
-        {t('shops.mine')}
-      </ThemedText>
+      <SectionLabel>{t('shops.mine')}</SectionLabel>
       {saved.length === 0 ? (
-        <ThemedText type="small" themeColor="textSecondary">
-          {t('shops.noneSaved')}
-        </ThemedText>
+        <Card>
+          <ThemedText type="small" themeColor="textSecondary">
+            {t('shops.noneSaved')}
+          </ThemedText>
+        </Card>
       ) : (
         saved.map((shop) => (
           <SavedShopCard
@@ -112,40 +124,52 @@ export default function ShopsScreen() {
         ))
       )}
 
-      <ThemedText type="smallBold" accessibilityRole="header">
-        {t('shops.nearby')}
-      </ThemedText>
+      <SectionLabel>{t('shops.nearby')}</SectionLabel>
+      {search.kind === 'done' && search.shops.length > 0 ? (
+        <View style={styles.filters}>
+          <Chip label={t('shops.openNow')} selected={openOnly} onPress={() => setOpenOnly((on) => !on)} />
+          <Chip label={t('shops.rated')} selected={ratedOnly} onPress={() => setRatedOnly((on) => !on)} />
+        </View>
+      ) : null}
       {!PLACES_KEY ? (
-        <ThemedText type="small" themeColor="textSecondary">
-          {t('shops.notConfigured')}
-        </ThemedText>
+        <Card>
+          <ThemedText type="small" themeColor="textSecondary">
+            {t('shops.notConfigured')}
+          </ThemedText>
+        </Card>
       ) : search.kind === 'idle' || search.kind === 'needsPermission' ? (
-        <>
+        <Card>
           <ThemedText type="small" themeColor="textSecondary">
             {t('shops.locationNeeded')}
           </ThemedText>
-          <Button title={t('shops.allowLocation')} onPress={() => find(true)} />
-        </>
+          <Button
+            title={t('shops.allowLocation')}
+            icon={<Icon name="pin" size={18} color={theme.onAccent} />}
+            onPress={() => find(true)}
+          />
+        </Card>
       ) : search.kind === 'searching' ? (
-        <View style={styles.searching}>
-          <ActivityIndicator />
+        <Card style={styles.searching}>
+          <ActivityIndicator color={theme.accent} />
           <ThemedText type="small" themeColor="textSecondary">
             {t('shops.searching')}
           </ThemedText>
-        </View>
+        </Card>
       ) : search.kind === 'error' ? (
-        <>
+        <Card>
           <ThemedText type="small" themeColor="textSecondary">
             {t('shops.error')}
           </ThemedText>
-          <Button title={t('shops.retry')} onPress={() => find(false)} />
-        </>
-      ) : search.shops.length === 0 ? (
-        <ThemedText type="small" themeColor="textSecondary">
-          {t('shops.empty')}
-        </ThemedText>
+          <Button title={t('shops.retry')} variant="secondary" onPress={() => find(false)} />
+        </Card>
+      ) : nearby.length === 0 ? (
+        <Card>
+          <ThemedText type="small" themeColor="textSecondary">
+            {search.shops.length === 0 ? t('shops.empty') : t('shops.noneMatch')}
+          </ThemedText>
+        </Card>
       ) : (
-        search.shops.map((shop) => (
+        nearby.map((shop) => (
           <NearbyShopCard
             key={shop.placeId}
             shop={shop}
@@ -158,52 +182,55 @@ export default function ShopsScreen() {
   );
 }
 
-function ShopActions({
-  phone,
-  directions,
-  extra,
-}: {
-  phone?: string;
-  directions: string;
-  extra?: { label: string; onPress: () => void };
-}) {
+function ShopActions({ phone, directions }: { phone?: string; directions: string }) {
   const { t } = useTranslation();
   const theme = useTheme();
-  const actions = [
-    phone ? { label: t('shops.call'), onPress: () => Linking.openURL(`tel:${phone.replace(/[^\d+]/g, '')}`) } : null,
-    { label: t('shops.directions'), onPress: () => Linking.openURL(directions) },
-    extra ?? null,
-  ].filter((action): action is { label: string; onPress: () => void } => action !== null);
-
   return (
     <View style={styles.actions}>
-      {actions.map((action) => (
-        <Pressable key={action.label} accessibilityRole="button" onPress={action.onPress} hitSlop={Spacing.two}>
-          <ThemedText type="smallBold" style={{ color: theme.tint }}>
-            {action.label}
-          </ThemedText>
-        </Pressable>
-      ))}
+      {phone ? (
+        <Button
+          title={t('shops.call')}
+          variant="secondary"
+          size="small"
+          icon={<Icon name="call" size={16} color={theme.text} />}
+          onPress={() => Linking.openURL(`tel:${phone.replace(/[^\d+]/g, '')}`)}
+        />
+      ) : null}
+      <Button
+        title={t('shops.directions')}
+        variant="secondary"
+        size="small"
+        icon={<Icon name="directions" size={16} color={theme.text} />}
+        onPress={() => Linking.openURL(directions)}
+      />
     </View>
   );
 }
 
 function SavedShopCard({ shop, onRemove }: { shop: SavedShop; onRemove: () => void }) {
   const { t } = useTranslation();
+  const theme = useTheme();
   return (
-    <ThemedView type="backgroundElement" style={styles.card}>
-      <ThemedText type="smallBold">{shop.name}</ThemedText>
-      {shop.address ? (
-        <ThemedText type="small" themeColor="textSecondary">
-          {shop.address}
-        </ThemedText>
-      ) : null}
-      <ShopActions
-        phone={shop.phone}
-        directions={directionsUrl(shop)}
-        extra={{ label: t('shops.remove'), onPress: onRemove }}
-      />
-    </ThemedView>
+    <Card>
+      <View style={styles.titleRow}>
+        <View style={styles.flex}>
+          <View style={styles.badge}>
+            <Icon name="bookmarked" size={12} color={theme.textSecondary} />
+            <ThemedText type="caption" themeColor="textSecondary">
+              {t('shops.myShop')}
+            </ThemedText>
+          </View>
+          <ThemedText type="bodyStrong">{shop.name}</ThemedText>
+          {shop.address ? (
+            <ThemedText type="caption" themeColor="textSecondary">
+              {shop.address}
+            </ThemedText>
+          ) : null}
+        </View>
+        <IconButton icon="bookmarked" variant="outlined" accessibilityLabel={t('shops.remove')} onPress={onRemove} />
+      </View>
+      <ShopActions phone={shop.phone} directions={directionsUrl(shop)} />
+    </Card>
   );
 }
 
@@ -220,63 +247,71 @@ function NearbyShopCard({
   const format = useFormat();
   const theme = useTheme();
   const details = [
-    shop.rating !== undefined
-      ? t('shops.rating', { rating: shop.rating.toFixed(1), count: shop.ratingCount ?? 0 })
-      : null,
+    shop.rating !== undefined ? t('shops.rating', { rating: shop.rating.toFixed(1), count: shop.ratingCount ?? 0 }) : null,
     t('shops.away', { distance: format.distance(shop.distanceKm) }),
   ].filter(Boolean);
 
   return (
-    <ThemedView type="backgroundElement" style={styles.card}>
+    <Card>
       <View style={styles.titleRow}>
-        <ThemedText type="smallBold" style={styles.name}>
-          {shop.name}
-        </ThemedText>
-        {shop.openNow !== undefined ? (
-          <ThemedText type="small" style={{ color: shop.openNow ? theme.success : theme.textSecondary }}>
-            {shop.openNow ? t('shops.openNow') : t('shops.closed')}
+        <View style={styles.flex}>
+          <ThemedText type="bodyStrong">{shop.name}</ThemedText>
+          <ThemedText type="caption" themeColor="textSecondary">
+            {details.join(' · ')}
+            {shop.openNow !== undefined ? (
+              <ThemedText type="caption" style={{ color: shop.openNow ? theme.successText : theme.textSecondary }}>
+                {` · ${shop.openNow ? t('shops.openNow') : t('shops.closed')}`}
+              </ThemedText>
+            ) : null}
           </ThemedText>
-        ) : null}
+          {shop.address ? (
+            <ThemedText type="caption" themeColor="textSecondary">
+              {shop.address}
+            </ThemedText>
+          ) : null}
+        </View>
+        <IconButton
+          icon={saved ? 'bookmarked' : 'bookmark'}
+          variant={saved ? 'inverse' : 'outlined'}
+          accessibilityLabel={saved ? t('shops.saved') : t('shops.save')}
+          accessibilityState={{ selected: saved }}
+          onPress={onToggleSaved}
+        />
       </View>
-      <ThemedText type="small" themeColor="textSecondary">
-        {details.join(' · ')}
-      </ThemedText>
-      {shop.address ? (
-        <ThemedText type="small" themeColor="textSecondary">
-          {shop.address}
-        </ThemedText>
-      ) : null}
-      <ShopActions
-        phone={shop.phone}
-        directions={directionsUrl(shop)}
-        extra={{ label: saved ? t('shops.saved') : t('shops.save'), onPress: onToggleSaved }}
-      />
-    </ThemedView>
+      <ShopActions phone={shop.phone} directions={directionsUrl(shop)} />
+    </Card>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    gap: Spacing.one,
-    padding: Spacing.four,
-    borderRadius: Spacing.four,
+  flex: {
+    flex: 1,
+    minWidth: 0,
+    gap: Spacing.half,
   },
   titleRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: Spacing.two,
+    alignItems: 'flex-start',
+    gap: Spacing.two + Spacing.one,
   },
-  name: {
-    flexShrink: 1,
+  badge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.one,
   },
   actions: {
     flexDirection: 'row',
-    gap: Spacing.four,
-    paddingTop: Spacing.two,
+    flexWrap: 'wrap',
+    gap: Spacing.two,
   },
   searching: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: Spacing.two + Spacing.one,
+  },
+  filters: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: Spacing.two,
   },
 });

@@ -1,65 +1,111 @@
 /**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
+ * Design tokens for the "Night Drive" visual system: a near-black ground with
+ * one cyan accent for primary actions, three status colours with translucent
+ * tints, Barlow for text and Barlow Semi Condensed for titles and numbers.
+ *
+ * Screens never hard-code colours, radii or font names; they read them from
+ * here through `useTheme()` and `ThemedText`. Add a token when a new role
+ * appears, not a one-off value in a screen.
  */
 
-import { Platform } from 'react-native';
+import {
+  Barlow_400Regular,
+  Barlow_500Medium,
+  Barlow_600SemiBold,
+} from '@expo-google-fonts/barlow';
+import {
+  BarlowSemiCondensed_700Bold,
+  BarlowSemiCondensed_800ExtraBold,
+} from '@expo-google-fonts/barlow-semi-condensed';
 
 export const Colors = {
-  light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
-    tint: '#1E6FD9',
-    onTint: '#ffffff',
-    danger: '#C4302B',
-    warning: '#A15C00',
-    success: '#2E7D32',
-    border: '#D9D9E0',
-  },
   dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
-    tint: '#5AA2FF',
-    onTint: '#000000',
-    danger: '#FF6B63',
-    warning: '#F5B041',
-    success: '#6CCB70',
-    border: '#3A3D42',
+    /** Screen ground. */
+    background: '#0A0C0F',
+    /** Cards and fields. */
+    surface: '#14181D',
+    /** Segmented tracks and fields inside cards. */
+    surfaceRaised: '#1C2128',
+    border: '#262C34',
+    /** Borders on controls that must read as tappable. */
+    borderStrong: '#2E353E',
+    text: '#F2F4F5',
+    textSecondary: '#9AA3AD',
+    /** Decorative strokes only, never text. */
+    textFaint: '#5C6670',
+    /** The one accent: primary actions and focus. */
+    accent: '#3DD9EB',
+    onAccent: '#061317',
+    /** Selected segments and chips: a solid fill of the text colour. */
+    inverse: '#F2F4F5',
+    onInverse: '#0A0C0F',
+    danger: '#FF5A4E',
+    dangerText: '#FF7A70',
+    dangerTint: 'rgba(255,90,78,0.14)',
+    warning: '#FFB020',
+    warningText: '#FFB020',
+    warningTint: 'rgba(255,176,32,0.14)',
+    success: '#5BD48A',
+    successText: '#5BD48A',
+    successTint: 'rgba(91,212,138,0.14)',
+    /** Peak opacity of the accent wash rising from a vehicle card's bottom edge. */
+    glow: 0.22,
+    /** Floating tab bar fill. Opaque: content scrolling under it must not ghost through. */
+    nav: '#1C2128',
+    shadow: 'rgba(0,0,0,0.5)',
+  },
+  light: {
+    background: '#F4F5F7',
+    surface: '#FFFFFF',
+    surfaceRaised: '#ECEEF1',
+    border: '#DDE1E6',
+    borderStrong: '#D3D8DE',
+    text: '#0E1116',
+    textSecondary: '#59616B',
+    textFaint: '#9AA3AD',
+    accent: '#3DD9EB',
+    onAccent: '#061317',
+    inverse: '#0E1116',
+    onInverse: '#FFFFFF',
+    danger: '#D92D20',
+    dangerText: '#B42318',
+    dangerTint: '#FDECEA',
+    warning: '#E89400',
+    warningText: '#8A5A00',
+    warningTint: '#FFF4DB',
+    success: '#2E9E5B',
+    successText: '#1F7A44',
+    successTint: '#E3F4EA',
+    glow: 0.28,
+    nav: '#FFFFFF',
+    shadow: 'rgba(14,17,22,0.14)',
   },
 } as const;
 
-export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
+export type ColorScheme = keyof typeof Colors;
+/** Every colour token (the string-valued ones). */
+export type ThemeColor = {
+  [K in keyof typeof Colors.dark]: (typeof Colors.dark)[K] extends string ? K : never;
+}[keyof typeof Colors.dark];
+export type Theme = (typeof Colors)[ColorScheme];
 
-export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
-  },
-  default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
-  },
-  web: {
-    sans: 'var(--font-display)',
-    serif: 'var(--font-serif)',
-    rounded: 'var(--font-rounded)',
-    mono: 'var(--font-mono)',
-  },
-});
+/** Font family names as registered with expo-font. Weight is chosen by family, not `fontWeight`. */
+export const Fonts = {
+  body: 'Barlow_400Regular',
+  bodyMedium: 'Barlow_500Medium',
+  bodySemiBold: 'Barlow_600SemiBold',
+  displayBold: 'BarlowSemiCondensed_700Bold',
+  display: 'BarlowSemiCondensed_800ExtraBold',
+} as const;
+
+/** Passed to `useFonts` once at startup. */
+export const FontAssets = {
+  [Fonts.body]: Barlow_400Regular,
+  [Fonts.bodyMedium]: Barlow_500Medium,
+  [Fonts.bodySemiBold]: Barlow_600SemiBold,
+  [Fonts.displayBold]: BarlowSemiCondensed_700Bold,
+  [Fonts.display]: BarlowSemiCondensed_800ExtraBold,
+};
 
 export const Spacing = {
   half: 2,
@@ -69,7 +115,33 @@ export const Spacing = {
   four: 24,
   five: 32,
   six: 64,
+  /** Horizontal screen gutter. */
+  gutter: 20,
 } as const;
 
-export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
+export const Radius = {
+  /** Text fields, segments. */
+  field: 14,
+  /** Cards and list groups. */
+  card: 18,
+  /** Vehicle cards. */
+  hero: 24,
+  pill: 999,
+} as const;
+
+export const Control = {
+  /** Minimum tappable size. */
+  touch: 44,
+  /** Fields and standard buttons. */
+  height: 52,
+  /** Primary call to action. */
+  heightLarge: 56,
+} as const;
+
+/** The floating tab bar's height and its distance from the bottom safe area. */
+export const TabBar = {
+  height: 64,
+  margin: 12,
+} as const;
+
 export const MaxContentWidth = 800;

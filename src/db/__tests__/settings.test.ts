@@ -14,11 +14,17 @@ beforeEach(async () => {
 
 describe('settings', () => {
   it('starts with defaults, saves, overwrites and clears', async () => {
-    expect(await getPreferences(db)).toEqual({ language: 'system', distanceUnit: 'km' });
+    expect(await getPreferences(db)).toEqual({ language: 'system', distanceUnit: 'km', appearance: 'system' });
     await setPreference(db, 'distanceUnit', 'mi');
     await setPreference(db, 'province', 'QC');
     await setPreference(db, 'distanceUnit', 'km');
-    expect(await getPreferences(db)).toEqual({ language: 'system', distanceUnit: 'km', province: 'QC' });
+    await setPreference(db, 'appearance', 'dark');
+    expect(await getPreferences(db)).toEqual({
+      language: 'system',
+      distanceUnit: 'km',
+      appearance: 'dark',
+      province: 'QC',
+    });
     await setPreference(db, 'province', undefined);
     expect((await getPreferences(db)).province).toBeUndefined();
   });
