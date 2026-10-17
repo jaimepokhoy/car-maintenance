@@ -42,7 +42,12 @@
     },
     "platforms": [
       "ios",
-      "android"
-    ]
+      "android",
+      "web"
+    ],
+    "web": {
+      "output": "single",
+      "favicon": "./assets/images/favicon.png"
+    }
   }
 }

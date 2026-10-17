@@ -13,7 +13,7 @@ function toLocalDate(date: IsoDate): Date {
   return new Date(year, month - 1, day);
 }
 
-/** A calendar date picker: the system compact picker on iOS, a dialog on Android. */
+/** A calendar date picker: the system compact picker on iOS, a dialog on Android, the browser picker on web. */
 export function DateField({
   label,
   value,
@@ -55,6 +55,26 @@ export function DateField({
             style={styles.ios}
           />
         </View>
+      ) : Platform.OS === 'web' ? (
+        // The browser's own picker; its value is already YYYY-MM-DD.
+        <input
+          type="date"
+          aria-label={label}
+          value={value}
+          max={maximum}
+          onChange={(event) => event.target.value && onChange(event.target.value)}
+          style={{
+            minHeight: Control.height,
+            borderRadius: Radius.field,
+            border: `1px solid ${error ? theme.danger : theme.borderStrong}`,
+            backgroundColor: theme.surface,
+            color: theme.text,
+            colorScheme: scheme,
+            padding: `0 ${Spacing.three - Spacing.half}px`,
+            fontFamily: Fonts.bodyMedium,
+            fontSize: 17,
+          }}
+        />
       ) : (
         <Pressable
           accessibilityRole="button"

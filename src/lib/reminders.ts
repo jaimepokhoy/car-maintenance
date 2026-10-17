@@ -36,6 +36,7 @@ export function configureNotifications(): void {
 
 /** Asks for permission once there's something worth reminding about. */
 export async function requestReminderPermission(): Promise<boolean> {
+  if (Platform.OS === 'web') return false; // Local notifications are native only.
   const current = await Notifications.getPermissionsAsync();
   if (current.granted) return true;
   if (!current.canAskAgain) return false;
@@ -97,7 +98,7 @@ function content(
  * Cheap enough to run whenever the app opens or data changes.
  */
 export async function syncReminders(db: Db): Promise<void> {
-  if (!(await Notifications.getPermissionsAsync()).granted) return;
+  if (Platform.OS === 'web' || !(await Notifications.getPermissionsAsync()).granted) return;
 
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync(CHANNEL_ID, {
