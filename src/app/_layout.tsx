@@ -4,11 +4,11 @@ import { useFonts } from 'expo-font';
 import * as Notifications from 'expo-notifications';
 import { DarkTheme, DefaultTheme, router, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { SQLiteProvider, useSQLiteContext } from 'expo-sqlite';
+import { SQLiteProvider, useSQLiteContext, type SQLiteDatabase } from 'expo-sqlite';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppState } from 'react-native';
+import { AppState, Platform } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Colors, FontAssets, Fonts } from '@/constants/theme';
@@ -20,9 +20,27 @@ import { configureNotifications, refreshReminders } from '@/lib/reminders';
 SplashScreen.preventAutoHideAsync();
 configureNotifications();
 
+// Web (testing only): one page at a time can hold the database file, and a refresh
+// can start before the old page lets go. A failed open can't be retried in place,
+// so reload a few times; a second open tab still surfaces the error.
+const LOCK_RETRIES = 'db-lock-retries';
+
+function retryIfLocked(error: Error) {
+  if (Platform.OS !== 'web' || !error.message.includes('createSyncAccessHandle')) throw error;
+  const tries = Number(sessionStorage.getItem(LOCK_RETRIES) ?? 0);
+  if (tries >= 3) throw error;
+  sessionStorage.setItem(LOCK_RETRIES, String(tries + 1));
+  setTimeout(() => location.reload(), 500);
+}
+
+async function init(db: SQLiteDatabase) {
+  if (Platform.OS === 'web') sessionStorage.removeItem(LOCK_RETRIES);
+  await migrate(db);
+}
+
 export default function RootLayout() {
   return (
-    <SQLiteProvider databaseName="car-maintenance.db" onInit={migrate}>
+    <SQLiteProvider databaseName="car-maintenance.db" onInit={init} onError={retryIfLocked}>
       <PreferencesProvider>
         <AppShell />
       </PreferencesProvider>
@@ -67,7 +85,7 @@ function AppShell() {
   return (
     <ThemeProvider value={navigationTheme}>
       {/* Mounted with the navigator so a tapped reminder never pushes before the router exists. */}
-      <ReminderSync />
+      {Platform.OS !== 'web' && <ReminderSync />}
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <Stack
         screenOptions={{

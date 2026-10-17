@@ -6,7 +6,7 @@ Free iOS and Android app for Canadian car owners to track maintenance, get remin
 
 ## Before you call a task done
 
-Run `npm run check` (typecheck, lint, tests). CI runs the same plus an iOS and Android bundle. The app targets iOS and Android only (no web). Expo's version-matching API is blocked in some sandboxes; if `npx expo install` fails, pin the version from `node_modules/expo/bundledNativeModules.json` and use `npm install`.
+Run `npm run check` (typecheck, lint, tests). CI runs the same plus an iOS and Android bundle. The app targets iOS and Android. `npm run web` opens it in a browser for testing only, and every merge to `main` publishes that build to https://jaimepokhoy.github.io/car-maintenance/ (no responsive layout; reminders, CSV export and confirmation dialogs are native-only). Expo's version-matching API is blocked in some sandboxes; if `npx expo install` fails, pin the version from `node_modules/expo/bundledNativeModules.json` and use `npm install`.
 
 ## Conventions
 
