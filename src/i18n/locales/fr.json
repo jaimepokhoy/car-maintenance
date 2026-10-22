@@ -16,7 +16,8 @@
     "benefitReminders": "Des rappels avant les échéances",
     "benefitHistory": "Tous vos entretiens et coûts au même endroit",
     "benefitGuide": "Un guide en langage clair pour chaque tâche",
-    "actionsHint": "Appui long pour modifier ou supprimer"
+    "actionsHint": "Appui long pour modifier ou supprimer",
+    "shopLogo": "Logo de {{name}}"
   },
   "shops": {
     "title": "Garages",
