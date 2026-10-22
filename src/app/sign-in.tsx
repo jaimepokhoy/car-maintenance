@@ -51,6 +51,8 @@ function SignInForm() {
   }, [session]);
 
   async function run(action: NonNullable<typeof busy>, attempt: () => Promise<AuthResult>): Promise<boolean> {
+    // One attempt at a time, so a second tap can't start a parallel sign-in.
+    if (busy) return false;
     setBusy(action);
     setError(undefined);
     try {
@@ -82,7 +84,15 @@ function SignInForm() {
   if (step === 'code') {
     return (
       <FormScreen
-        footer={<Button title={t('auth.verify')} size="large" onPress={verify} loading={busy === 'verify'} />}>
+        footer={
+          <Button
+            title={t('auth.verify')}
+            size="large"
+            onPress={verify}
+            loading={busy === 'verify'}
+            disabled={!!busy}
+          />
+        }>
         <ThemedText type="small" themeColor="textSecondary">
           {t('auth.codeSent', { email: normalizeEmail(email) })}
         </ThemedText>
@@ -108,6 +118,7 @@ function SignInForm() {
             size="small"
             onPress={() => sendCode('resend')}
             loading={busy === 'resend'}
+            disabled={!!busy}
           />
           <Button
             title={t('auth.changeEmail')}
@@ -126,7 +137,13 @@ function SignInForm() {
   return (
     <FormScreen
       footer={
-        <Button title={t('auth.sendCode')} size="large" onPress={() => sendCode('send')} loading={busy === 'send'} />
+        <Button
+          title={t('auth.sendCode')}
+          size="large"
+          onPress={() => sendCode('send')}
+          loading={busy === 'send'}
+          disabled={!!busy}
+        />
       }>
       <ThemedText type="small" themeColor="textSecondary">
         {t('auth.intro')}
@@ -143,6 +160,7 @@ function SignInForm() {
               size="large"
               onPress={() => run('google', signInWithGoogle)}
               loading={busy === 'google'}
+              disabled={!!busy}
             />
           ) : null}
           <ThemedText type="caption" themeColor="textSecondary" style={styles.or}>

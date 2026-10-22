@@ -29,7 +29,6 @@ export const ICONS = {
   book: { ios: 'book.fill', android: 'menu_book' },
   export: { ios: 'square.and.arrow.up', android: 'ios_share' },
   speed: { ios: 'gauge.with.needle', android: 'speed' },
-  mail: { ios: 'envelope.fill', android: 'mail' },
   account: { ios: 'person.crop.circle.fill', android: 'account_circle' },
   signOut: { ios: 'rectangle.portrait.and.arrow.right', android: 'logout' },
   // Maintenance items.
