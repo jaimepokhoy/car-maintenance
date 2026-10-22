@@ -42,11 +42,17 @@ describe('pickOnAccent', () => {
   });
 
   it('always returns a colour that passes 4.5:1', () => {
-    for (const accent of ['#FF8A3D', '#D32F2F', '#2E7D32', '#FFEB3B', '#6A1B9A']) {
-      const onAccent = pickOnAccent(accent);
-      expect(onAccent).not.toBeNull();
-      expect(contrastRatio(accent, onAccent!)).toBeGreaterThanOrEqual(4.5);
+    for (const accent of ['#FF8A3D', '#D32F2F', '#2E7D32', '#FFEB3B', '#6A1B9A', '#3D7FFF']) {
+      expect(contrastRatio(accent, pickOnAccent(accent))).toBeGreaterThanOrEqual(4.5);
     }
+    for (let grey = 0; grey <= 255; grey++) {
+      const hex = `#${grey.toString(16).padStart(2, '0').repeat(3)}`;
+      expect(contrastRatio(hex, pickOnAccent(hex))).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  it('falls back to black on mid-tones where neither ink nor white passes', () => {
+    expect(pickOnAccent('#7A7A7A')).toBe('#000000');
   });
 });
 
