@@ -11,7 +11,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 
-select plan(31);
+select plan(33);
 
 -- Fixtures, written as postgres (bypasses RLS).
 insert into auth.users (id, email, aud, role) values
@@ -201,6 +201,12 @@ select lives_ok(
     on conflict (id) do update set notes = excluded.notes$$,
   'customers can sync a shop-created record back unchanged'
 );
+select throws_ok(
+  $$update public.service_records set created_by_tenant_id = 'bbbbbbbb-0000-0000-0000-000000000000'
+    where id = '30000000-0000-0000-0000-0000000000a1'$$,
+  '42501', null,
+  'customers cannot re-mark a shop-created record as another shop''s'
+);
 
 -- Revoking consent removes access immediately.
 update public.customer_links set revoked_at = now() where tenant_id = 'aaaaaaaa-0000-0000-0000-000000000000';
@@ -208,6 +214,7 @@ update public.customer_links set revoked_at = now() where tenant_id = 'aaaaaaaa-
 select set_config('request.jwt.claims', '{"sub": "00000000-0000-0000-0000-00000000000a", "role": "authenticated"}', true);
 select is_empty('select 1 from public.vehicles', 'after revoking, staff no longer see the customer''s vehicles');
 select is_empty('select 1 from public.service_records', 'after revoking, staff no longer see the customer''s records');
+update public.service_records set notes = 'Edited after revoke' where id = '30000000-0000-0000-0000-0000000000a1';
 
 -- Anonymous visitors ----------------------------------------------------------
 reset role;
@@ -215,6 +222,11 @@ select is(
   (select name from public.tenants where slug = 'shop-a'),
   'Shop A',
   'customers cannot rename a tenant'
+);
+select is(
+  (select notes from public.service_records where id = '30000000-0000-0000-0000-0000000000a1'),
+  'Synced from phone',
+  'after revoking, staff can no longer edit their shop''s records for that customer'
 );
 
 set local role anon;
