@@ -23,19 +23,22 @@ import { useFormat } from '@/hooks/use-format';
 import { fetchModels } from '@/lib/vehicle-models';
 import { decodeVin } from '@/lib/vin-decode';
 
-type ModelLookup = { state: 'needsYear' | 'loading' | 'failed' | 'none' } | { state: 'loaded'; models: string[] };
+type ModelLookup = { state: 'needsMake' | 'loading' | 'failed' | 'none' } | { state: 'loaded'; models: string[] };
 
-/** Loads model names for the chosen make and year, so the model picker can suggest them. */
+/**
+ * Loads model names as soon as a make is chosen, so the model picker can
+ * suggest them. A valid year narrows the list to that year's models.
+ */
 function useModelLookup(make: string, yearInput: string): ModelLookup {
   const year = parseWholeNumber(yearInput);
   const validYear = year !== null && year >= 1950 && year <= new Date().getFullYear() + 1 ? year : null;
   const trimmedMake = make.trim();
-  const key = trimmedMake && validYear !== null ? `${trimmedMake}|${validYear}` : null;
+  const key = trimmedMake ? `${trimmedMake}|${validYear ?? ''}` : null;
   const [result, setResult] = useState<{ key: string; lookup: ModelLookup }>();
 
   useEffect(() => {
-    if (!trimmedMake || validYear === null) return;
-    const requested = `${trimmedMake}|${validYear}`;
+    if (!trimmedMake) return;
+    const requested = `${trimmedMake}|${validYear ?? ''}`;
     let current = true;
     fetchModels(trimmedMake, validYear)
       .then((models) => {
@@ -55,7 +58,7 @@ function useModelLookup(make: string, yearInput: string): ModelLookup {
     };
   }, [trimmedMake, validYear]);
 
-  if (!key) return { state: 'needsYear' };
+  if (!key) return { state: 'needsMake' };
   return result?.key === key ? result.lookup : { state: 'loading' };
 }
 
