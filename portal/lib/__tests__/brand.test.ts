@@ -51,7 +51,7 @@ describe('parseBrandForm', () => {
     const result = parseBrandForm(
       form({
         name: ' ',
-        accent: '#7A7A7A',
+        accent: '#12345',
         logoUrl: 'https://evil.example/logo.png',
         email: 'nope',
         bookingUrl: 'javascript:alert(1)',
@@ -65,7 +65,7 @@ describe('parseBrandForm', () => {
       ok: false,
       errors: {
         name: 'nameRequired',
-        accent: 'accentNoContrast',
+        accent: 'accentInvalid',
         logoUrl: 'logoInvalid',
         email: 'emailInvalid',
         bookingUrl: 'urlInvalid',
@@ -79,6 +79,20 @@ describe('parseBrandForm', () => {
     const other = tenantAssetsPrefix('https://abc.supabase.co', 'tenant-2');
     const result = parseBrandForm(form({ ...valid, accent: 'blue', logoUrl: `${other}logo.png` }), {}, prefix);
     expect(result).toEqual({ ok: false, errors: { accent: 'accentInvalid', logoUrl: 'logoInvalid' } });
+  });
+
+  it('rejects a logo URL that climbs out of the tenant folder', () => {
+    for (const logoUrl of [`${prefix}../tenant-2/logo.png`, `${prefix}sub/logo.png`, `${prefix}..`, `${prefix}a.png?x`]) {
+      expect(parseBrandForm(form({ ...valid, logoUrl }), {}, prefix)).toEqual({
+        ok: false,
+        errors: { logoUrl: 'logoInvalid' },
+      });
+    }
+  });
+
+  it('saves a mid-tone accent with black text, like the app', () => {
+    const result = parseBrandForm(form({ ...valid, accent: '#7a7a7a' }), {}, prefix);
+    expect(result.ok && result.update.brand).toMatchObject({ accent: '#7A7A7A', onAccent: '#000000' });
   });
 });
 

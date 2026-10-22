@@ -21,7 +21,6 @@ export type BrandField = 'name' | 'accent' | 'logoUrl' | 'email' | 'bookingUrl' 
 export type BrandError =
   | 'nameRequired'
   | 'accentInvalid'
-  | 'accentNoContrast'
   | 'logoInvalid'
   | 'emailInvalid'
   | 'urlInvalid'
@@ -32,6 +31,8 @@ export type BrandParse =
   | { ok: false; errors: Partial<Record<BrandField, BrandError>> };
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+/** A plain file name directly in the tenant folder: no subfolders, `..`, query or fragment. */
+const LOGO_FILE = /^(?!\.+$)[A-Za-z0-9._-]+$/;
 
 /**
  * Validates the Brand form and builds the `tenants` update. `logoPrefix` is
@@ -49,11 +50,10 @@ export function parseBrandForm(form: FormData, existingBrand: Brand, logoPrefix:
 
   const accent = text('accent').toUpperCase();
   const onAccent = isHexColour(accent) ? pickOnAccent(accent) : null;
-  if (!isHexColour(accent)) errors.accent = 'accentInvalid';
-  else if (!onAccent) errors.accent = 'accentNoContrast';
+  if (!onAccent) errors.accent = 'accentInvalid';
 
   const logoUrl = text('logoUrl');
-  if (logoUrl && !(logoUrl.startsWith(logoPrefix) && logoUrl.length > logoPrefix.length)) {
+  if (logoUrl && !(logoUrl.startsWith(logoPrefix) && LOGO_FILE.test(logoUrl.slice(logoPrefix.length)))) {
     errors.logoUrl = 'logoInvalid';
   }
 
