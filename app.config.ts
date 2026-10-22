@@ -78,6 +78,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   experiments: {
     typedRoutes: true,
     reactCompiler: true,
+    // Set by the GitHub Pages workflow, which serves the web build under /<repo>.
+    ...(process.env.WEB_BASE_URL ? { baseUrl: process.env.WEB_BASE_URL } : {}),
   },
   platforms: ['ios', 'android', 'web'],
   web: {
