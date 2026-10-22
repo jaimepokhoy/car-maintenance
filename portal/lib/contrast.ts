@@ -1,0 +1,47 @@
+/**
+ * Accent contrast checks for the Brand page.
+ *
+ * Same formula and text colours as `contrastRatio` / `pickOnAccent` in the
+ * app's `src/domain/tenant.ts`, so the portal accepts exactly the accents the
+ * app can render. Switch to importing that module once both stacks are merged.
+ */
+
+/** WCAG AA for normal text. */
+export const MIN_TEXT_CONTRAST = 4.5;
+
+export const DARK_ON_ACCENT = '#061317';
+export const LIGHT_ON_ACCENT = '#FFFFFF';
+
+const HEX = /^#[0-9A-Fa-f]{6}$/;
+
+export function isHexColour(value: string): boolean {
+  return HEX.test(value);
+}
+
+/** WCAG contrast ratio between two `#RRGGBB` colours, from 1 to 21. */
+export function contrastRatio(hexA: string, hexB: string): number {
+  const a = relativeLuminance(hexA);
+  const b = relativeLuminance(hexB);
+  return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+}
+
+/**
+ * The text colour for labels on the accent: Night Drive's near-black ink when
+ * it reaches 4.5:1, otherwise white. Returns null when neither does, which
+ * only happens for mid-tone accents a shop should adjust.
+ */
+export function pickOnAccent(accentHex: string): string | null {
+  const dark = contrastRatio(accentHex, DARK_ON_ACCENT);
+  const light = contrastRatio(accentHex, LIGHT_ON_ACCENT);
+  const best = dark >= light ? { hex: DARK_ON_ACCENT, ratio: dark } : { hex: LIGHT_ON_ACCENT, ratio: light };
+  return best.ratio >= MIN_TEXT_CONTRAST ? best.hex : null;
+}
+
+function relativeLuminance(hex: string): number {
+  if (!HEX.test(hex)) throw new Error(`Not a #RRGGBB colour: ${hex}`);
+  const channel = (offset: number) => {
+    const value = parseInt(hex.slice(offset, offset + 2), 16) / 255;
+    return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+  };
+  return 0.2126 * channel(1) + 0.7152 * channel(3) + 0.0722 * channel(5);
+}

@@ -1,0 +1,31 @@
+{
+  "name": "car-maintenance-portal",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run",
+    "check": "npm run typecheck && npm run lint && npm test"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.117.2",
+    "next": "^16.4.2",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "@types/react": "~19.2.2",
+    "@types/react-dom": "~19.2.2",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.4.2",
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.5"
+  }
+}
