@@ -1,4 +1,5 @@
 import Constants from 'expo-constants';
+import { router } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -14,8 +15,11 @@ import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { PROVINCES } from '@/domain';
 import { usePreferences } from '@/hooks/use-preferences';
+import { useSession } from '@/hooks/use-session';
 import { useTheme } from '@/hooks/use-theme';
+import { deleteAccount, signOut } from '@/lib/auth';
 import { shareServiceHistory } from '@/lib/export';
+import { supabase } from '@/lib/supabase';
 
 export default function SettingsScreen() {
   const { t } = useTranslation();
@@ -56,6 +60,9 @@ export default function SettingsScreen() {
 
   return (
     <Screen title={t('settings.title')}>
+      {/* Accounts need Supabase; without it the app is offline-only and there is nothing to sign in to. */}
+      {supabase ? <AccountSection /> : null}
+
       <SectionLabel>{t('settings.preferences')}</SectionLabel>
       <Card style={styles.group}>
         <SegmentedControl
@@ -128,6 +135,88 @@ export default function SettingsScreen() {
         {`${Constants.expoConfig?.name ?? ''} · ${t('settings.version')} ${Constants.expoConfig?.version ?? '–'}`}
       </ThemedText>
     </Screen>
+  );
+}
+
+/** Sign in, or for a signed-in owner: who they are, sign out, and delete the account. */
+function AccountSection() {
+  const { t } = useTranslation();
+  const theme = useTheme();
+  const { session, ready } = useSession();
+  const [busy, setBusy] = useState<'signOut' | 'delete'>();
+
+  async function leave() {
+    setBusy('signOut');
+    try {
+      await signOut();
+    } finally {
+      setBusy(undefined);
+    }
+  }
+
+  function confirmDelete() {
+    Alert.alert(t('account.deleteConfirmTitle'), t('account.deleteConfirmBody'), [
+      { text: t('account.cancel'), style: 'cancel' },
+      {
+        text: t('account.deleteConfirm'),
+        style: 'destructive',
+        onPress: async () => {
+          setBusy('delete');
+          try {
+            const result = await deleteAccount();
+            Alert.alert(result.ok ? t('account.deleted') : t('account.deleteFailed'));
+          } finally {
+            setBusy(undefined);
+          }
+        },
+      },
+    ]);
+  }
+
+  if (!ready) return null;
+
+  return (
+    <>
+      <SectionLabel>{t('account.title')}</SectionLabel>
+      {session ? (
+        <Card>
+          <View style={styles.text}>
+            <ThemedText type="caption" themeColor="textSecondary">
+              {t('account.signedInAs')}
+            </ThemedText>
+            <ThemedText type="bodyStrong" numberOfLines={1}>
+              {session.user.email ?? t('account.noEmail')}
+            </ThemedText>
+          </View>
+          <Button
+            title={t('account.signOut')}
+            variant="secondary"
+            icon={<Icon name="signOut" size={18} color={theme.text} />}
+            onPress={leave}
+            loading={busy === 'signOut'}
+            disabled={!!busy}
+          />
+          <Button
+            title={t('account.delete')}
+            variant="destructive"
+            onPress={confirmDelete}
+            loading={busy === 'delete'}
+            disabled={!!busy}
+          />
+        </Card>
+      ) : (
+        <Card>
+          <ThemedText type="small" themeColor="textSecondary">
+            {t('account.signedOutHint')}
+          </ThemedText>
+          <Button
+            title={t('account.signIn')}
+            icon={<Icon name="account" size={18} color={theme.onAccent} />}
+            onPress={() => router.push('/sign-in')}
+          />
+        </Card>
+      )}
+    </>
   );
 }
 

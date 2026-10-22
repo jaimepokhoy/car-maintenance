@@ -358,5 +358,42 @@
     "search": "Rechercher ou taper",
     "cancel": "Annuler",
     "useTyped": "Utiliser « {{value}} »"
+  },
+  "auth": {
+    "title": "Connexion",
+    "intro": "Connectez-vous pour sauvegarder vos véhicules et votre historique d'entretien et les retrouver sur vos autres appareils. Vous pouvez continuer d'utiliser l'application sans compte.",
+    "google": "Continuer avec Google",
+    "or": "ou utilisez votre courriel",
+    "email": "Courriel",
+    "emailHint": "Nous vous enverrons un code à usage unique. Aucun mot de passe requis.",
+    "sendCode": "M'envoyer un code",
+    "codeSent": "Entrez le code envoyé à {{email}}. Vérifiez vos courriels indésirables s'il n'est pas arrivé.",
+    "code": "Code",
+    "verify": "Se connecter",
+    "resend": "Envoyer un nouveau code",
+    "changeEmail": "Utiliser un autre courriel",
+    "errors": {
+      "invalidEmail": "Entrez une adresse courriel valide.",
+      "invalidCode": "Ce code est erroné ou expiré. Vérifiez-le ou demandez-en un nouveau.",
+      "tooManyRequests": "Trop de tentatives. Attendez une minute et réessayez.",
+      "network": "Impossible de joindre le serveur. Vérifiez votre connexion et réessayez.",
+      "unavailable": "Ce mode de connexion n'est pas offert pour le moment.",
+      "generic": "Une erreur s'est produite. Réessayez."
+    }
+  },
+  "account": {
+    "title": "Compte",
+    "signedOutHint": "Connectez-vous pour sauvegarder vos données et les retrouver sur vos autres appareils.",
+    "signIn": "Se connecter",
+    "signedInAs": "Connecté en tant que",
+    "noEmail": "Compte Apple ou Google",
+    "signOut": "Se déconnecter",
+    "delete": "Supprimer le compte et toutes les données",
+    "deleteConfirmTitle": "Supprimer votre compte?",
+    "deleteConfirmBody": "Votre compte et tout ce qui y est sauvegardé seront définitivement supprimés. Les véhicules et l'historique enregistrés sur ce téléphone y restent. C'est irréversible.",
+    "deleteConfirm": "Supprimer le compte",
+    "cancel": "Annuler",
+    "deleted": "Votre compte et ses données ont été supprimés.",
+    "deleteFailed": "Impossible de supprimer votre compte. Vérifiez votre connexion et réessayez."
   }
 }

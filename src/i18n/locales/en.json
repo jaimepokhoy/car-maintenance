@@ -358,5 +358,42 @@
     "search": "Search or type",
     "cancel": "Cancel",
     "useTyped": "Use “{{value}}”"
+  },
+  "auth": {
+    "title": "Sign in",
+    "intro": "Sign in to back up your vehicles and service history and use them on your other devices. You can keep using the app without an account.",
+    "google": "Continue with Google",
+    "or": "or use your email",
+    "email": "Email",
+    "emailHint": "We'll email you a one-time code. No password needed.",
+    "sendCode": "Email me a code",
+    "codeSent": "Enter the code we sent to {{email}}. Check your junk folder if it hasn't arrived.",
+    "code": "Code",
+    "verify": "Sign in",
+    "resend": "Send a new code",
+    "changeEmail": "Use a different email",
+    "errors": {
+      "invalidEmail": "Enter a valid email address.",
+      "invalidCode": "That code is wrong or has expired. Check it or send a new one.",
+      "tooManyRequests": "Too many tries. Wait a minute and try again.",
+      "network": "Can't reach the server. Check your connection and try again.",
+      "unavailable": "This sign-in method isn't available right now.",
+      "generic": "Something went wrong. Try again."
+    }
+  },
+  "account": {
+    "title": "Account",
+    "signedOutHint": "Sign in to back up your data and use it on your other devices.",
+    "signIn": "Sign in",
+    "signedInAs": "Signed in as",
+    "noEmail": "Apple or Google account",
+    "signOut": "Sign out",
+    "delete": "Delete account and all data",
+    "deleteConfirmTitle": "Delete your account?",
+    "deleteConfirmBody": "Your account and everything backed up with it will be permanently deleted. Vehicles and history saved on this phone stay here. This can't be undone.",
+    "deleteConfirm": "Delete account",
+    "cancel": "Cancel",
+    "deleted": "Your account and its data have been deleted.",
+    "deleteFailed": "Couldn't delete your account. Check your connection and try again."
   }
 }
