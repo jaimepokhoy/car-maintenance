@@ -3,7 +3,7 @@
 import { type ChangeEvent, type FormEvent, startTransition, useActionState, useState } from 'react';
 
 import type { Brand, BrandField } from '@/lib/brand';
-import { DARK_ON_ACCENT, LIGHT_ON_ACCENT, contrastRatio, isHexColour, pickOnAccent } from '@/lib/contrast';
+import { DARK_ON_ACCENT, contrastRatio, isHexColour, pickOnAccent } from '@/lib/contrast';
 import { DAY_ORDER, hoursByDay, hoursFieldNames } from '@/lib/hours';
 import { type Locale, type Messages, format, localeTag } from '@/lib/i18n/messages';
 import { createClient } from '@/lib/supabase/browser';
@@ -52,11 +52,9 @@ export function BrandForm({ tenant, env, locale, t }: Props) {
 
   const validAccent = isHexColour(accent);
   const onAccent = validAccent ? pickOnAccent(accent) : null;
-  const bestRatio = validAccent
-    ? Math.max(contrastRatio(accent, DARK_ON_ACCENT), contrastRatio(accent, LIGHT_ON_ACCENT))
-    : null;
+  const ratio = onAccent ? contrastRatio(accent, onAccent) : null;
   const ratioText =
-    bestRatio === null ? '' : new Intl.NumberFormat(localeTag(locale), { maximumFractionDigits: 2 }).format(bestRatio);
+    ratio === null ? '' : new Intl.NumberFormat(localeTag(locale), { maximumFractionDigits: 2 }).format(ratio);
 
   // Submit without React's automatic form reset, so a failed save keeps the edits.
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -170,9 +168,9 @@ export function BrandForm({ tenant, env, locale, t }: Props) {
           </div>
         </div>
         <p id="contrast-status" role="status" className={onAccent ? 'success' : 'error'}>
-          {validAccent ? (
+          {onAccent ? (
             <>
-              {format(t.contrast, { ratio: ratioText })} {onAccent ? t.contrastPass : t.contrastFail}
+              {format(t.contrast, { ratio: ratioText })} {t.contrastPass}
             </>
           ) : (
             t.errors.accentInvalid

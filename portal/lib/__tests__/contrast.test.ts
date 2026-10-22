@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
-import { DARK_ON_ACCENT, LIGHT_ON_ACCENT, contrastRatio, isHexColour, pickOnAccent } from '../contrast';
+import {
+  BLACK_ON_ACCENT,
+  DARK_ON_ACCENT,
+  LIGHT_ON_ACCENT,
+  MIN_TEXT_CONTRAST,
+  contrastRatio,
+  isHexColour,
+  pickOnAccent,
+} from '../contrast';
 
 describe('contrastRatio', () => {
   it('spans 1 to 21', () => {
@@ -31,8 +39,17 @@ describe('pickOnAccent', () => {
     expect(pickOnAccent('#0B3D91')).toBe(LIGHT_ON_ACCENT);
   });
 
-  it('returns null for a mid-tone accent neither colour passes on', () => {
-    expect(pickOnAccent('#7A7A7A')).toBeNull();
+  it('falls back to black on a mid-tone accent neither colour passes on', () => {
+    expect(contrastRatio('#7A7A7A', DARK_ON_ACCENT)).toBeLessThan(MIN_TEXT_CONTRAST);
+    expect(contrastRatio('#7A7A7A', LIGHT_ON_ACCENT)).toBeLessThan(MIN_TEXT_CONTRAST);
+    expect(pickOnAccent('#7A7A7A')).toBe(BLACK_ON_ACCENT);
+  });
+
+  it('always returns a colour that reaches 4.5:1', () => {
+    for (let grey = 0; grey <= 255; grey += 5) {
+      const hex = `#${grey.toString(16).padStart(2, '0').repeat(3)}`;
+      expect(contrastRatio(hex, pickOnAccent(hex))).toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
+    }
   });
 });
 

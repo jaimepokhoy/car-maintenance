@@ -50,7 +50,6 @@ export const en = {
     accentHex: 'Hex code',
     contrast: 'Button text contrast: {ratio}:1',
     contrastPass: 'Readable (needs 4.5:1).',
-    contrastFail: 'Too low: no text colour reaches 4.5:1 on this accent. Pick a darker or lighter colour.',
     details: 'Shop details',
     name: 'Shop name',
     phone: 'Phone',
@@ -79,7 +78,6 @@ export const en = {
     errors: {
       nameRequired: 'Enter the shop name.',
       accentInvalid: 'Use a colour like #1A73E8.',
-      accentNoContrast: 'No text colour is readable on this accent. Pick a darker or lighter colour.',
       logoInvalid: 'Upload the logo again.',
       emailInvalid: 'Enter an email like service@shop.ca.',
       urlInvalid: 'Enter a full link starting with https://',
@@ -139,8 +137,6 @@ export const fr: Messages = {
     accentHex: 'Code hexadécimal',
     contrast: 'Contraste du texte des boutons : {ratio}:1',
     contrastPass: 'Lisible (4,5:1 requis).',
-    contrastFail:
-      'Trop faible : aucune couleur de texte n’atteint 4,5:1 sur cet accent. Choisissez une couleur plus foncée ou plus claire.',
     details: 'Coordonnées de l’atelier',
     name: 'Nom de l’atelier',
     phone: 'Téléphone',
@@ -169,8 +165,6 @@ export const fr: Messages = {
     errors: {
       nameRequired: 'Entrez le nom de l’atelier.',
       accentInvalid: 'Utilisez une couleur comme #1A73E8.',
-      accentNoContrast:
-        'Aucune couleur de texte n’est lisible sur cet accent. Choisissez une couleur plus foncée ou plus claire.',
       logoInvalid: 'Téléversez le logo de nouveau.',
       emailInvalid: 'Entrez un courriel comme service@atelier.ca.',
       urlInvalid: 'Entrez un lien complet commençant par https://',
