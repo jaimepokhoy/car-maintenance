@@ -394,6 +394,10 @@
     "deleteConfirm": "Delete account",
     "cancel": "Cancel",
     "deleted": "Your account and its data have been deleted.",
-    "deleteFailed": "Couldn't delete your account. Check your connection and try again."
+    "deleteFailed": "Couldn't delete your account. Check your connection and try again.",
+    "lastSynced": "Last synced {{time}}",
+    "neverSynced": "Not synced yet",
+    "syncing": "Syncing…",
+    "syncFailed": "couldn't sync, will retry"
   }
 }

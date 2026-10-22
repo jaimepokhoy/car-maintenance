@@ -13,9 +13,11 @@ import { Screen, SectionLabel } from '@/components/screen';
 import { SegmentedControl } from '@/components/segmented-control';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
-import { PROVINCES } from '@/domain';
+import { formatDateTime, PROVINCES } from '@/domain';
+import { useLocale } from '@/hooks/use-locale';
 import { usePreferences } from '@/hooks/use-preferences';
 import { useSession } from '@/hooks/use-session';
+import { useSync } from '@/hooks/use-sync';
 import { useTheme } from '@/hooks/use-theme';
 import { deleteAccount, signOut } from '@/lib/auth';
 import { shareServiceHistory } from '@/lib/export';
@@ -143,6 +145,8 @@ function AccountSection() {
   const { t } = useTranslation();
   const theme = useTheme();
   const { session, ready } = useSession();
+  const sync = useSync();
+  const locale = useLocale();
   const [busy, setBusy] = useState<'signOut' | 'delete'>();
 
   async function leave() {
@@ -186,6 +190,14 @@ function AccountSection() {
             </ThemedText>
             <ThemedText type="bodyStrong" numberOfLines={1}>
               {session.user.email ?? t('account.noEmail')}
+            </ThemedText>
+            <ThemedText type="caption" themeColor={sync.status === 'failed' ? 'dangerText' : 'textSecondary'}>
+              {sync.status === 'syncing'
+                ? t('account.syncing')
+                : sync.lastSyncedAt
+                  ? t('account.lastSynced', { time: formatDateTime(sync.lastSyncedAt, locale) })
+                  : t('account.neverSynced')}
+              {sync.status === 'failed' ? ` · ${t('account.syncFailed')}` : ''}
             </ThemedText>
           </View>
           <Button
