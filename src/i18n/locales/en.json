@@ -1,7 +1,6 @@
 {
   "tabs": {
     "garage": "Garage",
-    "shops": "Shops",
     "settings": "Settings"
   },
   "garage": {
@@ -17,31 +16,6 @@
     "benefitHistory": "Every service and cost in one place",
     "benefitGuide": "A plain-language guide for every job",
     "actionsHint": "Long press to edit or delete"
-  },
-  "shops": {
-    "title": "Shops",
-    "mine": "My shops",
-    "myShop": "My shop",
-    "nearby": "Nearby repair shops",
-    "noneSaved": "Save shops you trust to find them fast and link them to services.",
-    "notConfigured": "Shop search isn't available in this version yet.",
-    "locationNeeded": "Allow location access to find shops near you.",
-    "allowLocation": "Allow location",
-    "searching": "Finding shops near you…",
-    "error": "Couldn't load shops. Check your connection and try again.",
-    "retry": "Try again",
-    "empty": "No repair shops found within 10 km.",
-    "call": "Call",
-    "directions": "Directions",
-    "save": "Save as my shop",
-    "saved": "Saved as my shop",
-    "remove": "Remove from my shops",
-    "openNow": "Open now",
-    "closed": "Closed",
-    "rating": "{{rating}} ★ ({{count}})",
-    "away": "{{distance}} away",
-    "rated": "4+ stars",
-    "noneMatch": "No shops match these filters."
   },
   "settings": {
     "title": "Settings",
@@ -228,7 +202,6 @@
     "whyItMatters": "Why it matters",
     "doItYourself": "Do it yourself?",
     "free": "Free",
-    "findShop": "Find a shop",
     "logThis": "Log this",
     "difficulty": "Difficulty {{level}} of {{max}}",
     "diyLevel": {

@@ -28,9 +28,9 @@ Plain-language best-practice guidance per maintenance item (what, why, typical i
 
 ## Capabilities and Constraints
 
-Confirmed and built: multi-vehicle garage (VIN decode via NHTSA vPIC, year/make/model pickers, nickname, trim, plate, tire size, gas/hybrid/EV), service log with cost and shop, default maintenance schedule per powertrain with due status (overdue, due soon, OK, not logged), seasonal tire set and provincial changeover reminders, guidance card per item, cost summaries, CSV export, saved shops and nearby shop search (Google Places, needs an API key), language and unit preferences.
+Confirmed and built: multi-vehicle garage (VIN decode via NHTSA vPIC, year/make/model pickers, nickname, trim, plate, tire size, gas/hybrid/EV), service log with cost and shop, default maintenance schedule per powertrain with due status (overdue, due soon, OK, not logged), seasonal tire set and provincial changeover reminders, guidance card per item, cost summaries, CSV export, language and unit preferences.
 
-Not built (do not imply in UI): camera VIN scanning, receipt photos or OCR, account sign-in or cloud backup, booking, in-app search of shops, filter chips for shops, recall alerts.
+Not built (do not imply in UI): camera VIN scanning, receipt photos or OCR, account sign-in or cloud backup, booking, any shop finder or shop search (cut, not shipping), recall alerts.
 
 Technical rules: domain logic in `src/domain/` is pure TypeScript with tests; all user-facing text goes through i18n with keys in both `en.json` and `fr.json` (a test fails if they drift); distances stored in km and money in cents; Postgres rows user-owned with RLS. Styling comes from `src/constants/theme.ts` only.
 

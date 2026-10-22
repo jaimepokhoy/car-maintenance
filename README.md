@@ -11,7 +11,7 @@ npm install
 npx expo start
 ```
 
-Scan the QR code with the Expo Go app on your phone. Sign-in and sync need a Supabase project: copy `.env.example` to `.env.local` and fill it in. Nearby shop search needs a Google Places key in the same file. Everything else works without either.
+Scan the QR code with the Expo Go app on your phone. Sign-in and sync need a Supabase project: copy `.env.example` to `.env.local` and fill it in. Everything else works without it.
 
 ## Checks
 
