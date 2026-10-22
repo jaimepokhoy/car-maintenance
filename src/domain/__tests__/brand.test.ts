@@ -62,9 +62,11 @@ describe('resolveBrand', () => {
     expect(resolveBrand(shopConfig, profile({ accent: '#1D4ED8', onAccent: '#1E40AF' })).onAccent).toBe('#FFFFFF');
   });
 
-  it('falls back to the bundled accent when the live one has no readable text colour', () => {
-    // Mid-tone grey: neither near-black nor white reaches 4.5:1.
-    expect(resolveBrand(shopConfig, profile({ accent: '#777777' })).accent).toBe('#FF8A3D');
+  it('keeps a mid-tone live accent and still gives it readable text', () => {
+    // Neither near-black nor white reaches 4.5:1 on this grey.
+    const brand = resolveBrand(shopConfig, profile({ accent: '#777777' }));
+    expect(brand.accent).toBe('#777777');
+    expect(contrastRatio(brand.accent, brand.onAccent)).toBeGreaterThanOrEqual(4.5);
   });
 
   it('falls back to the bundled accent when the profile has no brand colour', () => {

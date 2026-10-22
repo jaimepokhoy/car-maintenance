@@ -52,12 +52,8 @@ const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
  */
 export function resolveBrand(config: TenantConfig, profile: TenantProfile | null): BrandOverlay {
   const live = profile?.brand.accent;
-  if (live && HEX.test(live)) {
-    const onAccent = readableOn(live, profile?.brand.onAccent);
-    if (onAccent) return { accent: live, onAccent };
-  }
-  // validateTenantConfig guarantees the bundled accent has a readable text colour.
-  return { accent: config.accent, onAccent: readableOn(config.accent, config.onAccent) ?? DARK_INK };
+  if (live && HEX.test(live)) return { accent: live, onAccent: readableOn(live, profile?.brand.onAccent) };
+  return { accent: config.accent, onAccent: readableOn(config.accent, config.onAccent) };
 }
 
 /** Night Drive's colour tokens with the brand's accent role laid over them. */
@@ -97,9 +93,7 @@ export function parseTenantProfile(value: unknown): TenantProfile | null {
   };
 }
 
-const DARK_INK = '#061317';
-
-function readableOn(accent: string, preferred: string | undefined): string | null {
+function readableOn(accent: string, preferred: string | undefined): string {
   if (preferred && HEX.test(preferred) && contrastRatio(accent, preferred) >= MIN_TEXT_CONTRAST) return preferred;
   return pickOnAccent(accent);
 }

@@ -6,7 +6,7 @@ Every colour, radius, size and font lives in `src/constants/theme.ts`. This file
 
 ## Shop brands
 
-A shop's own app keeps Night Drive and changes only the accent role: `accent` and `onAccent` come from the shop's brand (live from its portal profile, else its `tenant.json`), in both appearances. Status colours, surfaces, text, type and shape never change per shop. When a shop gives no `onAccent`, or one under 4.5:1 on its accent, the app picks near-black or white for contrast; an accent with neither falls back to the bundled one. The shop's logo appears only in the Garage header of its own app, on a `surface` tile; the unbranded app shows none.
+A shop's own app keeps Night Drive and changes only the accent role: `accent` and `onAccent` come from the shop's brand (live from its portal profile, else its `tenant.json`), in both appearances. Status colours, surfaces, text, type and shape never change per shop. When a shop gives no `onAccent`, or one under 4.5:1 on its accent, the app picks near-black or white for contrast, or pure black for the few mid-tones where neither passes. The shop's logo appears only in the Garage header of its own app, on a `surface` tile; the unbranded app shows none.
 
 ## Styling rules
 
