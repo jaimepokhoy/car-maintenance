@@ -29,6 +29,8 @@ export const MIN_TEXT_CONTRAST = 4.5;
 
 const DARK_ON_ACCENT = '#061317';
 const LIGHT_ON_ACCENT = '#FFFFFF';
+/** Black reaches 4.5:1 on every colour where white does not. */
+const BLACK_ON_ACCENT = '#000000';
 
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const HEX = /^#[0-9A-Fa-f]{6}$/;
@@ -97,9 +99,6 @@ export function validateTenantConfig(value: unknown): TenantValidation {
       errors.push(`onAccent contrast on accent is ${ratio.toFixed(2)}:1, needs ${MIN_TEXT_CONTRAST}:1`);
     }
   }
-  if (errors.length === 0 && pickOnAccent(input.accent as string) === null) {
-    errors.push(`accent ${String(input.accent)} has no text colour with ${MIN_TEXT_CONTRAST}:1 contrast`);
-  }
 
   return errors.length > 0 ? { ok: false, errors } : { ok: true, config: input as TenantConfig };
 }
@@ -112,15 +111,15 @@ export function contrastRatio(hexA: string, hexB: string): number {
 }
 
 /**
- * The text colour for labels on the accent: Night Drive's near-black ink when
- * it reaches 4.5:1, otherwise white. Returns null when neither does, which
- * only happens for mid-tone accents a shop should adjust.
+ * The text colour for labels on the accent, always at least 4.5:1: Night
+ * Drive's near-black ink or white, whichever reads better, and pure black for
+ * the few mid-tone accents where neither passes.
  */
-export function pickOnAccent(accentHex: string): string | null {
+export function pickOnAccent(accentHex: string): string {
   const dark = contrastRatio(accentHex, DARK_ON_ACCENT);
   const light = contrastRatio(accentHex, LIGHT_ON_ACCENT);
   const best = dark >= light ? { hex: DARK_ON_ACCENT, ratio: dark } : { hex: LIGHT_ON_ACCENT, ratio: light };
-  return best.ratio >= MIN_TEXT_CONTRAST ? best.hex : null;
+  return best.ratio >= MIN_TEXT_CONTRAST ? best.hex : BLACK_ON_ACCENT;
 }
 
 function relativeLuminance(hex: string): number {
