@@ -4,11 +4,10 @@ import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
-import { pushPlatform, tenantSlugFromExtra } from '@/domain';
+import { SHOP_CHANNEL_ID, pushPlatform, tenantSlugFromExtra } from '@/domain';
 import i18n from '@/i18n';
 
-/** Android channel for messages a shop sends; `send-campaign` should target it. */
-export const SHOP_CHANNEL_ID = 'shop-messages';
+export { SHOP_CHANNEL_ID };
 
 /** How long sign-out waits for the token delete before it signs out anyway. */
 const REMOVE_TIMEOUT_MS = 3_000;
