@@ -305,6 +305,9 @@
     "tiresBody": "Prenez rendez-vous avant que les garages soient débordés.",
     "tiresLegalBody": "Les pneus d'hiver sont obligatoires au Québec à partir du {{date}}."
   },
+  "push": {
+    "channelName": "Messages de votre garage"
+  },
   "provinces": {
     "AB": "Alberta",
     "BC": "Colombie-Britannique",
