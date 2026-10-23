@@ -16,7 +16,8 @@
     "benefitReminders": "Reminders before things are due",
     "benefitHistory": "Every service and cost in one place",
     "benefitGuide": "A plain-language guide for every job",
-    "actionsHint": "Long press to edit or delete"
+    "actionsHint": "Long press to edit or delete",
+    "shopLogo": "{{name}} logo"
   },
   "shops": {
     "title": "Shops",

@@ -4,6 +4,10 @@ The app is a car's instrument cluster at night. Near-black ground, charcoal surf
 
 Every colour, radius, size and font lives in `src/constants/theme.ts`. This file holds only the rules the code can't tell you.
 
+## Shop brands
+
+A shop's own app keeps Night Drive and changes only the accent role: `accent` and `onAccent` come from the shop's brand (live from its portal profile, else its `tenant.json`), in both appearances. Status colours, surfaces, text, type and shape never change per shop. When a shop gives no `onAccent`, or one under 4.5:1 on its accent, the app picks near-black or white for contrast, or pure black for the few mid-tones where neither passes. The shop's logo appears only in the Garage header of its own app, on a `surface` tile; the unbranded app shows none.
+
 ## Styling rules
 
 ### Do
@@ -26,5 +30,6 @@ Every colour, radius, size and font lives in `src/constants/theme.ts`. This file
 - Uppercase anything other than the `display`, `headline` and `label` text types.
 - Set `fontWeight` in a style; pick the weight by family name (`Fonts.body`, `Fonts.bodySemiBold`, `Fonts.display`).
 - Hard-code a hex, radius or font name in a screen.
+- Read `Colors` directly for the accent; it holds only the Night Drive base. `useTheme()` adds the shop's accent.
 - Use `textFaint` for text; it is a decorative stroke colour only.
 - Add gradients, illustration or hard offset shadows. The vehicle card's glow and silhouette are the one sanctioned piece of art.

@@ -13,8 +13,16 @@ export function useTabBarInset(): number {
   return insets.bottom + TabBar.margin + TabBar.height + Spacing.three;
 }
 
-/** A top-level tab screen: safe area, a display title with an optional action, and scrolling content. */
-export function Screen({ title, action, children }: PropsWithChildren<{ title: string; action?: ReactNode }>) {
+/**
+ * A top-level tab screen: safe area, a display title with an optional leading
+ * mark and trailing action, and scrolling content.
+ */
+export function Screen({
+  title,
+  leading,
+  action,
+  children,
+}: PropsWithChildren<{ title: string; leading?: ReactNode; action?: ReactNode }>) {
   const bottom = useTabBarInset();
   return (
     <ThemedView style={styles.container}>
@@ -24,9 +32,12 @@ export function Screen({ title, action, children }: PropsWithChildren<{ title: s
           contentInsetAdjustmentBehavior="never"
           keyboardShouldPersistTaps="handled">
           <View style={styles.header}>
-            <ThemedText type="display" accessibilityRole="header" style={styles.title}>
-              {title}
-            </ThemedText>
+            <View style={styles.titleRow}>
+              {leading}
+              <ThemedText type="display" accessibilityRole="header" style={styles.title}>
+                {title}
+              </ThemedText>
+            </View>
             {action}
           </View>
           {children}
@@ -112,6 +123,12 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.three,
     paddingBottom: Spacing.one,
     minHeight: 44,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two + Spacing.one,
+    flexShrink: 1,
   },
   title: {
     flexShrink: 1,
