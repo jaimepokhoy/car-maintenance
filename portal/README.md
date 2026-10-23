@@ -18,6 +18,7 @@ Only the anon key is used: every query runs as the signed-in staff member, and t
 - `/sign-in`: email one-time code. `shouldCreateUser` is off, so only accounts created at onboarding can sign in. The Supabase email template must include `{{ .Token }}` for the code to arrive.
 - `/tenants`: shop picker for staff of several shops (`tenant_staff`); staff of one shop go straight to its Brand page.
 - `/t/<tenant id>/brand`: logo (uploaded to `tenant-assets/<tenant id>/`), accent colour with a live contrast check and light/dark preview, name, contact details, opening hours, booking and website links. Saves to `tenants`.
+- `/t/<tenant id>/messages`: compose a reminder or promotion (title, message, all customers or those with service due soon or overdue), preview who it reaches, send it, and see past messages with delivery counts. Preview and send call the `send-campaign` Edge Function (`supabase/functions/send-campaign/`) with the staff member's access token; the function holds the service-role key and enforces 4 messages per shop in 30 days.
 
 Strings live in `lib/i18n/messages.ts` (English and French, same keys). Pure logic is in `lib/` with Vitest tests in `lib/__tests__/`.
 

@@ -23,3 +23,16 @@ export type {
   Vehicle,
 } from '../../src/domain/types';
 export { formatDate, formatDistance, formatMoney } from '../../src/domain/units';
+export {
+  CAMPAIGN_BODY_MAX,
+  CAMPAIGN_LIMIT,
+  CAMPAIGN_TITLE_MAX,
+  CAMPAIGN_WINDOW_DAYS,
+  type CampaignAllowance,
+  type CampaignAudience,
+  type CampaignDraft,
+  type CampaignError,
+  type CampaignField,
+  campaignAllowance,
+  validateCampaign,
+} from '../../src/domain/campaigns';

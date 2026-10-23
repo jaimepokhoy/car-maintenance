@@ -417,3 +417,31 @@ fieldset[aria-invalid='true'] {
   border-left: 3px solid var(--danger);
   padding-left: 1rem;
 }
+
+.radio {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 400;
+  min-height: 2.75rem;
+}
+
+/* A lock-screen style notification, to show staff what customers will see. */
+.notification-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  max-width: 24rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 0.75rem 1rem;
+  overflow-wrap: anywhere;
+}
+
+.notification-app {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+}

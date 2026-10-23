@@ -5,12 +5,13 @@ import { usePathname } from 'next/navigation';
 
 import type { Messages } from '@/lib/i18n/messages';
 
-/** Brand and Customers tabs for one shop; vehicle pages count as Customers. */
+/** Customers, Messages and Brand tabs for one shop; vehicle pages count as Customers. */
 export function TenantNav({ tenantId, t }: { tenantId: string; t: Messages['nav'] }) {
   const pathname = usePathname();
   const base = `/t/${tenantId}`;
   const links = [
     { href: `${base}/customers`, label: t.customers, active: [`${base}/customers`, `${base}/vehicles`] },
+    { href: `${base}/messages`, label: t.messages, active: [`${base}/messages`] },
     { href: `${base}/brand`, label: t.brand, active: [`${base}/brand`] },
   ];
 
