@@ -13,6 +13,15 @@ jest.mock('expo-notifications', () => ({
   getExpoPushTokenAsync: jest.fn(),
   setNotificationChannelAsync: jest.fn(),
 }));
+const mockTenant = { bundledTenant: { slug: 'default' }, isBrandedBuild: false };
+jest.mock('@/lib/tenant-config', () => ({
+  get bundledTenant() {
+    return mockTenant.bundledTenant;
+  },
+  get isBrandedBuild() {
+    return mockTenant.isBrandedBuild;
+  },
+}));
 jest.mock('@/i18n', () => ({ __esModule: true, default: { t: (key: string) => key } }));
 
 const TOKEN = 'ExponentPushToken[abc]';
@@ -48,6 +57,8 @@ function setExtra(extra: Record<string, unknown>) {
 }
 
 beforeEach(async () => {
+  mockTenant.bundledTenant = { slug: 'default' };
+  mockTenant.isBrandedBuild = false;
   Platform.OS = 'ios';
   setExtra({ eas: { projectId: 'project-1' } });
   jest.mocked(Notifications.getPermissionsAsync).mockResolvedValue({ granted: true } as never);
@@ -69,7 +80,8 @@ describe('registering a push token', () => {
   });
 
   it('records the shop a branded build belongs to', async () => {
-    setExtra({ eas: { projectId: 'project-1' }, tenant: { slug: 'garage-tremblay' } });
+    mockTenant.bundledTenant = { slug: 'garage-tremblay' };
+    mockTenant.isBrandedBuild = true;
     const { client, calls } = fakeClient({ id: SHOP });
 
     await registerPushToken(client, 'me');

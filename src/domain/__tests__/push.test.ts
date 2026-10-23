@@ -1,4 +1,4 @@
-import { isCampaignNotification, notificationTarget, pushPlatform, tenantSlugFromExtra } from '../push';
+import { isCampaignNotification, notificationTarget, pushPlatform } from '../push';
 
 describe('push platform', () => {
   it('offers remote push on iOS and Android only', () => {
@@ -6,26 +6,6 @@ describe('push platform', () => {
     expect(pushPlatform('android')).toBe('android');
     expect(pushPlatform('web')).toBeNull();
     expect(pushPlatform('windows')).toBeNull();
-  });
-});
-
-describe('tenant slug', () => {
-  it('reads the shop slug a branded build carries', () => {
-    expect(tenantSlugFromExtra({ tenant: { slug: 'garage-tremblay' } })).toBe('garage-tremblay');
-  });
-
-  it('has no shop in the unbranded app', () => {
-    expect(tenantSlugFromExtra(undefined)).toBeNull();
-    expect(tenantSlugFromExtra(null)).toBeNull();
-    expect(tenantSlugFromExtra({})).toBeNull();
-    expect(tenantSlugFromExtra({ eas: { projectId: 'x' } })).toBeNull();
-    expect(tenantSlugFromExtra({ tenant: { slug: 'default' } })).toBeNull();
-  });
-
-  it('ignores a slug that is not a usable string', () => {
-    expect(tenantSlugFromExtra({ tenant: { slug: '' } })).toBeNull();
-    expect(tenantSlugFromExtra({ tenant: { slug: 42 } })).toBeNull();
-    expect(tenantSlugFromExtra({ tenant: 'garage-tremblay' })).toBeNull();
   });
 });
 
