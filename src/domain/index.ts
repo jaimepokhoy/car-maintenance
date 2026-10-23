@@ -19,3 +19,4 @@ export * from './sync';
 export * from './push';
 export * from './opening-hours';
 export * from './consent';
+export * from './campaigns';

@@ -60,7 +60,8 @@
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
     "test": "jest",
-    "check": "npm run typecheck && npm run lint && npm test"
+    "functions:domain": "node scripts/sync-function-domain.js",
+    "check": "npm run typecheck && npm run lint && npm test && node scripts/sync-function-domain.js --check"
   },
   "private": true,
   "engines": {
@@ -70,7 +71,11 @@
     "preset": "jest-expo",
     "testPathIgnorePatterns": [
       "/node_modules/",
-      "/supabase/"
+      "/supabase/",
+      "/portal/"
+    ],
+    "modulePathIgnorePatterns": [
+      "<rootDir>/portal/"
     ]
   },
   "overrides": {
