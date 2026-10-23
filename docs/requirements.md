@@ -119,12 +119,12 @@ Agreed on 2026-10-22. The model is BiblioCommons for libraries: one platform and
 | Brand settings | In the portal: logo, accent colour (with a contrast check), contact details, hours, booking and website links. Changes reach the app without a store update |
 | Customers | Customers who agreed to share, with their vehicles and what is due soon or overdue |
 | Log a service | Staff add a service to a customer's history. It syncs to the customer's phone with a "Logged by <shop>" badge; the customer can change only its notes |
-| Messages | Push reminders and promotions to all customers or to those with service due soon or overdue, 4 sends per 30 days |
+| Messages | Push service reminders and promotions to all customers or to those with service due soon or overdue, 4 sends per 30 days |
 
 ### Consent and messages
 
 - Sharing is opt-in per shop, asked once in the shop's app ("Not now" is remembered on the device). Revoking stops the shop's access immediately; sharing again reuses the same link.
-- **CASL:** a promotion is a commercial electronic message, so it needs the customer's explicit opt-in to promotions, separate from their consent to share data. Service reminders about the customer's own vehicle are a separate category and don't need that opt-in. Every promotion names the shop and the customer can opt out in the app. Messages don't have a reminder or promotion type yet, and the app has no promotions opt-in, so shops must not send promotions until both ship.
+- **CASL:** a promotion is a commercial electronic message, so it needs the customer's explicit opt-in to promotions, separate from their consent to share data. Service reminders about the customer's own vehicle are a separate category and don't need that opt-in. Every promotion names the shop, and the customer can opt out again. Staff pick the kind (service reminder or promotion) for every message, and promotions go only to customers who opted in. The app doesn't have the opt-in toggle yet, so promotions reach nobody until it ships. Whether service reminders also need express consent under CASL is an open legal question; for now they rely on the sharing consent.
 - **Privacy:** each shop signs a data-processing agreement before go-live, and the shop's app has its own privacy policy naming the shop as a recipient under consent. Data stays in the Canada region. Details in `docs/tenants.md` (Privacy).
 
 ### Not in v1

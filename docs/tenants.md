@@ -101,7 +101,7 @@ Before the first public release: a TestFlight and Play internal test with a few 
 
 - Send staff the portal address. They sign in with an email code, then set the logo, accent, hours and links on the Brand page; changes reach the app without a store update.
 - Explain the consent model: the shop sees only customers who agreed to share in the shop's app, shown as "Customer since <date>", and a customer can revoke at any time.
-- Explain messages: 4 sends in any 30 days. Promotions reach only customers who opted in to them (see Privacy); reminders about service due on their own vehicle don't need that opt-in.
+- Explain messages: 4 sends in any 30 days. Each message is a service reminder or a promotion. Promotions reach only customers who opted in to them (see Privacy), which today is nobody; reminders about service due on their own vehicle don't need that opt-in.
 - Invoice the shop.
 
 ## Suspending or removing a shop
@@ -115,6 +115,6 @@ The consumer privacy policy is PIPEDA-aligned; white-label shops add:
 - **Consent:** a customer's data reaches a shop only after they agree in that shop's app. It is a separate agreement per shop, recorded in `customer_links` with the time, and revocable in Settings; revoking stops access at once. Without consent the shop sees nothing, not even that the person uses its app.
 - **What the shop sees:** the customer's vehicles, service history, custom intervals and saved shops, and when they started sharing. Not their name, email or location.
 - **Data-processing agreement** with every shop before go-live: the shop uses the data only to service the customer's vehicles and contact them about it, keeps staff access to people who need it, tells us about any breach, and stops using the data when the customer revokes or the contract ends.
-- **CASL:** promotions are commercial electronic messages and need the customer's explicit opt-in to promotions, separate from consent to share data; each one names the shop and can be turned off in the app. Service reminders about the customer's own vehicle are a separate category. The promotions opt-in isn't built yet (open follow-up in `docs/architecture.md`).
+- **CASL:** promotions are commercial electronic messages and need the customer's explicit opt-in to promotions, separate from consent to share data; each one names the shop and can be turned off in the app. Service reminders about the customer's own vehicle are a separate category. Staff choose the kind for each message, and `send-campaign` sends promotions only to customers with `promotions_opt_in_at` set. The app's opt-in toggle isn't built yet, so promotions reach nobody until it ships (open follow-up in `docs/architecture.md`). Whether reminders need express consent too is an open legal question.
 - **Region:** one Supabase project in the Canada (Central) region for all shops; shop data, logos and push tokens stay there. Expo's push service relays message text and push tokens; name it as a service provider in the policy.
 - **Each shop's store listing** carries its own privacy policy URL and App Privacy / Data safety answers, which must match ours.

@@ -78,7 +78,8 @@ Migrations from `20261022000000_tenancy.sql` on. Customer data stays user-owned;
 | `is_tenant_staff`, `is_linked_customer` | Security definer helpers the policies call |
 | `service_records.created_by_tenant_id` | Set when a shop logs the service. `guard_created_by_tenant` stops a customer claiming a shop wrote their record; `guard_shop_record_fields` lets the customer change only `notes` and `deleted_at` on a shop's record (hard delete and account deletion stay allowed) |
 | `push_tokens` | Expo push tokens, written only through `register_push_token` |
-| `campaigns`, `campaign_failures` | Shop messages and per-device failures, written only by `send-campaign` |
+| `customer_links.promotions_opt_in_at` | Set by the customer to receive that shop's promotions; staff can read it but not set it |
+| `campaigns`, `campaign_failures` | Shop messages (`kind` is `service_reminder` or `promotion`) and per-device failures, written only by `send-campaign` |
 | `tenant-assets` bucket | Shop logos, public read, staff write under `<tenant_id>/` |
 
 Staff can read `vehicles`, `service_records`, `maintenance_intervals` and `shops` of customers with a live link, and insert or update `service_records` for them only with `created_by_tenant_id` set to their shop. RLS tests are in `supabase/tests/` (`npx supabase test db` against the local stack); CI doesn't run them yet.
@@ -100,19 +101,19 @@ After sign-in the app registers its Expo push token with `register_push_token`, 
 - **Brand:** logo upload, accent with a live contrast check, contact details, hours (one opening per day), booking and website links.
 - **Customers:** linked customers as "Customer since <date>" (staff can't read names), their vehicles and what is due. The odometer shown is the higher of the vehicle's and its latest service's. "Today" is the Newfoundland date, so no Canadian shop sees today's work rejected as a future date.
 - **Log a service** for a linked customer.
-- **Messages:** compose, preview the audience, send, and see past messages.
+- **Messages:** compose a service reminder or promotion, preview the audience, send, and see past messages.
 
 The portal imports pure code from `src/domain/` (`portal/lib/domain.ts`) for due status, units and dates, so it can't disagree with the app.
 
 ### send-campaign Edge Function
 
-`supabase/functions/send-campaign/` (details in its README) checks that the caller is staff of an active shop, picks linked customers (all, or those with something due soon or overdue via `src/domain/campaigns.ts`), and sends through the Expo Push API to tokens registered from that shop's app. `start_campaign` enforces 4 sends per shop in any rolling 30 days (`CAMPAIGN_LIMIT`, `CAMPAIGN_WINDOW_DAYS`) in one locked transaction; sends that reached nobody don't count. The portal's preview id is the idempotency key. Deploy with `npx supabase functions deploy send-campaign`. A hosted deploy hasn't been tried: the function imports `src/domain/` from outside `supabase/functions` through its `deno.json` import map, and if the hosted bundler won't follow that, copy the domain files in at deploy time.
+`supabase/functions/send-campaign/` (details in its README) checks that the caller is staff of an active shop and picks linked customers. Every message has a `kind`: a `promotion` goes only to customers who opted in to that shop's promotions (`customer_links.promotions_opt_in_at`, which only the customer can set), a `service_reminder` to every linked customer. The audience is all of them or those with something due soon or overdue (`src/domain/campaigns.ts`). It sends through the Expo Push API to tokens registered from that shop's app. `start_campaign` enforces 4 sends per shop in any rolling 30 days (`CAMPAIGN_LIMIT`, `CAMPAIGN_WINDOW_DAYS`) in one locked transaction; sends that reached nobody don't count. The portal's preview id is the idempotency key. Deploy with `npx supabase functions deploy send-campaign`. The function can't import from outside `supabase/functions`, so it uses a generated copy of the domain modules it needs in `supabase/functions/_shared/domain/`. After changing `src/domain/campaigns.ts` or anything it imports, run `npm run functions:domain`; `npm run check` and CI fail when the copy is stale.
 
 ## Open follow-ups
 
 - `is_linked_customer(tenant, customer)` is callable by any signed-in user, so anyone can probe whether a given user shares with a given shop. Restrict it to that shop's staff and the customer, or move it out of the exposed schema.
 - A suspended shop keeps its staff's access to customer data: the staff policies check `tenant_staff` and the link, not `tenants.status`. Suspension today only hides the profile and blocks messages and push registration.
-- Promotions need their own opt-in (CASL, `docs/requirements.md` section 9): a flag on `customer_links`, a toggle in the app, and `send-campaign` filtering promotions on it. Messages have no reminder or promotion type yet.
+- The app has no promotions opt-in toggle yet (CASL, `docs/requirements.md` section 9), so promotions reach nobody. It needs a per-shop toggle that sets and clears `customer_links.promotions_opt_in_at`, plus that column in the app's local schema and sync columns.
 - `app.config.ts` sets no per-tenant `extra.eas.projectId`, which EAS Build and remote push need for each shop's EAS project (`docs/tenants.md`, step 6).
 - When a shop's service syncs down with a higher odometer, the app should move the vehicle's odometer forward.
 - `tenants` has no time-zone field; "open now" assumes the device's zone.
