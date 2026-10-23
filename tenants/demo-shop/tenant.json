@@ -1,0 +1,10 @@
+{
+  "slug": "demo-shop",
+  "appName": "Demo Auto Service",
+  "iosBundleId": "ca.carmaintenance.demoshop",
+  "androidPackage": "ca.carmaintenance.demoshop",
+  "scheme": "demoshop",
+  "accent": "#FF8A3D",
+  "splashBackground": "#1A1D21",
+  "easUpdateChannel": "demo-shop"
+}
