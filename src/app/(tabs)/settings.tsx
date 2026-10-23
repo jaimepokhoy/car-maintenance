@@ -13,21 +13,36 @@ import { Screen, SectionLabel } from '@/components/screen';
 import { SegmentedControl } from '@/components/segmented-control';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
-import { formatDateTime, PROVINCES } from '@/domain';
+import { getTenantNames, listCustomerLinks, saveCustomerLink } from '@/db/customer-links';
+import type { Db } from '@/db/types';
+import {
+  activeLinks,
+  consentStatus,
+  formatDateTime,
+  PROVINCES,
+  revokeConsent,
+  toIsoDate,
+  type CustomerLink,
+} from '@/domain';
+import { useDbQuery } from '@/hooks/use-db-query';
+import { useFormat } from '@/hooks/use-format';
 import { useLocale } from '@/hooks/use-locale';
 import { usePreferences } from '@/hooks/use-preferences';
 import { useSession } from '@/hooks/use-session';
 import { useSync } from '@/hooks/use-sync';
+import { useTenant } from '@/hooks/use-tenant';
 import { useTheme } from '@/hooks/use-theme';
 import { deleteAccount, signOut } from '@/lib/auth';
 import { shareServiceHistory } from '@/lib/export';
 import { supabase } from '@/lib/supabase';
+import { isBrandedBuild } from '@/lib/tenant-config';
 
 export default function SettingsScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const { preferences, update } = usePreferences();
   const db = useSQLiteContext();
+  const { session } = useSession();
   const [exporting, setExporting] = useState(false);
 
   async function exportHistory() {
@@ -64,6 +79,8 @@ export default function SettingsScreen() {
     <Screen title={t('settings.title')}>
       {/* Accounts need Supabase; without it the app is offline-only and there is nothing to sign in to. */}
       {supabase ? <AccountSection /> : null}
+      {/* Links are made and synced through the account, so sharing shows only when signed in. */}
+      {session ? <SharingSection /> : null}
 
       <SectionLabel>{t('settings.preferences')}</SectionLabel>
       <Card style={styles.group}>
@@ -137,6 +154,78 @@ export default function SettingsScreen() {
         {`${Constants.expoConfig?.name ?? ''} · ${t('settings.version')} ${Constants.expoConfig?.version ?? '–'}`}
       </ThemedText>
     </Screen>
+  );
+}
+
+async function loadSharing(db: Db) {
+  return { links: await listCustomerLinks(db), names: await getTenantNames(db) };
+}
+
+/**
+ * The shops that can see this owner's vehicles and history, each with a way
+ * to stop sharing. In a shop's app, also offers to share with that shop when
+ * the owner said "not now" or stopped sharing earlier.
+ */
+function SharingSection() {
+  const { t } = useTranslation();
+  const db = useSQLiteContext();
+  const format = useFormat();
+  const shopId = useTenant().profile?.id;
+  const { data, reload } = useDbQuery(loadSharing);
+
+  if (!data) return null;
+  const shared = activeLinks(data.links);
+  const offer = isBrandedBuild && shopId && consentStatus(data.links, shopId, false) !== 'shared';
+  const nameOf = (tenantId: string) => data.names.get(tenantId) ?? t('sharing.unknownShop');
+
+  function confirmRevoke(link: CustomerLink) {
+    const shop = nameOf(link.tenantId);
+    Alert.alert(t('sharing.revokeTitle', { shop }), t('sharing.revokeBody', { shop }), [
+      { text: t('sharing.cancel'), style: 'cancel' },
+      {
+        text: t('sharing.revoke'),
+        style: 'destructive',
+        onPress: async () => {
+          const now = new Date();
+          await saveCustomerLink(db, revokeConsent(link, now), now);
+          reload();
+        },
+      },
+    ]);
+  }
+
+  return (
+    <>
+      <SectionLabel>{t('sharing.title')}</SectionLabel>
+      <Card>
+        {shared.length === 0 ? (
+          <ThemedText type="small" themeColor="textSecondary">
+            {t('sharing.none')}
+          </ThemedText>
+        ) : (
+          shared.map((link) => (
+            <View key={link.id} style={styles.sharedRow}>
+              <View style={[styles.text, styles.flex]}>
+                <ThemedText type="bodyStrong" numberOfLines={1}>
+                  {nameOf(link.tenantId)}
+                </ThemedText>
+                <ThemedText type="caption" themeColor="textSecondary">
+                  {t('sharing.since', { date: format.date(toIsoDate(new Date(link.consentedAt))) })}
+                </ThemedText>
+              </View>
+              <Button title={t('sharing.revoke')} size="small" variant="destructive" onPress={() => confirmRevoke(link)} />
+            </View>
+          ))
+        )}
+        {offer ? (
+          <Button
+            title={t('sharing.share', { shop: nameOf(shopId) })}
+            variant="secondary"
+            onPress={() => router.push('/consent')}
+          />
+        ) : null}
+      </Card>
+    </>
   );
 }
 
@@ -238,6 +327,15 @@ const styles = StyleSheet.create({
   },
   text: {
     gap: Spacing.half,
+  },
+  flex: {
+    flex: 1,
+    minWidth: 0,
+  },
+  sharedRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.three,
   },
   chips: {
     flexDirection: 'row',
