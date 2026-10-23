@@ -33,6 +33,8 @@ export type ServiceLogContext = {
 };
 
 export const MAX_NOTES_LENGTH = 1000;
+/** `service_records.cost_cents` is a Postgres `integer`. */
+const MAX_COST_CENTS = 2_147_483_647;
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -72,6 +74,7 @@ export function parseServiceLog(form: FormData, context: ServiceLogContext): Ser
   if (unknown) errors.itemIds = 'unknownItem';
   if (!isCalendarDate(performedOn)) errors.performedOn = 'invalidDate';
   if (notes.length > MAX_NOTES_LENGTH) errors.notes = 'notesTooLong';
+  if (result.ok && (result.value.costCents ?? 0) > MAX_COST_CENTS) errors.cost = 'invalidCost';
 
   if (!result.ok || Object.keys(errors).length > 0) return { ok: false, errors };
 

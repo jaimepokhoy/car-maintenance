@@ -48,6 +48,11 @@ describe('parseServiceLog', () => {
     });
   });
 
+  it('rejects a cost too large for the database column', () => {
+    const result = parseServiceLog(form({ ...valid, cost: '99999999999' }), context);
+    expect(result).toEqual({ ok: false, errors: { cost: 'invalidCost' } });
+  });
+
   it('leaves cost, currency and notes empty when not given', () => {
     const result = parseServiceLog(form({ ...valid, cost: '', notes: '' }), context);
     expect(result.ok && result.record).toMatchObject({ cost_cents: null, currency: null, notes: null });
