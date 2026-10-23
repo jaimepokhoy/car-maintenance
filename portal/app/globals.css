@@ -1,0 +1,289 @@
+/* Plain, accessible defaults. Follows the system light/dark setting. */
+:root {
+  color-scheme: light dark;
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --text: #0e1116;
+  --text-secondary: #59616b;
+  --border: #d3d8de;
+  --primary: #0e1116;
+  --on-primary: #ffffff;
+  --danger: #b42318;
+  --success: #1f7a44;
+  --focus: #1a73e8;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0a0c0f;
+    --surface: #14181d;
+    --text: #f2f4f5;
+    --text-secondary: #9aa3ad;
+    --border: #2e353e;
+    --primary: #f2f4f5;
+    --on-primary: #0a0c0f;
+    --danger: #ff7a70;
+    --success: #5bd48a;
+    --focus: #8ab4f8;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+main {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+
+h1 {
+  font-size: 1.75rem;
+  margin: 0 0 0.25rem;
+}
+
+h2 {
+  font-size: 1.25rem;
+  margin: 0 0 0.75rem;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.site-title {
+  font-weight: 600;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.muted {
+  color: var(--text-secondary);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin: 1.25rem 0;
+}
+
+fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+legend {
+  padding: 0;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+label,
+.label {
+  font-weight: 600;
+}
+
+.help {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+input[type='text'],
+input[type='email'],
+input[type='tel'],
+input[type='url'],
+input[type='time'],
+textarea {
+  font: inherit;
+  color: inherit;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  min-height: 2.75rem;
+}
+
+input[aria-invalid='true'],
+textarea[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+
+button,
+.button {
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  min-height: 2.75rem;
+  border: 1px solid var(--primary);
+  background: var(--primary);
+  color: var(--on-primary);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+button.secondary {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--border);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.link-button {
+  background: none;
+  border: 0;
+  padding: 0.25rem;
+  min-height: 0;
+  color: inherit;
+  font-weight: 400;
+  text-decoration: underline;
+}
+
+.error {
+  color: var(--danger);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.success {
+  color: var(--success);
+}
+
+.tenant-list {
+  list-style: none;
+  padding: 0;
+}
+
+.tenant-list a {
+  display: block;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-decoration: none;
+}
+
+.hours-row {
+  display: grid;
+  grid-template-columns: 9rem 1fr 1fr;
+  gap: 0.5rem 0.75rem;
+  align-items: end;
+  margin-bottom: 0.5rem;
+}
+
+.hours-row label {
+  font-weight: 400;
+}
+
+.swatch {
+  width: 3rem;
+  height: 2.75rem;
+  padding: 0.125rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: none;
+}
+
+.logo {
+  width: 4rem;
+  height: 4rem;
+  object-fit: contain;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+/* Fixed app colours, so the preview matches the app whatever the portal theme. */
+.preview {
+  border-radius: 12px;
+  padding: 1rem;
+  border: 1px solid;
+}
+
+.preview-light {
+  background: #f4f5f7;
+  color: #0e1116;
+  border-color: #dde1e6;
+}
+
+.preview-dark {
+  background: #0a0c0f;
+  color: #f2f4f5;
+  border-color: #262c34;
+}
+
+.preview .button {
+  border: 0;
+  margin-top: 0.75rem;
+}
+
+@media (max-width: 30rem) {
+  .hours-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .hours-row > :first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+.spread {
+  justify-content: space-between;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
