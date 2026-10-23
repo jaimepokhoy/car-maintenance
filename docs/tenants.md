@@ -82,12 +82,16 @@ Each shop's app adds to the shared Supabase project's auth settings:
 Each shop's app is its own EAS project, signed with the shop's Apple team and published to the shop's Play account.
 
 ```bash
-TENANT=shop-slug npx eas-cli@latest init          # link or create the shop's EAS project
+export TENANT=shop-slug                            # every EAS command reads app.config.ts, so keep this set
+npx eas-cli@latest init                            # link or create the shop's EAS project
 npx eas-cli@latest build --profile shop-slug-preview --platform all     # internal test build
 npx eas-cli@latest build --profile shop-slug-production --platform all
 npx eas-cli@latest submit --profile production --platform ios          # to the shop's App Store Connect
 npx eas-cli@latest submit --profile production --platform android      # to the shop's Play Console
+npx eas-cli@latest update --channel shop-slug --message "..."           # later JS-only fixes
 ```
+
+Without `TENANT`, `eas submit` and `eas update` resolve the default app's config and target the wrong project. In PowerShell use `$env:TENANT = "shop-slug"`.
 
 When EAS asks for Apple credentials, sign in as the operator and pick the shop's team. For Play, create the app in the shop's Play Console first and give EAS a service-account key from that account.
 
@@ -106,7 +110,7 @@ Before the first public release: a TestFlight and Play internal test with a few 
 
 ## Suspending or removing a shop
 
-`update public.tenants set status = 'suspended' where slug = 'shop-slug';` hides its profile from the app and blocks messages and new push registrations. It does **not** remove staff access to customer data yet (open follow-up in `docs/architecture.md`), so also delete the shop's `tenant_staff` rows. Remove the app from sale in the shop's store accounts.
+`update public.tenants set status = 'suspended' where slug = 'shop-slug';` removes it from `tenant_profiles` (installed apps drop the live profile on their next online refresh) and blocks messages and new push registrations. It does **not** remove staff access to customer data yet (open follow-up in `docs/architecture.md`), so also delete the shop's `tenant_staff` rows. Remove the app from sale in the shop's store accounts.
 
 ## Privacy
 
