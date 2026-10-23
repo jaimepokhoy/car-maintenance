@@ -126,9 +126,15 @@ const PUSH_BATCH = 200;
 
 type LocalRow = Record<string, string | number | null>;
 
+/**
+ * `updated_at` is left out so the server stamps it on insert as well as on
+ * update. Otherwise a row created while offline would keep the device's
+ * older time and fall behind other devices' pull cursors, never reaching them.
+ */
 function toRemote(table: SyncTable, row: LocalRow, userId: string): RemoteRow {
   const remote: RemoteRow = { user_id: userId };
   for (const [column, kind] of Object.entries(COLUMNS[table])) {
+    if (column === 'updated_at') continue;
     const value = row[column];
     if (kind === 'boolean') remote[column] = value === 1;
     else if (kind === 'textArray') remote[column] = JSON.parse(String(value));
