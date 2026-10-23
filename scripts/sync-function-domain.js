@@ -8,10 +8,10 @@
  *   node scripts/sync-function-domain.js          # write the copies
  *   node scripts/sync-function-domain.js --check  # fail if they are out of date (npm run check, CI)
  */
-const fs = require('node:fs');
-const path = require('node:path');
+import fs from 'node:fs';
+import path from 'node:path';
 
-const root = path.resolve(__dirname, '..');
+const root = path.resolve(import.meta.dirname, '..');
 const sourceDir = path.join(root, 'src/domain');
 const targetDir = path.join(root, 'supabase/functions/_shared/domain');
 /** The modules the functions import; their own imports are followed. */
