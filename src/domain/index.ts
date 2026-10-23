@@ -17,3 +17,4 @@ export * from './vehicle-catalog';
 export * from './auth';
 export * from './sync';
 export * from './push';
+export * from './opening-hours';

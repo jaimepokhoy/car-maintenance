@@ -11,13 +11,15 @@ import { useTranslation } from 'react-i18next';
 import { AppState, Platform } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { Colors, FontAssets, Fonts } from '@/constants/theme';
+import { FontAssets, Fonts } from '@/constants/theme';
 import { migrate } from '@/db/migrations';
 import { notificationTarget } from '@/domain';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { PreferencesProvider } from '@/hooks/use-preferences';
 import { SessionProvider } from '@/hooks/use-session';
 import { SyncProvider } from '@/hooks/use-sync';
+import { TenantProvider } from '@/hooks/use-tenant';
+import { useTheme } from '@/hooks/use-theme';
 import { configureNotifications, refreshReminders } from '@/lib/reminders';
 
 SplashScreen.preventAutoHideAsync();
@@ -49,11 +51,13 @@ export default function RootLayout() {
       onInit={init}
       onError={retryIfLocked}>
       <PreferencesProvider>
-        <SessionProvider>
-          <SyncProvider>
-            <AppShell />
-          </SyncProvider>
-        </SessionProvider>
+        <TenantProvider>
+          <SessionProvider>
+            <SyncProvider>
+              <AppShell />
+            </SyncProvider>
+          </SessionProvider>
+        </TenantProvider>
       </PreferencesProvider>
     </SQLiteProvider>
   );
@@ -62,7 +66,7 @@ export default function RootLayout() {
 /** Theme, fonts and the navigation stack, all of which depend on the owner's stored preferences. */
 function AppShell() {
   const scheme = useColorScheme();
-  const colors = Colors[scheme];
+  const colors = useTheme();
   const { t } = useTranslation();
   const [fontsLoaded, fontError] = useFonts(FontAssets);
 

@@ -2,7 +2,8 @@
   "tabs": {
     "garage": "Garage",
     "shops": "Shops",
-    "settings": "Settings"
+    "settings": "Settings",
+    "yourShop": "Your shop"
   },
   "garage": {
     "title": "Garage",
@@ -16,7 +17,8 @@
     "benefitReminders": "Reminders before things are due",
     "benefitHistory": "Every service and cost in one place",
     "benefitGuide": "A plain-language guide for every job",
-    "actionsHint": "Long press to edit or delete"
+    "actionsHint": "Long press to edit or delete",
+    "shopLogo": "{{name}} logo"
   },
   "shops": {
     "title": "Shops",
@@ -42,6 +44,26 @@
     "away": "{{distance}} away",
     "rated": "4+ stars",
     "noneMatch": "No shops match these filters."
+  },
+  "yourShop": {
+    "title": "Your shop",
+    "logo": "{{name}} logo",
+    "openNow": "Open now",
+    "closed": "Closed",
+    "openAllDay": "Open 24 hours",
+    "closesToday": "closes at {{time}}",
+    "closesTomorrow": "closes tomorrow at {{time}}",
+    "closesOn": "closes {{day}} at {{time}}",
+    "opensToday": "opens at {{time}}",
+    "opensTomorrow": "opens tomorrow at {{time}}",
+    "opensOn": "opens {{day}} at {{time}}",
+    "hours": "Hours",
+    "today": "Today",
+    "closedAllDay": "Closed",
+    "window": "{{opens}} – {{closes}}",
+    "noHours": "This shop hasn't shared its hours yet.",
+    "book": "Book a service",
+    "website": "Website"
   },
   "settings": {
     "title": "Settings",

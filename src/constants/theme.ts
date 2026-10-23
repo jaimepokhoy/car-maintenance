@@ -6,6 +6,10 @@
  * Screens never hard-code colours, radii or font names; they read them from
  * here through `useTheme()` and `ThemedText`. Add a token when a new role
  * appears, not a one-off value in a screen.
+ *
+ * `Colors` is the fixed Night Drive base. The accent role (`accent`,
+ * `onAccent`) is a brand overlay: the shop's colours in a branded build,
+ * `DefaultBrand` otherwise. `useTheme()` lays it over both schemes.
  */
 
 import {
@@ -33,9 +37,6 @@ export const Colors = {
     textSecondary: '#9AA3AD',
     /** Decorative strokes only, never text. */
     textFaint: '#5C6670',
-    /** The one accent: primary actions and focus. */
-    accent: '#3DD9EB',
-    onAccent: '#061317',
     /** Selected segments and chips: a solid fill of the text colour. */
     inverse: '#F2F4F5',
     onInverse: '#0A0C0F',
@@ -63,8 +64,6 @@ export const Colors = {
     text: '#0E1116',
     textSecondary: '#59616B',
     textFaint: '#9AA3AD',
-    accent: '#3DD9EB',
-    onAccent: '#061317',
     inverse: '#0E1116',
     onInverse: '#FFFFFF',
     danger: '#D92D20',
@@ -82,12 +81,25 @@ export const Colors = {
   },
 } as const;
 
+/** The accent role a shop's brand may override, the same in both schemes. */
+export type Brand = {
+  /** The one accent: primary actions and focus. */
+  accent: string;
+  /** Text and icons on the accent. */
+  onAccent: string;
+};
+
+/** Night Drive's own cyan, used by the unbranded app. */
+export const DefaultBrand: Brand = {
+  accent: '#3DD9EB',
+  onAccent: '#061317',
+};
+
 export type ColorScheme = keyof typeof Colors;
+type BaseColors = (typeof Colors)[ColorScheme];
+export type Theme = { [K in keyof BaseColors]: BaseColors[K] extends string ? string : number } & Brand;
 /** Every colour token (the string-valued ones). */
-export type ThemeColor = {
-  [K in keyof typeof Colors.dark]: (typeof Colors.dark)[K] extends string ? K : never;
-}[keyof typeof Colors.dark];
-export type Theme = (typeof Colors)[ColorScheme];
+export type ThemeColor = { [K in keyof Theme]: Theme[K] extends string ? K : never }[keyof Theme];
 
 /** Font family names as registered with expo-font. Weight is chosen by family, not `fontWeight`. */
 export const Fonts = {

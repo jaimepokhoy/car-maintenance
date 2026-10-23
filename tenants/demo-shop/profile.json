@@ -1,0 +1,21 @@
+{
+  "slug": "demo-shop",
+  "name": "Demo Auto Service",
+  "brand": {},
+  "phone": "+1 416-555-0142",
+  "email": "service@example.com",
+  "address": "100 Queen St W, Toronto, ON M5H 2N2",
+  "latitude": 43.6525,
+  "longitude": -79.3839,
+  "hours": [
+    { "day": 1, "opens": "08:00", "closes": "18:00" },
+    { "day": 2, "opens": "08:00", "closes": "18:00" },
+    { "day": 3, "opens": "08:00", "closes": "18:00" },
+    { "day": 4, "opens": "08:00", "closes": "20:00" },
+    { "day": 5, "opens": "08:00", "closes": "18:00" },
+    { "day": 6, "opens": "09:00", "closes": "15:00" }
+  ],
+  "booking_url": "https://example.com/book",
+  "website_url": "https://example.com",
+  "updated_at": "2026-10-22T00:00:00Z"
+}
