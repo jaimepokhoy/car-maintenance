@@ -21,6 +21,8 @@ export type OpeningHours = { day: number; opens: string; closes: string };
 
 /** A row of the public `tenant_profiles` view in Supabase. */
 export type TenantProfile = {
+  /** The shop's `tenants.id`; missing from the profile bundled with a build and from older caches. */
+  id?: string;
   slug: string;
   name: string;
   brand: TenantBrand;
@@ -78,6 +80,7 @@ export function parseTenantProfile(value: unknown): TenantProfile | null {
   if (typeof brandInput.logoUrl === 'string' && HTTPS_URL.test(brandInput.logoUrl)) brand.logoUrl = brandInput.logoUrl;
 
   return {
+    ...(typeof value.id === 'string' && value.id !== '' ? { id: value.id } : {}),
     slug,
     name,
     brand,

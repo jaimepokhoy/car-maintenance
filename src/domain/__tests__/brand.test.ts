@@ -120,6 +120,13 @@ describe('parseTenantProfile', () => {
     expect(parseTenantProfile(row)).toEqual(row);
   });
 
+  it('keeps the shop id the live view returns, and only a non-empty string', () => {
+    const id = 'aaaaaaaa-0000-4000-8000-000000000000';
+    expect(parseTenantProfile({ ...row, id })).toEqual({ ...row, id });
+    expect(parseTenantProfile({ ...row, id: '' })).toEqual(row);
+    expect(parseTenantProfile({ ...row, id: 7 })).toEqual(row);
+  });
+
   it('rejects rows without the required fields', () => {
     expect(parseTenantProfile(null)).toBeNull();
     expect(parseTenantProfile([])).toBeNull();

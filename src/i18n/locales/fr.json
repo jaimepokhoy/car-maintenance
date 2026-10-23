@@ -179,7 +179,9 @@
     "updatedToday": "mis à jour aujourd'hui",
     "updatedAgo": "mis à jour il y a {{ago}}",
     "logHint": "Ouvre le formulaire pour enregistrer cet entretien",
-    "nothingTracked": "Aucun suivi pour l’instant"
+    "nothingTracked": "Aucun suivi pour l’instant",
+    "loggedBy": "Ajouté par {{shop}}",
+    "editNotesHint": "Ouvre vos notes pour cet entretien"
   },
   "due": {
     "dueBy": "À faire d'ici {{limits}}",
@@ -424,5 +426,34 @@
     "neverSynced": "Pas encore synchronisé",
     "syncing": "Synchronisation…",
     "syncFailed": "échec, nouvel essai bientôt"
+  },
+  "notesForm": {
+    "title": "Notes",
+    "notes": "Vos notes",
+    "placeholder": "Ce que vous voulez retenir de cette visite",
+    "save": "Enregistrer les notes",
+    "shopRecord": "{{shop}} a ajouté cet entretien. Vous pouvez y ajouter vos notes; le reste demeure tel que le garage l’a inscrit."
+  },
+  "consent": {
+    "title": "Partage",
+    "question": "Partager vos véhicules et votre historique d’entretien avec {{shop}}?",
+    "sees": "Le garage voit vos véhicules, vos relevés d’odomètre, votre calendrier d’entretien et votre historique.",
+    "logs": "Il peut ajouter les travaux qu’il effectue à votre historique, marqués comme ajoutés par le garage.",
+    "messages": "Il peut vous envoyer des rappels d’entretien et des offres.",
+    "revoke": "Vous pouvez arrêter le partage en tout temps dans Réglages. Le garage perd l’accès dès que votre téléphone se synchronise.",
+    "private": "Votre adresse courriel et vos photos de reçus restent privées. Rien n’est partagé tant que vous ne choisissez pas Partager.",
+    "share": "Partager",
+    "notNow": "Pas maintenant"
+  },
+  "sharing": {
+    "title": "Partagé avec",
+    "none": "Aucun garage ne voit vos véhicules ni votre historique.",
+    "since": "Depuis le {{date}}",
+    "share": "Partager avec {{shop}}",
+    "revoke": "Arrêter le partage",
+    "revokeTitle": "Arrêter le partage avec {{shop}}?",
+    "revokeBody": "{{shop}} ne verra plus vos véhicules ni votre historique. Les entretiens qu’il a déjà ajoutés restent dans votre historique.",
+    "cancel": "Annuler",
+    "unknownShop": "un garage"
   }
 }
