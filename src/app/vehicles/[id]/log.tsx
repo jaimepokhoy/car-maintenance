@@ -14,7 +14,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { listServiceRecords, logService } from '@/db/service-records';
-import { listSavedShops } from '@/db/shops';
+import { listSavedShops, tenantPlaceId } from '@/db/shops';
 import type { Db } from '@/db/types';
 import { getVehicle } from '@/db/vehicles';
 import {
@@ -31,6 +31,7 @@ import {
 import { useDbQuery } from '@/hooks/use-db-query';
 import { useFormat } from '@/hooks/use-format';
 import { refreshReminders } from '@/lib/reminders';
+import { bundledTenant, isBrandedBuild } from '@/lib/tenant-config';
 
 export default function LogServiceScreen() {
   const { id, item } = useLocalSearchParams<{ id: string; item?: MaintenanceItemId }>();
@@ -71,8 +72,13 @@ function LogServiceForm({
   const [pickingDate, setPickingDate] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof ServiceFormValues, ServiceFormError>>>({});
   const [saving, setSaving] = useState(false);
-  const [shopId, setShopId] = useState<string | undefined>();
   const { data: shops = [] } = useDbQuery(listSavedShops);
+  // A shop's own app links new services to that shop until the owner picks another.
+  const ownShopId = isBrandedBuild
+    ? shops.find((shop) => shop.placeId === tenantPlaceId(bundledTenant.slug))?.id
+    : undefined;
+  const [pickedShop, setPickedShop] = useState<{ id: string | undefined }>();
+  const shopId = pickedShop ? pickedShop.id : ownShopId;
 
   const errorFor = (field: keyof ServiceFormValues) =>
     errors[field] ? t(`serviceForm.errors.${errors[field]}`) : undefined;
@@ -218,7 +224,7 @@ function LogServiceForm({
               role="radio"
               label={t('serviceForm.noShop')}
               selected={shopId === undefined}
-              onPress={() => setShopId(undefined)}
+              onPress={() => setPickedShop({ id: undefined })}
             />
             {shops.map((shop) => (
               <Chip
@@ -226,7 +232,7 @@ function LogServiceForm({
                 role="radio"
                 label={shop.name}
                 selected={shopId === shop.id}
-                onPress={() => setShopId(shop.id)}
+                onPress={() => setPickedShop({ id: shop.id })}
               />
             ))}
           </View>
