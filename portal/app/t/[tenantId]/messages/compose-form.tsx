@@ -100,6 +100,25 @@ export function ComposeForm({ tenantId, shopName, remaining, localeTag, t }: Pro
           </span>
           {fieldError('body')}
         </div>
+        <fieldset aria-invalid={errors.kind ? true : undefined} aria-describedby="kind-help">
+          <legend className="label">{t.kind}</legend>
+          {(['service_reminder', 'promotion'] as const).map((kind) => (
+            <label key={kind} className="radio">
+              <input
+                type="radio"
+                name="kind"
+                value={kind}
+                checked={draft.kind === kind}
+                onChange={() => edit('kind', kind)}
+              />{' '}
+              {t.kinds[kind]}
+            </label>
+          ))}
+          <span id="kind-help" className="help">
+            {t.kindHelp}
+          </span>
+          {fieldError('kind')}
+        </fieldset>
         <fieldset aria-invalid={errors.audience ? true : undefined}>
           <legend className="label">{t.audience}</legend>
           {(['all', 'due_soon'] as const).map((audience) => (
@@ -134,6 +153,7 @@ export function ComposeForm({ tenantId, shopName, remaining, localeTag, t }: Pro
               : format(t.reach, { customers: state.customers, devices: state.devices })}
           </p>
           {state.customers > 0 && state.devices < state.customers && <p className="muted">{t.reachNoPhone}</p>}
+          {state.draft.kind === 'promotion' && <p className="muted">{t.promotionReach}</p>}
           <p className="muted">
             {state.allowance.remaining > 0
               ? format(t.remaining, { count: state.allowance.remaining })

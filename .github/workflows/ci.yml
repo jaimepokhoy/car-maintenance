@@ -21,6 +21,8 @@ jobs:
         run: npm run lint
       - name: Test
         run: npm test -- --ci
+      - name: Edge Function domain copy matches src/domain
+        run: node scripts/sync-function-domain.js --check
       - name: Bundle (iOS and Android)
         run: npx expo export --platform ios --platform android --output-dir dist
 
@@ -45,3 +47,18 @@ jobs:
         run: npm test
       - name: Build
         run: npm run build
+
+  functions:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: supabase/functions/send-campaign
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Typecheck
+        run: deno check index.ts store.ts
+      - name: Test
+        run: deno test

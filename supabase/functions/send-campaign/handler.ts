@@ -13,18 +13,20 @@ import {
   type CampaignDraft,
   type ExpoPushMessage,
   type ExpoPushTicket,
+  type LinkedCustomer,
   type PushTokenRow,
   type SentCampaign,
   buildPushMessages,
   campaignAllowance,
   chunk,
+  eligibleCustomers,
   mergeBatches,
   pushTargets,
   selectAudience,
   tallyBatch,
   validateCampaign,
-} from '../../../src/domain/campaigns.ts';
-import type { ServiceRecord } from '../../../src/domain/types.ts';
+} from '../_shared/domain/campaigns.ts';
+import type { ServiceRecord } from '../_shared/domain/types.ts';
 
 export interface DueInputs {
   vehicles: AudienceVehicle[];
@@ -43,8 +45,8 @@ export interface CampaignStore {
   /** The signed-in user behind an access token, or null when it isn't valid. */
   userForToken(jwt: string): Promise<string | null>;
   isStaff(tenantId: string, userId: string): Promise<boolean>;
-  /** Users with a live (non-revoked, non-deleted) link to the shop. */
-  linkedCustomerIds(tenantId: string): Promise<string[]>;
+  /** Users with a live (non-revoked, non-deleted) link to the shop, and whether they opted in to promotions. */
+  linkedCustomers(tenantId: string): Promise<LinkedCustomer[]>;
   dueInputs(customerIds: string[]): Promise<DueInputs>;
   /** Push tokens registered from this shop's app by these users. */
   pushTokens(tenantId: string, userIds: string[]): Promise<PushTokenRow[]>;
@@ -84,7 +86,7 @@ export type SendCampaignResponse =
   | { dryRun: false; campaignId: string; customers: number; devices: number; sent: number; failed: number };
 
 /**
- * POST { tenantId, title, body, audience, dryRun?, campaignId? } with the
+ * POST { tenantId, title, body, audience, kind, dryRun?, campaignId? } with the
  * staff member's access token. A dry run returns who would get it and how
  * many sends are left, and changes nothing. A send needs `campaignId`, a
  * UUID the portal generates per preview, so the same preview can't go out
@@ -120,7 +122,8 @@ export function createHandler({ store, sendPush, now = () => new Date(), log = c
     try {
       if (!(await store.isStaff(tenantId, userId))) return json(403, { error: 'forbidden' });
 
-      const customerIds = await store.linkedCustomerIds(tenantId);
+      // Promotions only reach customers who opted in to them.
+      const customerIds = eligibleCustomers(campaign.kind, await store.linkedCustomers(tenantId));
       // Only "due soon" needs vehicles and history.
       const dueInputs: DueInputs =
         campaign.audience === 'due_soon' && customerIds.length > 0

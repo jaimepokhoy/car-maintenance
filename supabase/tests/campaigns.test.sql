@@ -1,23 +1,28 @@
--- Tests for campaign sending (20261022220000_campaign_sending.sql).
+-- Tests for campaign sending (20261022220000_campaign_sending.sql and
+-- 20261022230000_campaign_kinds.sql).
 -- Run with `npx supabase test db` against a local stack.
 --
 -- Cast: shop A (active) with staff_a, shop B (active) with staff_b, shop C
--- (suspended). The send-campaign function runs as service_role and calls
+-- (suspended), and a customer linked to shop A. The send-campaign function runs as service_role and calls
 -- start_campaign with a 720-hour window and a 15-minute stale limit.
 
 begin;
 create extension if not exists pgtap with schema extensions;
 
-select plan(19);
+select plan(23);
 
 insert into auth.users (id, email, aud, role) values
   ('00000000-0000-0000-0000-0000000000ca', 'campaign_staff_a@test.ca', 'authenticated', 'authenticated'),
-  ('00000000-0000-0000-0000-0000000000cb', 'campaign_staff_b@test.ca', 'authenticated', 'authenticated');
+  ('00000000-0000-0000-0000-0000000000cb', 'campaign_staff_b@test.ca', 'authenticated', 'authenticated'),
+  ('00000000-0000-0000-0000-0000000000c1', 'campaign_customer@test.ca', 'authenticated', 'authenticated');
 
 insert into public.tenants (id, slug, name, status) values
   ('aaaaaaaa-0000-0000-0000-0000000000ca', 'campaign-shop-a', 'Shop A', 'active'),
   ('bbbbbbbb-0000-0000-0000-0000000000cb', 'campaign-shop-b', 'Shop B', 'active'),
   ('cccccccc-0000-0000-0000-0000000000cc', 'campaign-shop-c', 'Shop C', 'suspended');
+
+insert into public.customer_links (id, tenant_id, user_id, consented_at) values
+  ('70000000-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-0000000000ca', '00000000-0000-0000-0000-0000000000c1', now());
 
 insert into public.tenant_staff (tenant_id, user_id, role) values
   ('aaaaaaaa-0000-0000-0000-0000000000ca', '00000000-0000-0000-0000-0000000000ca', 'owner'),
@@ -36,7 +41,7 @@ insert into public.campaign_failures (campaign_id, tenant_id, error, message) va
 
 -- start_campaign with the function's limits.
 create function pg_temp.start(id text, tenant text, title text) returns text language sql as $$
-  select public.start_campaign(id::uuid, tenant::uuid, title, 'Body', 'all', null, 3, 4, interval '720 hours', interval '15 minutes');
+  select public.start_campaign(id::uuid, tenant::uuid, title, 'Body', 'all', 'service_reminder', null, 3, 4, interval '720 hours', interval '15 minutes');
 $$;
 
 -- The function, as service_role -----------------------------------------------
@@ -70,6 +75,11 @@ select results_eq(
   $$values ('sent'::text, 3, true)$$,
   'a started campaign is recorded as sent under its id, with its recipient count and no progress yet'
 );
+select results_eq(
+  $$select kind from public.campaigns where id = '60000000-0000-0000-0000-000000000001'$$,
+  $$values ('service_reminder'::text)$$,
+  'a campaign records whether it is a reminder or a promotion'
+);
 select is(pg_temp.start('60000000-0000-0000-0000-0000000000b1', 'bbbbbbbb-0000-0000-0000-0000000000cb', 'B'), 'started', 'each shop has its own limit');
 select throws_ok(
   $$select pg_temp.start('60000000-0000-0000-0000-0000000000c1', 'cccccccc-0000-0000-0000-0000000000cc', 'C')$$,
@@ -92,7 +102,7 @@ select results_eq(
   'staff read their shop''s delivery failures'
 );
 select throws_ok(
-  $$select public.start_campaign(gen_random_uuid(), 'aaaaaaaa-0000-0000-0000-0000000000ca', 'Sneaky', 'Body', 'all', null, 1, 99, interval '1 second', interval '1 second')$$,
+  $$select public.start_campaign(gen_random_uuid(), 'aaaaaaaa-0000-0000-0000-0000000000ca', 'Sneaky', 'Body', 'all', 'promotion', null, 1, 99, interval '1 second', interval '1 second')$$,
   '42501', null,
   'staff cannot start a send without the function'
 );
@@ -115,6 +125,26 @@ select throws_ok(
   $$insert into public.campaign_failures (campaign_id, tenant_id, error) values ('50000000-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-0000000000ca', 'x')$$,
   '42501', null,
   'staff cannot write delivery failures'
+);
+
+select lives_ok(
+  $$update public.customer_links set promotions_opt_in_at = now()$$,
+  'staff can try to opt a customer in to promotions'
+);
+select results_eq(
+  'select promotions_opt_in_at is null from public.customer_links',
+  'values (true)',
+  'but only the customer can opt in to promotions'
+);
+
+-- The customer ------------------------------------------------------------------
+select set_config('request.jwt.claims', '{"sub": "00000000-0000-0000-0000-0000000000c1", "role": "authenticated"}', true);
+
+update public.customer_links set promotions_opt_in_at = now() where id = '70000000-0000-0000-0000-000000000001';
+select results_eq(
+  'select promotions_opt_in_at is not null from public.customer_links',
+  'values (true)',
+  'a customer opts in to a shop''s promotions on their own link'
 );
 
 -- Staff of shop B ---------------------------------------------------------------

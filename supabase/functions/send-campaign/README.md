@@ -2,7 +2,7 @@
 
 Sends a shop's reminder or promotion as a push notification to its linked customers. The portal's Messages page calls it with the staff member's access token.
 
-`POST /functions/v1/send-campaign` with `{ tenantId, title, body, audience: "all" | "due_soon", dryRun?, campaignId? }`:
+`POST /functions/v1/send-campaign` with `{ tenantId, title, body, audience: "all" | "due_soon", kind: "service_reminder" | "promotion", dryRun?, campaignId? }`:
 
 - `dryRun: true`: `{ customers, devices, allowance: { remaining, nextAvailableAt } }`, nothing written.
 - Send: needs `campaignId`, a UUID the portal generates per preview. Returns `{ campaignId, customers, devices, sent, failed }`.
@@ -15,7 +15,7 @@ Sends a shop's reminder or promotion as a push notification to its linked custom
   - `429` past 4 sends in 30 days.
   - `500 send_interrupted` when the send started but failed before it could reply, so some phones may already have it.
 
-Recipients are customers with a live `customer_links` row; `due_soon` keeps those with an item due soon or overdue, using `src/domain/campaigns.ts` (the same due rules as the app and the portal). Only push tokens registered from this shop's app (`push_tokens.tenant_id`) are used. Messages go to the Expo Push API in batches of 100, on the app's `shop-messages` Android channel.
+Recipients are customers with a live `customer_links` row. A `promotion` goes only to those who opted in to the shop's promotions (`customer_links.promotions_opt_in_at`, set by the customer); a `service_reminder` goes to every linked customer. Then `due_soon` keeps those with an item due soon or overdue, using `src/domain/campaigns.ts` (the same due rules as the app and the portal). Only push tokens registered from this shop's app (`push_tokens.tenant_id`) are used. Messages go to the Expo Push API in batches of 100, on the app's `shop-messages` Android channel.
 
 The `start_campaign` SQL function checks the limit and records the campaign in one locked transaction. After that:
 
@@ -25,7 +25,7 @@ The `start_campaign` SQL function checks the limit and records the campaign in o
 
 Secrets: `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are provided by Supabase. Set `EXPO_ACCESS_TOKEN` if the Expo project has enhanced push security turned on.
 
-`deno.json` maps the extensionless imports inside `src/domain/` to their `.ts` files, since the Edge Runtime doesn't resolve them. Add an entry when `campaigns.ts` starts importing another domain module.
+The pure rules come from `src/domain/`, copied into `supabase/functions/_shared/domain/` by `npm run functions:domain` (relative imports get `.ts` added for Deno). The function imports only from `_shared`, so `supabase functions deploy` bundles everything from inside `supabase/functions`. Never edit the copies: `npm run check` and CI fail when they differ from `src/domain/`.
 
 ```bash
 cd supabase/functions/send-campaign

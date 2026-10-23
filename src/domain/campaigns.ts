@@ -12,6 +12,14 @@ export type CampaignAudience = 'all' | 'due_soon';
 
 export const CAMPAIGN_AUDIENCES: readonly CampaignAudience[] = ['all', 'due_soon'];
 
+/**
+ * What a campaign is for. A promotion is a commercial message, so it only goes
+ * to customers who opted in to the shop's promotions (`eligibleCustomers`).
+ */
+export type CampaignKind = 'service_reminder' | 'promotion';
+
+export const CAMPAIGN_KINDS: readonly CampaignKind[] = ['service_reminder', 'promotion'];
+
 /** iOS shows about this much of a title on the lock screen. */
 export const CAMPAIGN_TITLE_MAX = 65;
 export const CAMPAIGN_BODY_MAX = 240;
@@ -30,6 +38,7 @@ export interface CampaignDraft {
   title: string;
   body: string;
   audience: CampaignAudience;
+  kind: CampaignKind;
 }
 
 export type CampaignField = keyof CampaignDraft;
@@ -40,20 +49,31 @@ export type CampaignValidation =
   | { ok: false; errors: Partial<Record<CampaignField, CampaignError>> };
 
 /** Trims and checks a campaign before it is previewed or sent. */
-export function validateCampaign(input: { title?: unknown; body?: unknown; audience?: unknown }): CampaignValidation {
+export function validateCampaign(input: {
+  title?: unknown;
+  body?: unknown;
+  audience?: unknown;
+  kind?: unknown;
+}): CampaignValidation {
   const errors: Partial<Record<CampaignField, CampaignError>> = {};
   const title = typeof input.title === 'string' ? input.title.trim() : '';
   const body = typeof input.body === 'string' ? input.body.trim() : '';
-  const audience = input.audience;
+  const { audience, kind } = input;
 
   if (!title) errors.title = 'required';
   else if (title.length > CAMPAIGN_TITLE_MAX) errors.title = 'tooLong';
   if (!body) errors.body = 'required';
   else if (body.length > CAMPAIGN_BODY_MAX) errors.body = 'tooLong';
   if (!CAMPAIGN_AUDIENCES.includes(audience as CampaignAudience)) errors.audience = 'invalid';
+  // No default: staff choose, so a promotion never goes out as a reminder by accident.
+  if (kind === undefined || kind === null || kind === '') errors.kind = 'required';
+  else if (!CAMPAIGN_KINDS.includes(kind as CampaignKind)) errors.kind = 'invalid';
 
   if (Object.keys(errors).length > 0) return { ok: false, errors };
-  return { ok: true, campaign: { title, body, audience: audience as CampaignAudience } };
+  return {
+    ok: true,
+    campaign: { title, body, audience: audience as CampaignAudience, kind: kind as CampaignKind },
+  };
 }
 
 /** A campaign already sent, as the rate limit sees it. */
@@ -105,6 +125,23 @@ export function campaignAllowance(sent: SentCampaign[], now: Date): CampaignAllo
   // The oldest send that has to expire before the count drops below the limit.
   const freesUp = counted[counted.length - CAMPAIGN_LIMIT] + WINDOW_MS;
   return { remaining, nextAvailableAt: new Date(freesUp).toISOString() };
+}
+
+/** A customer with a live link to the shop. */
+export interface LinkedCustomer {
+  id: string;
+  /** True when they opted in to the shop's promotions (`customer_links.promotions_opt_in_at`). */
+  promotionsOptIn: boolean;
+}
+
+/**
+ * The linked customers a campaign of this kind may go to: all of them for a
+ * service reminder, only those who opted in for a promotion.
+ */
+export function eligibleCustomers(kind: CampaignKind, customers: LinkedCustomer[]): string[] {
+  return customers
+    .filter((customer) => kind === 'service_reminder' || customer.promotionsOptIn)
+    .map((customer) => customer.id);
 }
 
 export interface AudienceVehicle {

@@ -33,6 +33,7 @@ export {
   type CampaignDraft,
   type CampaignError,
   type CampaignField,
+  type CampaignKind,
   campaignAllowance,
   isUnfinishedSend,
   validateCampaign,

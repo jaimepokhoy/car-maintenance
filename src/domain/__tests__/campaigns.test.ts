@@ -8,6 +8,7 @@ import {
   buildPushMessages,
   campaignAllowance,
   chunk,
+  eligibleCustomers,
   isExpoPushToken,
   mergeBatches,
   pushTargets,
@@ -20,14 +21,14 @@ import type { ServiceRecord } from '../types';
 
 describe('validateCampaign', () => {
   it('trims and accepts a complete campaign', () => {
-    expect(validateCampaign({ title: '  Winter tires  ', body: ' Book your swap. ', audience: 'due_soon' })).toEqual({
+    expect(validateCampaign({ title: '  Winter tires  ', body: ' Book your swap. ', audience: 'due_soon', kind: 'promotion' })).toEqual({
       ok: true,
-      campaign: { title: 'Winter tires', body: 'Book your swap.', audience: 'due_soon' },
+      campaign: { title: 'Winter tires', body: 'Book your swap.', audience: 'due_soon', kind: 'promotion' },
     });
   });
 
   it('requires a title and a body', () => {
-    expect(validateCampaign({ title: '  ', body: '', audience: 'all' })).toEqual({
+    expect(validateCampaign({ title: '  ', body: '', audience: 'all', kind: 'promotion' })).toEqual({
       ok: false,
       errors: { title: 'required', body: 'required' },
     });
@@ -38,17 +39,45 @@ describe('validateCampaign', () => {
       title: 'x'.repeat(CAMPAIGN_TITLE_MAX + 1),
       body: 'x'.repeat(CAMPAIGN_BODY_MAX + 1),
       audience: 'all',
+      kind: 'service_reminder',
     });
     expect(result).toEqual({ ok: false, errors: { title: 'tooLong', body: 'tooLong' } });
-    expect(validateCampaign({ title: 'x'.repeat(CAMPAIGN_TITLE_MAX), body: 'x'.repeat(CAMPAIGN_BODY_MAX), audience: 'all' }).ok).toBe(true);
+    expect(validateCampaign({ title: 'x'.repeat(CAMPAIGN_TITLE_MAX), body: 'x'.repeat(CAMPAIGN_BODY_MAX), audience: 'all', kind: 'promotion' }).ok).toBe(true);
   });
 
   it('only knows the two audiences', () => {
-    expect(validateCampaign({ title: 'Hi', body: 'There', audience: 'everyone' })).toEqual({
+    expect(validateCampaign({ title: 'Hi', body: 'There', audience: 'everyone', kind: 'promotion' })).toEqual({
       ok: false,
       errors: { audience: 'invalid' },
     });
-    expect(validateCampaign({ title: 'Hi', body: 'There' })).toEqual({ ok: false, errors: { audience: 'invalid' } });
+    expect(validateCampaign({ title: 'Hi', body: 'There', kind: 'promotion' })).toEqual({ ok: false, errors: { audience: 'invalid' } });
+  });
+
+  it('needs a reminder or promotion, with no default', () => {
+    const campaign = { title: 'Hi', body: 'There', audience: 'all' };
+    expect(validateCampaign(campaign)).toEqual({ ok: false, errors: { kind: 'required' } });
+    expect(validateCampaign({ ...campaign, kind: '' })).toEqual({ ok: false, errors: { kind: 'required' } });
+    expect(validateCampaign({ ...campaign, kind: 'newsletter' })).toEqual({ ok: false, errors: { kind: 'invalid' } });
+    expect(validateCampaign({ ...campaign, kind: 'service_reminder' })).toMatchObject({
+      ok: true,
+      campaign: { kind: 'service_reminder' },
+    });
+  });
+});
+
+describe('eligibleCustomers', () => {
+  const customers = [
+    { id: 'opted-in', promotionsOptIn: true },
+    { id: 'not-asked', promotionsOptIn: false },
+  ];
+
+  it('sends service reminders to every linked customer', () => {
+    expect(eligibleCustomers('service_reminder', customers)).toEqual(['opted-in', 'not-asked']);
+  });
+
+  it('sends promotions only to customers who opted in', () => {
+    expect(eligibleCustomers('promotion', customers)).toEqual(['opted-in']);
+    expect(eligibleCustomers('promotion', [])).toEqual([]);
   });
 });
 

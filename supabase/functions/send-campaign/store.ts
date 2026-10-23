@@ -11,8 +11,8 @@ import {
   CAMPAIGN_WINDOW_HOURS,
   type AudienceInterval,
   type AudienceVehicle,
-} from '../../../src/domain/campaigns.ts';
-import type { MaintenanceItemId, Powertrain, ServiceRecord } from '../../../src/domain/types.ts';
+} from '../_shared/domain/campaigns.ts';
+import type { MaintenanceItemId, Powertrain, ServiceRecord } from '../_shared/domain/types.ts';
 import type { CampaignStore } from './handler.ts';
 
 /** The API returns at most 1,000 rows per request (`max_rows`). */
@@ -64,18 +64,18 @@ export function supabaseStore(admin: SupabaseClient): CampaignStore {
       return data !== null;
     },
 
-    async linkedCustomerIds(tenantId) {
-      const rows = await readAll<{ user_id: string }>((from, to) =>
+    async linkedCustomers(tenantId) {
+      const rows = await readAll<{ user_id: string; promotions_opt_in_at: string | null }>((from, to) =>
         admin
           .from('customer_links')
-          .select('user_id')
+          .select('user_id, promotions_opt_in_at')
           .eq('tenant_id', tenantId)
           .is('revoked_at', null)
           .is('deleted_at', null)
           .order('id')
           .range(from, to),
       );
-      return rows.map((row) => row.user_id);
+      return rows.map((row) => ({ id: row.user_id, promotionsOptIn: row.promotions_opt_in_at !== null }));
     },
 
     async dueInputs(customerIds) {
@@ -175,6 +175,7 @@ export function supabaseStore(admin: SupabaseClient): CampaignStore {
         p_title: campaign.title,
         p_body: campaign.body,
         p_audience: campaign.audience,
+        p_kind: campaign.kind,
         p_created_by: createdBy,
         p_recipient_count: recipientCount,
         p_limit: CAMPAIGN_LIMIT,
