@@ -1,6 +1,6 @@
 # Car Maintenance
 
-Free iOS and Android app for Canadian car owners to track maintenance, get reminders and find shops. Product scope and decisions: `docs/requirements.md`. How the code fits together: `docs/architecture.md`.
+Free iOS and Android app for Canadian car owners to track maintenance, get reminders and find shops. Product scope and decisions: `docs/requirements.md`. How the code fits together: `docs/architecture.md`. Mechanic shops also get their own branded app and a web portal (`portal/`); setting a shop up is in `docs/tenants.md`.
 
 @AGENTS.md
 
