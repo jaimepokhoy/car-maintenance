@@ -67,7 +67,11 @@
     "preset": "jest-expo",
     "testPathIgnorePatterns": [
       "/node_modules/",
-      "/supabase/"
+      "/supabase/",
+      "/portal/"
+    ],
+    "modulePathIgnorePatterns": [
+      "<rootDir>/portal/"
     ]
   },
   "overrides": {
