@@ -1,7 +1,6 @@
 {
   "tabs": {
     "garage": "Véhicules",
-    "shops": "Garages",
     "settings": "Réglages"
   },
   "garage": {
@@ -17,31 +16,6 @@
     "benefitHistory": "Tous vos entretiens et coûts au même endroit",
     "benefitGuide": "Un guide en langage clair pour chaque tâche",
     "actionsHint": "Appui long pour modifier ou supprimer"
-  },
-  "shops": {
-    "title": "Garages",
-    "mine": "Mes garages",
-    "myShop": "Mon garage",
-    "nearby": "Garages à proximité",
-    "noneSaved": "Enregistrez les garages de confiance pour les retrouver vite et les associer à vos entretiens.",
-    "notConfigured": "La recherche de garages n'est pas encore offerte dans cette version.",
-    "locationNeeded": "Autorisez l'accès à la position pour trouver des garages près de vous.",
-    "allowLocation": "Autoriser la position",
-    "searching": "Recherche de garages à proximité…",
-    "error": "Impossible de charger les garages. Vérifiez votre connexion et réessayez.",
-    "retry": "Réessayer",
-    "empty": "Aucun garage trouvé dans un rayon de 10 km.",
-    "call": "Appeler",
-    "directions": "Itinéraire",
-    "save": "Enregistrer comme mon garage",
-    "saved": "Enregistré comme mon garage",
-    "remove": "Retirer de mes garages",
-    "openNow": "Ouvert",
-    "closed": "Fermé",
-    "rating": "{{rating}} ★ ({{count}})",
-    "away": "à {{distance}}",
-    "rated": "4 étoiles et plus",
-    "noneMatch": "Aucun garage ne correspond à ces filtres."
   },
   "settings": {
     "title": "Réglages",
@@ -228,7 +202,6 @@
     "whyItMatters": "Pourquoi c'est important",
     "doItYourself": "Le faire soi-même?",
     "free": "Gratuit",
-    "findShop": "Trouver un garage",
     "logThis": "L'enregistrer",
     "difficulty": "Difficulté {{level}} sur {{max}}",
     "diyLevel": {

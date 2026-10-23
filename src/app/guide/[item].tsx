@@ -68,31 +68,17 @@ export default function GuideScreen() {
   return (
     <FormScreen
       footer={
-        <View style={styles.actions}>
+        id ? (
           <Button
-            title={t('guidance.findShop')}
-            variant="secondary"
+            title={t('guidance.logThis')}
             size="large"
-            icon={<Icon name="pin" size={18} color={theme.text} />}
-            style={styles.flex}
+            icon={<Icon name="check" size={18} color={theme.onAccent} weight="bold" />}
             onPress={() => {
               router.dismiss();
-              router.navigate('/shops');
+              router.push({ pathname: '/vehicles/[id]/log', params: { id, item } });
             }}
           />
-          {id ? (
-            <Button
-              title={t('guidance.logThis')}
-              size="large"
-              icon={<Icon name="check" size={18} color={theme.onAccent} weight="bold" />}
-              style={styles.flex}
-              onPress={() => {
-                router.dismiss();
-                router.push({ pathname: '/vehicles/[id]/log', params: { id, item } });
-              }}
-            />
-          ) : null}
-        </View>
+        ) : undefined
       }>
         <View style={styles.intro}>
           <ThemedText type="display" accessibilityRole="header">
@@ -248,9 +234,5 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.four - Spacing.one,
     marginTop: Spacing.one,
     borderTopWidth: 1,
-  },
-  actions: {
-    flexDirection: 'row',
-    gap: Spacing.two + Spacing.half,
   },
 });
