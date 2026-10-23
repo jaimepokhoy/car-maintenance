@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { defaultSchedule } from '../domain';
 import { en, format, fr, resolveLocale } from '../i18n/messages';
 
 function leaves(value: unknown, path = ''): Map<string, unknown> {
@@ -33,6 +34,13 @@ describe('messages', () => {
 
   it('uses Canadian spelling', () => {
     expect(JSON.stringify(en)).not.toMatch(/\bcolor\b/i);
+  });
+
+  it('names every maintenance item the app can schedule', () => {
+    const scheduled = new Set(
+      (['gas', 'hybrid', 'ev'] as const).flatMap((powertrain) => defaultSchedule(powertrain).map((i) => i.itemId)),
+    );
+    expect(Object.keys(en.items).sort()).toEqual([...scheduled].sort());
   });
 });
 
