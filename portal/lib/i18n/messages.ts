@@ -98,6 +98,14 @@ export const en = {
     titleHelp: 'Short and clear, up to {max} characters.',
     bodyLabel: 'Message',
     bodyHelp: '{count} of {max} characters.',
+    kind: 'Type of message',
+    kinds: {
+      service_reminder: 'Service reminder',
+      promotion: 'Promotion',
+    },
+    kindHelp:
+      'A service reminder is about the customer’s own vehicle, like an oil change that is due. Anything that offers a deal or advertises a service is a promotion. Promotions go only to customers who agreed to get offers from your shop.',
+    promotionReach: 'Only customers who agreed to get offers from your shop are counted.',
     audience: 'Send to',
     audiences: {
       all: 'All customers',
@@ -136,6 +144,9 @@ export const en = {
       audience_required: 'Choose who gets the message.',
       audience_tooLong: 'Choose who gets the message.',
       audience_invalid: 'Choose who gets the message.',
+      kind_required: 'Choose a service reminder or a promotion.',
+      kind_tooLong: 'Choose a service reminder or a promotion.',
+      kind_invalid: 'Choose a service reminder or a promotion.',
     },
   },
   customers: {
@@ -322,6 +333,14 @@ export const fr: Messages = {
     titleHelp: 'Court et clair, jusqu’à {max} caractères.',
     bodyLabel: 'Message',
     bodyHelp: '{count} caractères sur {max}.',
+    kind: 'Type de message',
+    kinds: {
+      service_reminder: 'Rappel d’entretien',
+      promotion: 'Promotion',
+    },
+    kindHelp:
+      'Un rappel d’entretien porte sur le véhicule du client, comme une vidange qui est due. Tout ce qui propose une offre ou annonce un service est une promotion. Les promotions sont envoyées seulement aux clients qui ont accepté de recevoir des offres de votre atelier.',
+    promotionReach: 'Seuls les clients qui ont accepté de recevoir des offres de votre atelier sont comptés.',
     audience: 'Destinataires',
     audiences: {
       all: 'Tous les clients',
@@ -361,6 +380,9 @@ export const fr: Messages = {
       audience_required: 'Choisissez les destinataires.',
       audience_tooLong: 'Choisissez les destinataires.',
       audience_invalid: 'Choisissez les destinataires.',
+      kind_required: 'Choisissez un rappel d’entretien ou une promotion.',
+      kind_tooLong: 'Choisissez un rappel d’entretien ou une promotion.',
+      kind_invalid: 'Choisissez un rappel d’entretien ou une promotion.',
     },
   },
   customers: {

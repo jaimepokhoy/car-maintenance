@@ -1,7 +1,7 @@
 // Run with `deno test` from this folder (or `npx deno test` without a Deno install).
 import { assertEquals } from '@std/assert';
 
-import type { ExpoPushMessage, ExpoPushTicket, SentCampaign } from '../../../src/domain/campaigns.ts';
+import type { ExpoPushMessage, ExpoPushTicket, SentCampaign } from '../_shared/domain/campaigns.ts';
 import { type CampaignStore, type DueInputs, type FailureLogEntry, createHandler, deliver } from './handler.ts';
 
 const TENANT = 'aaaaaaaa-0000-0000-0000-000000000000';
@@ -11,7 +11,12 @@ const NOW = new Date('2026-10-22T15:00:00Z');
 function fakeStore(overrides: Partial<{ campaigns: SentCampaign[]; tokens: { token: string; userId: string }[] }> = {}) {
   const state = {
     staff: new Set(['staff-1']),
-    linked: ['due', 'fine', 'no-phone'],
+    // Only 'fine' opted in to promotions.
+    linked: [
+      { id: 'due', promotionsOptIn: false },
+      { id: 'fine', promotionsOptIn: true },
+      { id: 'no-phone', promotionsOptIn: false },
+    ],
     due: {
       vehicles: [
         { id: 'v-due', userId: 'due', powertrain: 'gas', odometerKm: 52_000 },
@@ -40,7 +45,7 @@ function fakeStore(overrides: Partial<{ campaigns: SentCampaign[]; tokens: { tok
   const store: CampaignStore = {
     userForToken: (jwt) => Promise.resolve(jwt === 'staff-jwt' ? 'staff-1' : jwt === 'customer-jwt' ? 'due' : null),
     isStaff: (tenantId, userId) => Promise.resolve(tenantId === TENANT && state.staff.has(userId)),
-    linkedCustomerIds: () => Promise.resolve(state.linked),
+    linkedCustomers: () => Promise.resolve(state.linked),
     dueInputs: () => Promise.resolve(state.due),
     pushTokens: (_tenantId, userIds) => Promise.resolve(state.tokens.filter((row) => userIds.includes(row.userId))),
     sentCampaigns: () => Promise.resolve(state.campaigns),
@@ -86,7 +91,7 @@ function request(body: unknown, jwt = 'staff-jwt') {
   });
 }
 
-const campaign = { tenantId: TENANT, title: 'Winter tires', body: 'Book your swap before the snow.' };
+const campaign = { tenantId: TENANT, title: 'Winter tires', body: 'Book your swap before the snow.', kind: 'service_reminder' };
 let nextId = 0;
 /** A fresh campaign id, as the portal generates one per preview. */
 const id = () => `cccccccc-0000-0000-0000-${String(++nextId).padStart(12, '0')}`;
@@ -115,7 +120,10 @@ Deno.test('rejects an invalid campaign', async () => {
 
   const response = await handle(request({ tenantId: TENANT, title: '', body: 'x', audience: 'everyone' }));
   assertEquals(response.status, 400);
-  assertEquals(await response.json(), { error: 'invalid_campaign', fields: { title: 'required', audience: 'invalid' } });
+  assertEquals(await response.json(), {
+    error: 'invalid_campaign',
+    fields: { title: 'required', audience: 'invalid', kind: 'required' },
+  });
   assertEquals((await handle(request({ ...campaign, tenantId: 'nope', audience: 'all' }))).status, 400);
 });
 
@@ -270,4 +278,25 @@ Deno.test('delivers in batches of 100 and keeps going when one batch fails', asy
   assertEquals(result.sent, 150);
   assertEquals(result.failed, 100);
   assertEquals(result.failures[0], { token: 'ExponentPushToken[100]', error: 'RequestFailed', message: 'socket hang up' });
+});
+
+Deno.test('sends promotions only to customers who opted in to them', async () => {
+  const { state, store } = fakeStore();
+  const batches: ExpoPushMessage[][] = [];
+  const handle = createHandler({ store, sendPush: okSender(batches), now: () => NOW, log: quiet });
+
+  const preview = await handle(request({ ...campaign, kind: 'promotion', audience: 'all', dryRun: true }));
+  assertEquals((await preview.json()).customers, 1);
+
+  const response = await handle(request({ ...campaign, kind: 'promotion', audience: 'all', campaignId: id() }));
+  assertEquals(response.status, 200);
+  assertEquals(
+    batches.flat().map((message) => message.to),
+    ['ExponentPushToken[fine-1]'],
+  );
+  assertEquals(state.started[0].recipientCount, 1);
+
+  // 'fine' has nothing due, and the customer who is due didn't opt in.
+  const dueSoon = await handle(request({ ...campaign, kind: 'promotion', audience: 'due_soon', campaignId: id() }));
+  assertEquals(dueSoon.status, 422);
 });

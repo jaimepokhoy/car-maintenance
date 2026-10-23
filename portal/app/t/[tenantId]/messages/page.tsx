@@ -54,7 +54,10 @@ export default async function MessagesPage({ params }: { params: Promise<{ tenan
             <li key={campaign.id} className="card">
               <div className="row spread">
                 <strong>{campaign.title}</strong>
-                <span className="chip">{t.messages.audiences[campaign.audience]}</span>
+                <span className="row">
+                  <span className="chip">{t.messages.kinds[campaign.kind]}</span>
+                  <span className="chip">{t.messages.audiences[campaign.audience]}</span>
+                </span>
               </div>
               <p style={{ margin: '0.25rem 0' }}>{campaign.body}</p>
               <p className="muted" style={{ margin: 0 }}>

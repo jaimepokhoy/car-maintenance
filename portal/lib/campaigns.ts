@@ -14,13 +14,14 @@ export type CampaignRow = {
   title: string;
   body: string;
   audience: CampaignDraft['audience'];
+  kind: CampaignDraft['kind'];
   sent_at: string;
   recipient_count: number | null;
   sent_count: number | null;
   failed_count: number | null;
 };
 
-export const CAMPAIGN_COLUMNS = 'id, title, body, audience, sent_at, recipient_count, sent_count, failed_count';
+export const CAMPAIGN_COLUMNS = 'id, title, body, audience, kind, sent_at, recipient_count, sent_count, failed_count';
 
 export type MessageState =
   | { status: 'idle' }
@@ -48,11 +49,17 @@ export type ParsedCampaignForm =
 
 /** Reads and checks the compose form with the same rules the send-campaign function applies. */
 export function parseCampaignForm(form: FormData): ParsedCampaignForm {
-  const input = { title: form.get('title'), body: form.get('body'), audience: form.get('audience') };
+  const input = {
+    title: form.get('title'),
+    body: form.get('body'),
+    audience: form.get('audience'),
+    kind: form.get('kind'),
+  };
   const result = validateCampaign(input);
   if (result.ok) return { ok: true, draft: result.campaign };
   const text = (value: FormDataEntryValue | null) => (typeof value === 'string' ? value : undefined);
   const audience = text(input.audience);
+  const kind = text(input.kind);
   return {
     ok: false,
     state: {
@@ -61,6 +68,7 @@ export function parseCampaignForm(form: FormData): ParsedCampaignForm {
         title: text(input.title),
         body: text(input.body),
         audience: audience === 'all' || audience === 'due_soon' ? audience : undefined,
+        kind: kind === 'service_reminder' || kind === 'promotion' ? kind : undefined,
       },
       errors: result.errors,
     },

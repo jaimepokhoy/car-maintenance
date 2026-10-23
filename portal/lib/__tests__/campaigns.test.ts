@@ -10,33 +10,46 @@ function form(values: Record<string, string>) {
 }
 
 const ID = '6f1c1d2e-0000-4000-8000-000000000001';
-const draft = { title: 'Winter tires', body: 'Book your swap.', audience: 'all' as const };
+const draft = { title: 'Winter tires', body: 'Book your swap.', audience: 'all' as const, kind: 'promotion' as const };
 
 describe('parseCampaignForm', () => {
   it('accepts a complete campaign', () => {
-    expect(parseCampaignForm(form({ title: ' Winter tires ', body: 'Book your swap.', audience: 'all' }))).toEqual({
+    expect(parseCampaignForm(form({ title: ' Winter tires ', body: 'Book your swap.', audience: 'all', kind: 'promotion' }))).toEqual({
       ok: true,
       draft,
     });
   });
 
   it('keeps what was typed when something is wrong', () => {
-    expect(parseCampaignForm(form({ title: '', body: 'Hello', audience: 'everyone' }))).toEqual({
+    expect(parseCampaignForm(form({ title: '', body: 'Hello', audience: 'everyone', kind: 'newsletter' }))).toEqual({
       ok: false,
       state: {
         status: 'invalid',
-        draft: { title: '', body: 'Hello', audience: undefined },
-        errors: { title: 'required', audience: 'invalid' },
+        draft: { title: '', body: 'Hello', audience: undefined, kind: undefined },
+        errors: { title: 'required', audience: 'invalid', kind: 'invalid' },
       },
     });
   });
 
   it('has a message for every error the rules can give', () => {
-    for (const field of ['title', 'body', 'audience']) {
+    for (const field of ['title', 'body', 'audience', 'kind']) {
       for (const error of ['required', 'tooLong', 'invalid']) {
         expect(en.messages.errors).toHaveProperty(`${field}_${error}`);
       }
     }
+  });
+
+  it('needs the staff member to choose a reminder or a promotion', () => {
+    expect(parseCampaignForm(form({ title: 'Oil change', body: 'Yours is due.', audience: 'due_soon' }))).toMatchObject({
+      ok: false,
+      state: { errors: { kind: 'required' } },
+    });
+    expect(
+      parseCampaignForm(form({ title: 'Oil change', body: 'Yours is due.', audience: 'due_soon', kind: 'service_reminder' })),
+    ).toEqual({
+      ok: true,
+      draft: { title: 'Oil change', body: 'Yours is due.', audience: 'due_soon', kind: 'service_reminder' },
+    });
   });
 });
 
@@ -93,6 +106,7 @@ describe('allowanceFromHistory', () => {
     title: 't',
     body: 'b',
     audience: 'all',
+    kind: 'promotion',
     sent_at: sentAt,
     recipient_count: 1,
     sent_count: sentCount,

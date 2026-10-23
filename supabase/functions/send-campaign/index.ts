@@ -9,7 +9,7 @@
  */
 import { createClient } from '@supabase/supabase-js';
 
-import type { ExpoPushTicket } from '../../../src/domain/campaigns.ts';
+import type { ExpoPushTicket } from '../_shared/domain/campaigns.ts';
 import { type PushSender, createHandler } from './handler.ts';
 import { supabaseStore } from './store.ts';
 

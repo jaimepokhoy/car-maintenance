@@ -28,10 +28,11 @@ export function ComposeForm({ tenantId, shopName, remaining, localeTag, t }: Pro
     status: 'idle',
   });
   // Editing after a preview goes back to composing, so what is sent is what was previewed.
-  const [editedSincePreview, setEdited] = useState(false);
+  // The edit is tied to the state it was made on, so the old preview stays hidden until the new one arrives.
+  const [editedState, setEditedState] = useState<MessageState | null>(null);
   const [draft, setDraft] = useState<Partial<CampaignDraft>>({ audience: 'all' });
 
-  const previewing = state.status === 'preview' && !editedSincePreview;
+  const previewing = state.status === 'preview' && editedState !== state;
 
   const errors: Partial<Record<CampaignField, string>> = {};
   if (state.status === 'invalid') {
@@ -45,13 +46,12 @@ export function ComposeForm({ tenantId, shopName, remaining, localeTag, t }: Pro
     const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
     const data = new FormData(event.currentTarget);
     data.set('intent', submitter?.value ?? 'preview');
-    setEdited(false);
     startTransition(() => formAction(data));
   }
 
   function edit(field: CampaignField, value: string) {
     setDraft((current) => ({ ...current, [field]: value }));
-    setEdited(true);
+    setEditedState(state);
   }
 
   const fieldError = (field: CampaignField) =>
@@ -100,6 +100,25 @@ export function ComposeForm({ tenantId, shopName, remaining, localeTag, t }: Pro
           </span>
           {fieldError('body')}
         </div>
+        <fieldset aria-invalid={errors.kind ? true : undefined} aria-describedby="kind-help">
+          <legend className="label">{t.kind}</legend>
+          {(['service_reminder', 'promotion'] as const).map((kind) => (
+            <label key={kind} className="radio">
+              <input
+                type="radio"
+                name="kind"
+                value={kind}
+                checked={draft.kind === kind}
+                onChange={() => edit('kind', kind)}
+              />{' '}
+              {t.kinds[kind]}
+            </label>
+          ))}
+          <span id="kind-help" className="help">
+            {t.kindHelp}
+          </span>
+          {fieldError('kind')}
+        </fieldset>
         <fieldset aria-invalid={errors.audience ? true : undefined}>
           <legend className="label">{t.audience}</legend>
           {(['all', 'due_soon'] as const).map((audience) => (
@@ -134,6 +153,7 @@ export function ComposeForm({ tenantId, shopName, remaining, localeTag, t }: Pro
               : format(t.reach, { customers: state.customers, devices: state.devices })}
           </p>
           {state.customers > 0 && state.devices < state.customers && <p className="muted">{t.reachNoPhone}</p>}
+          {state.draft.kind === 'promotion' && <p className="muted">{t.promotionReach}</p>}
           <p className="muted">
             {state.allowance.remaining > 0
               ? format(t.remaining, { count: state.allowance.remaining })
