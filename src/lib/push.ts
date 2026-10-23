@@ -16,6 +16,9 @@ const REMOVE_TIMEOUT_MS = 3_000;
 /** The token registered in this run of the app, and for whom, so foregrounding doesn't re-upload it. */
 let registered: { token: string; userId: string } | null = null;
 
+/** The registration in progress, which sign-out waits for so it can't land after the delete. */
+let inFlight: Promise<unknown> = Promise.resolve();
+
 /** Expo needs the EAS project to issue a token; builds without one skip remote push. */
 function projectId(): string | undefined {
   return Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId;
@@ -36,7 +39,13 @@ async function tenantId(client: SupabaseClient): Promise<string | null> {
  * notification permission: this never asks for it (reminders do, when there's
  * something to remind about).
  */
-export async function registerPushToken(client: SupabaseClient, userId: string): Promise<void> {
+export function registerPushToken(client: SupabaseClient, userId: string): Promise<void> {
+  const run = register(client, userId);
+  inFlight = run.catch(() => {});
+  return run;
+}
+
+async function register(client: SupabaseClient, userId: string): Promise<void> {
   const platform = pushPlatform(Platform.OS);
   const id = projectId();
   if (!platform || !Device.isDevice || !id) return;
@@ -52,9 +61,12 @@ export async function registerPushToken(client: SupabaseClient, userId: string):
   }
 
   const { data: token } = await Notifications.getExpoPushTokenAsync({ projectId: id });
-  const { error } = await client
-    .from('push_tokens')
-    .upsert({ token, platform, tenant_id: await tenantId(client) }, { onConflict: 'token' });
+  // An RPC rather than an upsert: it takes the token over from whoever had this phone before.
+  const { error } = await client.rpc('register_push_token', {
+    p_token: token,
+    p_platform: platform,
+    p_tenant_id: await tenantId(client),
+  });
   if (error) throw error;
   registered = { token, userId };
 }
@@ -78,10 +90,10 @@ async function deviceToken(): Promise<string | null> {
  * so signing out offline isn't held up.
  */
 export async function removePushToken(client: SupabaseClient): Promise<void> {
-  const known = registered?.token;
-  registered = null;
-
   async function remove() {
+    await inFlight;
+    const known = registered?.token;
+    registered = null;
     const token = known ?? (await deviceToken());
     if (!token) return;
     const { error } = await client.from('push_tokens').delete().eq('token', token);

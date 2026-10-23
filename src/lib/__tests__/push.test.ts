@@ -22,7 +22,7 @@ const SHOP = '22222222-2222-4222-8222-222222222222';
 function fakeClient(profile: { id: string } | null = null) {
   const calls: [string, ...unknown[]][] = [];
   const builder: Record<string, unknown> = {};
-  for (const method of ['select', 'eq', 'upsert', 'delete']) {
+  for (const method of ['select', 'eq', 'delete']) {
     builder[method] = (...args: unknown[]) => {
       calls.push([method, ...args]);
       return builder;
@@ -31,6 +31,10 @@ function fakeClient(profile: { id: string } | null = null) {
   builder.maybeSingle = async () => ({ data: profile, error: null });
   builder.then = (resolve: (value: unknown) => void) => resolve({ data: null, error: null });
   const client = {
+    rpc: async (...args: unknown[]) => {
+      calls.push(['rpc', ...args]);
+      return { data: null, error: null };
+    },
     from: (table: string) => {
       calls.push(['from', table]);
       return builder;
@@ -61,11 +65,7 @@ describe('registering a push token', () => {
 
     expect(Notifications.getExpoPushTokenAsync).toHaveBeenCalledWith({ projectId: 'project-1' });
     expect(calls).not.toContainEqual(['from', 'tenant_profiles']);
-    expect(calls).toContainEqual([
-      'upsert',
-      { token: TOKEN, platform: 'ios', tenant_id: null },
-      { onConflict: 'token' },
-    ]);
+    expect(calls).toContainEqual(['rpc', 'register_push_token', { p_token: TOKEN, p_platform: 'ios', p_tenant_id: null }]);
   });
 
   it('records the shop a branded build belongs to', async () => {
@@ -75,11 +75,7 @@ describe('registering a push token', () => {
     await registerPushToken(client, 'me');
 
     expect(calls).toContainEqual(['eq', 'slug', 'garage-tremblay']);
-    expect(calls).toContainEqual([
-      'upsert',
-      { token: TOKEN, platform: 'ios', tenant_id: SHOP },
-      { onConflict: 'token' },
-    ]);
+    expect(calls).toContainEqual(['rpc', 'register_push_token', { p_token: TOKEN, p_platform: 'ios', p_tenant_id: SHOP }]);
   });
 
   it('creates the shop channel first on Android', async () => {
@@ -89,7 +85,7 @@ describe('registering a push token', () => {
     await registerPushToken(client, 'me');
 
     expect(Notifications.setNotificationChannelAsync).toHaveBeenCalledWith(SHOP_CHANNEL_ID, expect.anything());
-    expect(calls).toContainEqual(['upsert', expect.objectContaining({ platform: 'android' }), expect.anything()]);
+    expect(calls).toContainEqual(['rpc', 'register_push_token', expect.objectContaining({ p_platform: 'android' })]);
   });
 
   it('does nothing without permission, on web, or without an EAS project', async () => {
@@ -113,7 +109,7 @@ describe('registering a push token', () => {
     await registerPushToken(client, 'me');
     await registerPushToken(client, 'me');
 
-    expect(calls.filter(([method]) => method === 'upsert')).toHaveLength(1);
+    expect(calls.filter(([method]) => method === 'rpc')).toHaveLength(1);
   });
 });
 
@@ -125,6 +121,18 @@ describe('removing a push token', () => {
     await removePushToken(client);
 
     expect(calls).toContainEqual(['delete']);
+    expect(calls).toContainEqual(['eq', 'token', TOKEN]);
+  });
+
+  it('waits for a registration still in progress, so the token never outlives sign-out', async () => {
+    const { client, calls } = fakeClient();
+
+    const registering = registerPushToken(client, 'me');
+    await removePushToken(client);
+    await registering;
+
+    const methods = calls.map(([method]) => method);
+    expect(methods.indexOf('rpc')).toBeLessThan(methods.indexOf('delete'));
     expect(calls).toContainEqual(['eq', 'token', TOKEN]);
   });
 
