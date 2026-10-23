@@ -1,0 +1,11 @@
+{
+  "imports": {
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@2.117.2",
+    "@std/assert": "jsr:@std/assert@1",
+    "../../../src/domain/dates": "../../../src/domain/dates.ts",
+    "../../../src/domain/due-status": "../../../src/domain/due-status.ts",
+    "../../../src/domain/schedules": "../../../src/domain/schedules.ts",
+    "../../../src/domain/seasonal-tires": "../../../src/domain/seasonal-tires.ts",
+    "../../../src/domain/types": "../../../src/domain/types.ts"
+  }
+}

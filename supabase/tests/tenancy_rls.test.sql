@@ -151,9 +151,11 @@ select throws_ok(
   '42501', null,
   'staff cannot change their tenant''s status'
 );
-select lives_ok(
+-- Campaigns are written by the send-campaign function (see campaigns.test.sql).
+select throws_ok(
   $$insert into public.campaigns (tenant_id, title, body) values ('aaaaaaaa-0000-0000-0000-000000000000', 'Winter tires', 'Book your swap')$$,
-  'staff create campaigns for their tenant'
+  '42501', null,
+  'staff cannot write campaigns directly, even for their tenant'
 );
 select throws_ok(
   $$insert into public.campaigns (tenant_id, title, body) values ('bbbbbbbb-0000-0000-0000-000000000000', 'Winter tires', 'Book your swap')$$,

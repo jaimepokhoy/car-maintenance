@@ -396,6 +396,10 @@ deno_version = 2
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
+# Called by the shop portal with the staff member's access token.
+[functions.send-campaign]
+verify_jwt = true
+
 [analytics]
 enabled = true
 port = 54327
