@@ -1,5 +1,5 @@
 -- Tests for campaign sending (20261022220000_campaign_sending.sql and
--- 20261022230000_campaign_kinds.sql).
+-- 20261022235000_campaign_kinds.sql).
 -- Run with `npx supabase test db` against a local stack.
 --
 -- Cast: shop A (active) with staff_a, shop B (active) with staff_b, shop C
