@@ -32,7 +32,6 @@ export function ComposeForm({ tenantId, shopName, remaining, localeTag, t }: Pro
   const [draft, setDraft] = useState<Partial<CampaignDraft>>({ audience: 'all' });
 
   const previewing = state.status === 'preview' && !editedSincePreview;
-  const sent = state.status === 'sent' && !editedSincePreview;
 
   const errors: Partial<Record<CampaignField, string>> = {};
   if (state.status === 'invalid') {
@@ -119,6 +118,8 @@ export function ComposeForm({ tenantId, shopName, remaining, localeTag, t }: Pro
         </fieldset>
       </section>
 
+      {previewing && state.status === 'preview' && <input type="hidden" name="campaignId" value={state.campaignId} />}
+
       {previewing && state.status === 'preview' && (
         <section className="card" aria-labelledby="preview-heading">
           <h2 id="preview-heading">{t.preview}</h2>
@@ -150,9 +151,11 @@ export function ComposeForm({ tenantId, shopName, remaining, localeTag, t }: Pro
             {format(t.sendButton, { customers: state.customers })}
           </button>
         )}
-        <p role="status" aria-live="polite" className={sent ? 'success' : 'error'}>
+        <p role="status" aria-live="polite" className={state.status === 'sent' ? 'success' : 'error'}>
           {state.status === 'invalid' && t.fixErrors}
-          {sent && state.status === 'sent' && format(t.sent, { sent: state.sent, failed: state.failed })}
+          {state.status === 'sent' && format(t.sent, { sent: state.sent, failed: state.failed })}
+          {state.status === 'alreadySent' && t.alreadySent}
+          {state.status === 'interrupted' && t.interrupted}
           {state.status === 'noRecipients' && t.reachNone}
           {state.status === 'rateLimited' &&
             format(t.limitReached, { date: formatDay(state.nextAvailableAt, localeTag) })}

@@ -20,6 +20,9 @@ export const CAMPAIGN_BODY_MAX = 240;
 export const CAMPAIGN_LIMIT = 4;
 export const CAMPAIGN_WINDOW_DAYS = 30;
 
+/** Android notification channel the app creates for shop messages, so owners can mute them separately. */
+export const SHOP_CHANNEL_ID = 'shop-messages';
+
 /** The Expo Push API takes at most 100 messages per request. */
 export const PUSH_BATCH_SIZE = 100;
 
@@ -57,7 +60,7 @@ export function validateCampaign(input: { title?: unknown; body?: unknown; audie
 export interface SentCampaign {
   /** ISO timestamp. */
   sentAt: string;
-  /** Null while it is still sending. */
+  /** Null until the first batch has gone out. */
   sentCount: number | null;
 }
 
@@ -67,18 +70,33 @@ export interface CampaignAllowance {
   nextAvailableAt: string | null;
 }
 
-const WINDOW_MS = CAMPAIGN_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+const HOUR_MS = 60 * 60 * 1000;
+export const CAMPAIGN_WINDOW_HOURS = CAMPAIGN_WINDOW_DAYS * 24;
+const WINDOW_MS = CAMPAIGN_WINDOW_HOURS * HOUR_MS;
+
+/**
+ * A send that reported no progress for this long stopped before its first
+ * batch (the function was killed), so it reached nobody.
+ */
+export const CAMPAIGN_STALE_MINUTES = 15;
+const STALE_MS = CAMPAIGN_STALE_MINUTES * 60 * 1000;
+
+/** True when a campaign's send stopped before anything went out. */
+export function isUnfinishedSend(campaign: SentCampaign, now: Date): boolean {
+  return campaign.sentCount === null && Date.parse(campaign.sentAt) <= now.getTime() - STALE_MS;
+}
 
 /**
  * How many campaigns the shop can still send. A campaign counts for
  * `CAMPAIGN_WINDOW_DAYS` after it was sent, unless it reached nobody (every
- * delivery failed), so an Expo outage doesn't cost the shop a send. The
- * database enforces the same rule when a send starts (`start_campaign`).
+ * delivery failed, or the send stopped before its first batch), so an Expo
+ * outage doesn't cost the shop a send. The database enforces the same rule
+ * when a send starts (`start_campaign`).
  */
 export function campaignAllowance(sent: SentCampaign[], now: Date): CampaignAllowance {
   const since = now.getTime() - WINDOW_MS;
   const counted = sent
-    .filter((campaign) => campaign.sentCount === null || campaign.sentCount > 0)
+    .filter((campaign) => (campaign.sentCount === null ? !isUnfinishedSend(campaign, now) : campaign.sentCount > 0))
     .map((campaign) => Date.parse(campaign.sentAt))
     .filter((time) => time > since)
     .sort((a, b) => a - b);
@@ -120,11 +138,13 @@ export function selectAudience(audience: CampaignAudience, input: AudienceInput)
   if (audience === 'all') return customers;
 
   const linked = new Set(customers);
+  const recordsByVehicle = groupBy(input.records, (record) => record.vehicleId);
+  const intervalsByVehicle = groupBy(input.intervals, (interval) => interval.vehicleId);
   const due = new Set<string>();
   for (const vehicle of input.vehicles) {
     if (!linked.has(vehicle.userId) || due.has(vehicle.userId)) continue;
-    const records = input.records.filter((record) => record.vehicleId === vehicle.id);
-    const overrides = input.intervals.filter((interval) => interval.vehicleId === vehicle.id);
+    const records = recordsByVehicle.get(vehicle.id) ?? [];
+    const overrides = intervalsByVehicle.get(vehicle.id) ?? [];
     // A shop's record can be ahead of the vehicle row until the owner's app syncs.
     const odometerKm = Math.max(vehicle.odometerKm, ...records.map((record) => record.odometerKm));
     const statuses = computeVehicleDueStatuses(
@@ -138,6 +158,16 @@ export function selectAudience(audience: CampaignAudience, input: AudienceInput)
   return customers.filter((id) => due.has(id));
 }
 
+function groupBy<T>(rows: T[], key: (row: T) => string): Map<string, T[]> {
+  const out = new Map<string, T[]>();
+  for (const row of rows) {
+    const list = out.get(key(row));
+    if (list) list.push(row);
+    else out.set(key(row), [row]);
+  }
+  return out;
+}
+
 export interface PushTokenRow {
   token: string;
   userId: string;
@@ -145,6 +175,11 @@ export interface PushTokenRow {
 
 export function isExpoPushToken(token: string): boolean {
   return /^Expo(nent)?PushToken\[[^\]]+\]$/.test(token);
+}
+
+/** Removes push tokens from text, such as Expo's error messages, before staff can read it. */
+export function redactPushTokens(text: string): string {
+  return text.replace(/Expo(nent)?PushToken\[[^\]]*\]/g, '[token]');
 }
 
 /** The recipients' valid Expo push tokens, once each. */
@@ -162,6 +197,7 @@ export interface ExpoPushMessage {
   title: string;
   body: string;
   sound: 'default';
+  channelId: typeof SHOP_CHANNEL_ID;
   /** The app opens its home tab for `type: "campaign"` (see `push.ts`). */
   data: { type: 'campaign'; campaignId: string };
 }
@@ -175,6 +211,7 @@ export function buildPushMessages(
     title: campaign.title,
     body: campaign.body,
     sound: 'default',
+    channelId: SHOP_CHANNEL_ID,
     data: { type: 'campaign', campaignId: campaign.id },
   }));
 }
@@ -220,11 +257,11 @@ export function tallyBatch(tokens: string[], tickets: ExpoPushTicket[] | null, r
     }
     result.failed += 1;
     if (!tickets) {
-      result.failures.push({ token, error: 'RequestFailed', message: requestError ?? null });
+      result.failures.push({ token, error: 'RequestFailed', message: requestError ? redactPushTokens(requestError) : null });
       return;
     }
     const error = ticket?.details?.error ?? 'Unknown';
-    result.failures.push({ token, error, message: ticket?.message ?? null });
+    result.failures.push({ token, error, message: ticket?.message ? redactPushTokens(ticket.message) : null });
     if (error === 'DeviceNotRegistered') result.deadTokens.push(token);
   });
   return result;

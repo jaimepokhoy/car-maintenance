@@ -7,7 +7,8 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 import {
   CAMPAIGN_LIMIT,
-  CAMPAIGN_WINDOW_DAYS,
+  CAMPAIGN_STALE_MINUTES,
+  CAMPAIGN_WINDOW_HOURS,
   type AudienceInterval,
   type AudienceVehicle,
 } from '../../../src/domain/campaigns.ts';
@@ -167,8 +168,9 @@ export function supabaseStore(admin: SupabaseClient): CampaignStore {
       return (data ?? []).map((row) => ({ sentAt: row.sent_at as string, sentCount: row.sent_count as number | null }));
     },
 
-    async startCampaign({ tenantId, campaign, createdBy, recipientCount }) {
+    async startCampaign({ id, tenantId, campaign, createdBy, recipientCount }) {
       const { data, error } = await admin.rpc('start_campaign', {
+        p_id: id,
         p_tenant_id: tenantId,
         p_title: campaign.title,
         p_body: campaign.body,
@@ -176,13 +178,19 @@ export function supabaseStore(admin: SupabaseClient): CampaignStore {
         p_created_by: createdBy,
         p_recipient_count: recipientCount,
         p_limit: CAMPAIGN_LIMIT,
-        p_window: `${CAMPAIGN_WINDOW_DAYS} days`,
+        // Hours, not days: day intervals follow the session's DST rules and
+        // could disagree with campaignAllowance by an hour.
+        p_window: `${CAMPAIGN_WINDOW_HOURS} hours`,
+        p_stale: `${CAMPAIGN_STALE_MINUTES} minutes`,
       });
       check(error);
-      return (data as string | null) ?? null;
+      if (data !== 'started' && data !== 'duplicate' && data !== 'rate_limited') {
+        throw new Error(`start_campaign returned ${String(data)}`);
+      }
+      return data;
     },
 
-    async finishCampaign(campaignId, { sent, failed }) {
+    async recordProgress(campaignId, { sent, failed }) {
       const { error } = await admin
         .from('campaigns')
         .update({ sent_count: sent, failed_count: failed })

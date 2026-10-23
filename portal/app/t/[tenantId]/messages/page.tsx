@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 
+import { isUnfinished } from '@/lib/campaigns';
 import { loadMessagesPage } from '@/lib/campaigns-data';
 import { CAMPAIGN_LIMIT, CAMPAIGN_WINDOW_DAYS } from '@/lib/domain';
 import { format, localeTag } from '@/lib/i18n/messages';
@@ -59,7 +60,9 @@ export default async function MessagesPage({ params }: { params: Promise<{ tenan
               <p className="muted" style={{ margin: 0 }}>
                 {sentOn(campaign.sent_at)} ·{' '}
                 {campaign.sent_count === null
-                  ? t.messages.sending
+                  ? isUnfinished(campaign)
+                    ? t.messages.unfinished
+                    : t.messages.sending
                   : format(t.messages.delivered, { sent: campaign.sent_count, failed: campaign.failed_count ?? 0 })}
               </p>
             </li>

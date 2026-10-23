@@ -121,6 +121,10 @@ export const en = {
     historyFailed: 'We could not load your sent messages. Refresh the page to try again.',
     noHistory: 'No messages sent yet.',
     sending: 'Sending…',
+    unfinished: 'Did not go out. This message does not count toward your limit.',
+    alreadySent: 'This message was already sent. Write a new one or preview again to send another.',
+    interrupted:
+      'The send started but did not finish reporting back. Some customers may have received it. Check Sent messages before sending again.',
     delivered: 'Delivered to {sent} phones, {failed} failed',
     errors: {
       title_required: 'Enter a title.',
@@ -342,6 +346,10 @@ export const fr: Messages = {
     historyFailed: 'Nous n’avons pas pu charger vos messages envoyés. Actualisez la page pour réessayer.',
     noHistory: 'Aucun message envoyé pour l’instant.',
     sending: 'Envoi en cours…',
+    unfinished: 'Non envoyé. Ce message ne compte pas dans votre limite.',
+    alreadySent: 'Ce message a déjà été envoyé. Rédigez-en un nouveau ou refaites l’aperçu pour en envoyer un autre.',
+    interrupted:
+      'L’envoi a commencé, mais n’a pas fini de rendre compte. Certains clients l’ont peut-être reçu. Vérifiez les messages envoyés avant de réessayer.',
     delivered: 'Livré sur {sent} téléphones, {failed} échecs',
     errors: {
       title_required: 'Entrez un titre.',

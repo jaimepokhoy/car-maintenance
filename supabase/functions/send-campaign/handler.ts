@@ -50,14 +50,19 @@ export interface CampaignStore {
   pushTokens(tenantId: string, userIds: string[]): Promise<PushTokenRow[]>;
   /** Campaigns sent since `since` (ISO timestamp). */
   sentCampaigns(tenantId: string, since: string): Promise<SentCampaign[]>;
-  /** Records the campaign as sent if the shop is under the limit; null when it isn't. */
+  /**
+   * Records the campaign as sent under `id` if the shop is under the limit.
+   * `duplicate` when `id` was already used: the same preview sent twice.
+   */
   startCampaign(input: {
+    id: string;
     tenantId: string;
     campaign: CampaignDraft;
     createdBy: string;
     recipientCount: number;
-  }): Promise<string | null>;
-  finishCampaign(campaignId: string, counts: { sent: number; failed: number }): Promise<void>;
+  }): Promise<'started' | 'duplicate' | 'rate_limited'>;
+  /** Writes the counts so far; called after each batch. */
+  recordProgress(campaignId: string, counts: { sent: number; failed: number }): Promise<void>;
   logFailures(campaignId: string, tenantId: string, failures: FailureLogEntry[]): Promise<void>;
   deleteTokens(tokens: string[]): Promise<void>;
 }
@@ -79,9 +84,11 @@ export type SendCampaignResponse =
   | { dryRun: false; campaignId: string; customers: number; devices: number; sent: number; failed: number };
 
 /**
- * POST { tenantId, title, body, audience, dryRun? } with the staff member's
- * access token. A dry run returns who would get it and how many sends are
- * left, and changes nothing.
+ * POST { tenantId, title, body, audience, dryRun?, campaignId? } with the
+ * staff member's access token. A dry run returns who would get it and how
+ * many sends are left, and changes nothing. A send needs `campaignId`, a
+ * UUID the portal generates per preview, so the same preview can't go out
+ * twice.
  */
 export function createHandler({ store, sendPush, now = () => new Date(), log = console }: HandlerDeps) {
   return async function handle(req: Request): Promise<Response> {
@@ -105,7 +112,11 @@ export function createHandler({ store, sendPush, now = () => new Date(), log = c
     const validation = validateCampaign(input);
     if (!validation.ok) return json(400, { error: 'invalid_campaign', fields: validation.errors });
     const { campaign } = validation;
+    const dryRun = input.dryRun === true;
+    const campaignId = typeof input.campaignId === 'string' ? input.campaignId.toLowerCase() : '';
+    if (!dryRun && !UUID.test(campaignId)) return json(400, { error: 'invalid_campaign_id' });
 
+    let started = false;
     try {
       if (!(await store.isStaff(tenantId, userId))) return json(403, { error: 'forbidden' });
 
@@ -124,32 +135,48 @@ export function createHandler({ store, sendPush, now = () => new Date(), log = c
         return campaignAllowance(await store.sentCampaigns(tenantId, since), now());
       };
 
-      if (input.dryRun === true) {
+      if (dryRun) {
         return json(200, { dryRun: true, customers: recipients.length, devices: tokens.length, allowance: await allowance() });
       }
 
       // Don't use up one of the shop's sends on a message nobody would get.
       if (tokens.length === 0) return json(422, { error: 'no_recipients' });
 
-      const campaignId = await store.startCampaign({ tenantId, campaign, createdBy: userId, recipientCount: tokens.length });
-      if (!campaignId) return json(429, { error: 'rate_limited', limit: CAMPAIGN_LIMIT, allowance: await allowance() });
+      const outcome = await store.startCampaign({
+        id: campaignId,
+        tenantId,
+        campaign,
+        createdBy: userId,
+        recipientCount: tokens.length,
+      });
+      if (outcome === 'duplicate') return json(409, { error: 'already_sent', campaignId });
+      if (outcome === 'rate_limited') {
+        return json(429, { error: 'rate_limited', limit: CAMPAIGN_LIMIT, allowance: await allowance() });
+      }
+      started = true;
 
-      const result = await deliver(tokens, { id: campaignId, ...campaign }, sendPush);
+      // From here on messages are going out: bookkeeping failures are logged
+      // but never reported as a failed send, or staff would send it again.
+      const warn = (what: string) => (error: unknown) => log.error(`send-campaign ${campaignId}: ${what}`, error);
+      const result = await deliver(tokens, { id: campaignId, ...campaign }, sendPush, (counts) =>
+        store.recordProgress(campaignId, counts).catch(warn('progress not saved')),
+      );
       const owner = new Map(tokenRows.map((row) => [row.token, row.userId]));
-      await store.finishCampaign(campaignId, { sent: result.sent, failed: result.failed });
       if (result.failures.length > 0) {
         log.error(`send-campaign ${campaignId}: ${result.failed} of ${tokens.length} failed`, summarize(result));
-        await store.logFailures(
-          campaignId,
-          tenantId,
-          result.failures.map((failure) => ({
-            userId: owner.get(failure.token) ?? null,
-            error: failure.error,
-            message: failure.message,
-          })),
-        );
+        await store
+          .logFailures(
+            campaignId,
+            tenantId,
+            result.failures.map((failure) => ({
+              userId: owner.get(failure.token) ?? null,
+              error: failure.error,
+              message: failure.message,
+            })),
+          )
+          .catch(warn('failures not logged'));
       }
-      if (result.deadTokens.length > 0) await store.deleteTokens(result.deadTokens);
+      if (result.deadTokens.length > 0) await store.deleteTokens(result.deadTokens).catch(warn('dead tokens not removed'));
       log.info(`send-campaign ${campaignId}: sent ${result.sent}, failed ${result.failed}`);
 
       return json(200, {
@@ -162,16 +189,21 @@ export function createHandler({ store, sendPush, now = () => new Date(), log = c
       });
     } catch (error) {
       log.error('send-campaign failed', error);
-      return json(500, { error: 'internal' });
+      // Once started, some messages may have gone out: say so rather than invite a resend.
+      return json(500, { error: started ? 'send_interrupted' : 'internal' });
     }
   };
 }
 
-/** Sends in batches of 100, one request at a time. A failed batch doesn't stop the rest. */
+/**
+ * Sends in batches of 100, one request at a time, reporting the running
+ * totals after each batch. A failed batch doesn't stop the rest.
+ */
 export async function deliver(
   tokens: string[],
   campaign: { id: string; title: string; body: string },
   sendPush: PushSender,
+  onProgress: (counts: { sent: number; failed: number }) => Promise<unknown> = () => Promise.resolve(),
 ): Promise<BatchResult> {
   const results: BatchResult[] = [];
   for (const batch of chunk(tokens)) {
@@ -182,6 +214,8 @@ export async function deliver(
       response = { error: error instanceof Error ? error.message : String(error) };
     }
     results.push('tickets' in response ? tallyBatch(batch, response.tickets) : tallyBatch(batch, null, response.error));
+    const { sent, failed } = mergeBatches(results);
+    await onProgress({ sent, failed });
   }
   return mergeBatches(results);
 }

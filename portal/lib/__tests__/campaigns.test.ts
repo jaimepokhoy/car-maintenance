@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { type CampaignRow, allowanceFromHistory, parseCampaignForm, toMessageState } from '../campaigns';
+import { type CampaignRow, allowanceFromHistory, isUnfinished, parseCampaignForm, toMessageState } from '../campaigns';
 import { en } from '../i18n/messages';
 
 function form(values: Record<string, string>) {
@@ -9,6 +9,7 @@ function form(values: Record<string, string>) {
   return data;
 }
 
+const ID = '6f1c1d2e-0000-4000-8000-000000000001';
 const draft = { title: 'Winter tires', body: 'Book your swap.', audience: 'all' as const };
 
 describe('parseCampaignForm', () => {
@@ -42,9 +43,10 @@ describe('parseCampaignForm', () => {
 describe('toMessageState', () => {
   it('shows a dry run as a preview', () => {
     const allowance = { remaining: 2, nextAvailableAt: null };
-    expect(toMessageState(200, { dryRun: true, customers: 5, devices: 7, allowance }, draft)).toEqual({
+    expect(toMessageState(200, { dryRun: true, customers: 5, devices: 7, allowance }, draft, ID)).toEqual({
       status: 'preview',
       draft,
+      campaignId: ID,
       customers: 5,
       devices: 7,
       allowance,
@@ -53,13 +55,13 @@ describe('toMessageState', () => {
 
   it('reports a send', () => {
     expect(
-      toMessageState(200, { dryRun: false, campaignId: 'c', customers: 5, devices: 7, sent: 6, failed: 1 }, draft),
+      toMessageState(200, { dryRun: false, campaignId: 'c', customers: 5, devices: 7, sent: 6, failed: 1 }, draft, ID),
     ).toEqual({ status: 'sent', customers: 5, devices: 7, sent: 6, failed: 1 });
   });
 
   it('explains the rate limit and when it lifts', () => {
     const body = { error: 'rate_limited', limit: 4, allowance: { remaining: 0, nextAvailableAt: '2026-11-21T15:00:00.000Z' } };
-    expect(toMessageState(429, body, draft)).toEqual({
+    expect(toMessageState(429, body, draft, ID)).toEqual({
       status: 'rateLimited',
       draft,
       nextAvailableAt: '2026-11-21T15:00:00.000Z',
@@ -67,13 +69,21 @@ describe('toMessageState', () => {
   });
 
   it('says when nobody would get it', () => {
-    expect(toMessageState(422, { error: 'no_recipients' }, draft)).toEqual({ status: 'noRecipients', draft });
+    expect(toMessageState(422, { error: 'no_recipients' }, draft, ID)).toEqual({ status: 'noRecipients', draft });
+  });
+
+  it('recognises a preview that was already sent', () => {
+    expect(toMessageState(409, { error: 'already_sent', campaignId: ID }, draft, ID)).toEqual({ status: 'alreadySent', draft });
+  });
+
+  it('warns when a send started but did not report back', () => {
+    expect(toMessageState(500, { error: 'send_interrupted' }, draft, ID)).toEqual({ status: 'interrupted', draft });
   });
 
   it('treats anything else as a failure', () => {
-    expect(toMessageState(500, { error: 'internal' }, draft)).toEqual({ status: 'failed', draft });
-    expect(toMessageState(403, null, draft)).toEqual({ status: 'failed', draft });
-    expect(toMessageState(200, { dryRun: true }, draft)).toEqual({ status: 'failed', draft });
+    expect(toMessageState(500, { error: 'internal' }, draft, ID)).toEqual({ status: 'failed', draft });
+    expect(toMessageState(403, null, draft, ID)).toEqual({ status: 'failed', draft });
+    expect(toMessageState(200, { dryRun: true }, draft, ID)).toEqual({ status: 'failed', draft });
   });
 });
 
@@ -92,5 +102,15 @@ describe('allowanceFromHistory', () => {
   it('counts sends in the last 30 days that reached someone', () => {
     const now = new Date('2026-10-22T12:00:00Z');
     expect(allowanceFromHistory([row('2026-10-20T00:00:00Z', 3), row('2026-10-21T00:00:00Z', 0)], now).remaining).toBe(3);
+  });
+});
+
+describe('isUnfinished', () => {
+  const now = new Date('2026-10-22T12:00:00Z');
+
+  it('flags a send with no progress after 15 minutes', () => {
+    expect(isUnfinished({ sent_at: '2026-10-22T11:30:00Z', sent_count: null }, now)).toBe(true);
+    expect(isUnfinished({ sent_at: '2026-10-22T11:55:00Z', sent_count: null }, now)).toBe(false);
+    expect(isUnfinished({ sent_at: '2026-10-22T11:30:00Z', sent_count: 0 }, now)).toBe(false);
   });
 });

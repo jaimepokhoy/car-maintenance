@@ -2,12 +2,13 @@
 -- Run with `npx supabase test db` against a local stack.
 --
 -- Cast: shop A (active) with staff_a, shop B (active) with staff_b, shop C
--- (suspended). The send-campaign function runs as service_role.
+-- (suspended). The send-campaign function runs as service_role and calls
+-- start_campaign with a 720-hour window and a 15-minute stale limit.
 
 begin;
 create extension if not exists pgtap with schema extensions;
 
-select plan(17);
+select plan(19);
 
 insert into auth.users (id, email, aud, role) values
   ('00000000-0000-0000-0000-0000000000ca', 'campaign_staff_a@test.ca', 'authenticated', 'authenticated'),
@@ -22,60 +23,56 @@ insert into public.tenant_staff (tenant_id, user_id, role) values
   ('aaaaaaaa-0000-0000-0000-0000000000ca', '00000000-0000-0000-0000-0000000000ca', 'owner'),
   ('bbbbbbbb-0000-0000-0000-0000000000cb', '00000000-0000-0000-0000-0000000000cb', 'staff');
 
--- Shop A's history: one send that reached nobody and one older than 30 days,
--- neither of which counts toward the limit.
+-- Shop A's history, none of which counts toward the limit: a send that
+-- reached nobody, one older than 30 days, and one that stopped before its
+-- first batch an hour ago.
 insert into public.campaigns (id, tenant_id, title, body, status, sent_at, sent_count) values
   ('50000000-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-0000000000ca', 'Outage', 'Nobody got this', 'sent', now() - interval '1 day', 0),
-  ('50000000-0000-0000-0000-000000000002', 'aaaaaaaa-0000-0000-0000-0000000000ca', 'Old', 'Long ago', 'sent', now() - interval '31 days', 12);
+  ('50000000-0000-0000-0000-000000000002', 'aaaaaaaa-0000-0000-0000-0000000000ca', 'Old', 'Long ago', 'sent', now() - interval '31 days', 12),
+  ('50000000-0000-0000-0000-000000000003', 'aaaaaaaa-0000-0000-0000-0000000000ca', 'Stuck', 'Killed mid-send', 'sent', now() - interval '1 hour', null);
 
 insert into public.campaign_failures (campaign_id, tenant_id, error, message) values
   ('50000000-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-0000000000ca', 'RequestFailed', 'HTTP 503');
 
+-- start_campaign with the function's limits.
+create function pg_temp.start(id text, tenant text, title text) returns text language sql as $$
+  select public.start_campaign(id::uuid, tenant::uuid, title, 'Body', 'all', null, 3, 4, interval '720 hours', interval '15 minutes');
+$$;
+
 -- The function, as service_role -----------------------------------------------
 set local role service_role;
 
-select isnt(
-  public.start_campaign('aaaaaaaa-0000-0000-0000-0000000000ca', 'One', 'Body', 'all', '00000000-0000-0000-0000-0000000000ca', 3, 4, interval '30 days'),
-  null,
-  'the first send of the month starts'
-);
-select isnt(
-  public.start_campaign('aaaaaaaa-0000-0000-0000-0000000000ca', 'Two', 'Body', 'due_soon', '00000000-0000-0000-0000-0000000000ca', 3, 4, interval '30 days'),
-  null,
-  'the second send starts'
-);
-select isnt(
-  public.start_campaign('aaaaaaaa-0000-0000-0000-0000000000ca', 'Three', 'Body', 'all', '00000000-0000-0000-0000-0000000000ca', 3, 4, interval '30 days'),
-  null,
-  'the third send starts'
-);
-select isnt(
-  public.start_campaign('aaaaaaaa-0000-0000-0000-0000000000ca', 'Four', 'Body', 'all', '00000000-0000-0000-0000-0000000000ca', 3, 4, interval '30 days'),
-  null,
-  'the fourth send starts: the failed and the old campaign do not count'
+select is(pg_temp.start('60000000-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-0000000000ca', 'One'), 'started', 'the first send of the month starts');
+select is(pg_temp.start('60000000-0000-0000-0000-000000000002', 'aaaaaaaa-0000-0000-0000-0000000000ca', 'Two'), 'started', 'the second send starts');
+select is(pg_temp.start('60000000-0000-0000-0000-000000000003', 'aaaaaaaa-0000-0000-0000-0000000000ca', 'Three'), 'started', 'the third send starts');
+select is(
+  pg_temp.start('60000000-0000-0000-0000-000000000004', 'aaaaaaaa-0000-0000-0000-0000000000ca', 'Four'),
+  'started',
+  'the fourth send starts: failed, old and stuck campaigns do not count'
 );
 select is(
-  public.start_campaign('aaaaaaaa-0000-0000-0000-0000000000ca', 'Five', 'Body', 'all', '00000000-0000-0000-0000-0000000000ca', 3, 4, interval '30 days'),
-  null,
+  pg_temp.start('60000000-0000-0000-0000-000000000005', 'aaaaaaaa-0000-0000-0000-0000000000ca', 'Five'),
+  'rate_limited',
   'the fifth send in 30 days is refused'
 );
 select results_eq(
-  $$select count(*)::int from public.campaigns where tenant_id = 'aaaaaaaa-0000-0000-0000-0000000000ca' and title = 'Five'$$,
+  $$select count(*)::int from public.campaigns where title = 'Five'$$,
   'values (0)',
   'a refused send leaves no campaign behind'
 );
+select is(
+  pg_temp.start('60000000-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-0000000000ca', 'One again'),
+  'duplicate',
+  'sending the same preview twice is recognised'
+);
 select results_eq(
-  $$select status, recipient_count, sent_count is null from public.campaigns where title = 'One'$$,
+  $$select status, recipient_count, sent_count is null from public.campaigns where id = '60000000-0000-0000-0000-000000000001'$$,
   $$values ('sent'::text, 3, true)$$,
-  'a started campaign is recorded as sent with its recipient count, delivery still pending'
+  'a started campaign is recorded as sent under its id, with its recipient count and no progress yet'
 );
-select isnt(
-  public.start_campaign('bbbbbbbb-0000-0000-0000-0000000000cb', 'B', 'Body', 'all', '00000000-0000-0000-0000-0000000000cb', 1, 4, interval '30 days'),
-  null,
-  'each shop has its own limit'
-);
+select is(pg_temp.start('60000000-0000-0000-0000-0000000000b1', 'bbbbbbbb-0000-0000-0000-0000000000cb', 'B'), 'started', 'each shop has its own limit');
 select throws_ok(
-  $$select public.start_campaign('cccccccc-0000-0000-0000-0000000000cc', 'C', 'Body', 'all', null, 1, 4, interval '30 days')$$,
+  $$select pg_temp.start('60000000-0000-0000-0000-0000000000c1', 'cccccccc-0000-0000-0000-0000000000cc', 'C')$$,
   'P0002', null,
   'a suspended shop cannot send'
 );
@@ -86,7 +83,7 @@ select set_config('request.jwt.claims', '{"sub": "00000000-0000-0000-0000-000000
 
 select results_eq(
   'select count(*)::int from public.campaigns',
-  'values (6)',
+  'values (7)',
   'staff read their shop''s campaigns'
 );
 select results_eq(
@@ -95,7 +92,7 @@ select results_eq(
   'staff read their shop''s delivery failures'
 );
 select throws_ok(
-  $$select public.start_campaign('aaaaaaaa-0000-0000-0000-0000000000ca', 'Sneaky', 'Body', 'all', null, 1, 99, interval '1 second')$$,
+  $$select public.start_campaign(gen_random_uuid(), 'aaaaaaaa-0000-0000-0000-0000000000ca', 'Sneaky', 'Body', 'all', null, 1, 99, interval '1 second', interval '1 second')$$,
   '42501', null,
   'staff cannot start a send without the function'
 );
@@ -108,6 +105,11 @@ select throws_ok(
   $$update public.campaigns set sent_at = now() - interval '90 days'$$,
   '42501', null,
   'staff cannot backdate campaigns'
+);
+select throws_ok(
+  $$insert into public.campaigns (tenant_id, title, body) values ('aaaaaaaa-0000-0000-0000-0000000000ca', 'Direct', 'Body')$$,
+  '42501', null,
+  'staff cannot create campaigns directly'
 );
 select throws_ok(
   $$insert into public.campaign_failures (campaign_id, tenant_id, error) values ('50000000-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-0000000000ca', 'x')$$,

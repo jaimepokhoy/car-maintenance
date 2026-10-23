@@ -34,5 +34,6 @@ export {
   type CampaignError,
   type CampaignField,
   campaignAllowance,
+  isUnfinishedSend,
   validateCampaign,
 } from '../../src/domain/campaigns';

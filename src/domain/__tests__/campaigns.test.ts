@@ -2,6 +2,7 @@ import {
   CAMPAIGN_BODY_MAX,
   CAMPAIGN_LIMIT,
   CAMPAIGN_TITLE_MAX,
+  SHOP_CHANNEL_ID,
   type AudienceInput,
   type ExpoPushTicket,
   buildPushMessages,
@@ -10,6 +11,7 @@ import {
   isExpoPushToken,
   mergeBatches,
   pushTargets,
+  redactPushTokens,
   selectAudience,
   tallyBatch,
   validateCampaign,
@@ -78,9 +80,14 @@ describe('campaignAllowance', () => {
   it('does not count a send that reached nobody, but counts one still sending', () => {
     const sent = [
       { sentAt: daysAgo(1), sentCount: 0 },
-      { sentAt: daysAgo(1), sentCount: null },
+      { sentAt: new Date(now.getTime() - 5 * 60_000).toISOString(), sentCount: null },
     ];
     expect(campaignAllowance(sent, now).remaining).toBe(3);
+  });
+
+  it('does not count a send that stopped before its first batch', () => {
+    const stuck = { sentAt: new Date(now.getTime() - 20 * 60_000).toISOString(), sentCount: null };
+    expect(campaignAllowance([stuck], now).remaining).toBe(CAMPAIGN_LIMIT);
   });
 });
 
@@ -168,8 +175,17 @@ describe('push targets and messages', () => {
 
   it('marks messages as a campaign so the app opens its home tab', () => {
     expect(buildPushMessages(['ExponentPushToken[a]'], { id: 'c1', title: 'Hi', body: 'There' })).toEqual([
-      { to: 'ExponentPushToken[a]', title: 'Hi', body: 'There', sound: 'default', data: { type: 'campaign', campaignId: 'c1' } },
+      { to: 'ExponentPushToken[a]', title: 'Hi', body: 'There', sound: 'default', channelId: SHOP_CHANNEL_ID, data: { type: 'campaign', campaignId: 'c1' } },
     ]);
+  });
+});
+
+describe('redactPushTokens', () => {
+  it("keeps tokens out of Expo's error messages", () => {
+    expect(redactPushTokens('"ExponentPushToken[abc123]" is not a registered push notification recipient')).toBe(
+      '"[token]" is not a registered push notification recipient',
+    );
+    expect(redactPushTokens('HTTP 503')).toBe('HTTP 503');
   });
 });
 
@@ -187,14 +203,14 @@ describe('batching', () => {
     const tokens = ['t1', 't2', 't3', 't4'];
     const tickets: ExpoPushTicket[] = [
       { status: 'ok', id: 'x' },
-      { status: 'error', message: 'gone', details: { error: 'DeviceNotRegistered' } },
+      { status: 'error', message: '"ExponentPushToken[t2]" is not registered', details: { error: 'DeviceNotRegistered' } },
       { status: 'error', message: 'slow down', details: { error: 'MessageRateExceeded' } },
     ];
     expect(tallyBatch(tokens, tickets)).toEqual({
       sent: 1,
       failed: 3,
       failures: [
-        { token: 't2', error: 'DeviceNotRegistered', message: 'gone' },
+        { token: 't2', error: 'DeviceNotRegistered', message: '"[token]" is not registered' },
         { token: 't3', error: 'MessageRateExceeded', message: 'slow down' },
         { token: 't4', error: 'Unknown', message: null },
       ],
