@@ -18,6 +18,8 @@ export const supabase: SupabaseClient | null =
           autoRefreshToken: true,
           persistSession: true,
           detectSessionInUrl: false,
+          // OAuth (Google) returns a one-time code to the app, exchanged in `src/lib/auth.ts`.
+          flowType: 'pkce',
         },
       })
     : null;

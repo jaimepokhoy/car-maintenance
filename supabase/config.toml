@@ -244,6 +244,16 @@ otp_expiry = 3600
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
+# The app signs in with a one-time code (src/lib/auth.ts), so both emails that can
+# answer signInWithOtp carry {{ .Token }} rather than only a link.
+[auth.email.template.magic_link]
+subject = "Your sign-in code · Votre code de connexion"
+content_path = "./supabase/templates/sign-in-code.html"
+
+[auth.email.template.confirmation]
+subject = "Your sign-in code · Votre code de connexion"
+content_path = "./supabase/templates/sign-in-code.html"
+
 # Uncomment to customize email template
 # [auth.email.template.invite]
 # subject = "You have been invited"

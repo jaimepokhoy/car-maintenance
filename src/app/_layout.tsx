@@ -15,6 +15,7 @@ import { Colors, FontAssets, Fonts } from '@/constants/theme';
 import { migrate } from '@/db/migrations';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { PreferencesProvider } from '@/hooks/use-preferences';
+import { SessionProvider } from '@/hooks/use-session';
 import { configureNotifications, refreshReminders } from '@/lib/reminders';
 
 SplashScreen.preventAutoHideAsync();
@@ -42,7 +43,9 @@ export default function RootLayout() {
   return (
     <SQLiteProvider databaseName="car-maintenance.db" onInit={init} onError={retryIfLocked}>
       <PreferencesProvider>
-        <AppShell />
+        <SessionProvider>
+          <AppShell />
+        </SessionProvider>
       </PreferencesProvider>
     </SQLiteProvider>
   );
@@ -110,6 +113,8 @@ function AppShell() {
           options={{ presentation: 'modal', title: t('odometerForm.title') }}
         />
         <Stack.Screen name="guide/[item]" options={{ presentation: 'modal', title: '' }} />
+        <Stack.Screen name="sign-in" options={{ presentation: 'modal', title: t('auth.title') }} />
+        <Stack.Screen name="auth-callback" options={{ headerShown: false }} />
       </Stack>
     </ThemeProvider>
   );
