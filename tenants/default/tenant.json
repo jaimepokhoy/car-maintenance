@@ -1,0 +1,9 @@
+{
+  "slug": "default",
+  "appName": "Car Maintenance",
+  "scheme": "carmaintenance",
+  "accent": "#3DD9EB",
+  "onAccent": "#061317",
+  "splashBackground": "#208AEF",
+  "easUpdateChannel": "default"
+}

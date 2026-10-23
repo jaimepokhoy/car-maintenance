@@ -1,7 +1,7 @@
 import { createMemoryDb } from '@/test-utils/memory-db';
 
 import { migrate } from '../migrations';
-import { getPreferences, setPreference } from '../settings';
+import { getCachedTenantProfile, getPreferences, setCachedTenantProfile, setPreference } from '../settings';
 import type { Db } from '../types';
 import { getVehicle, insertVehicle, updateTireSet } from '../vehicles';
 
@@ -27,6 +27,37 @@ describe('settings', () => {
     });
     await setPreference(db, 'province', undefined);
     expect((await getPreferences(db)).province).toBeUndefined();
+  });
+});
+
+describe('tenant profile cache', () => {
+  const profile = {
+    slug: 'demo-shop',
+    name: 'Demo Auto Service',
+    brand: { accent: '#FF8A3D' },
+    phone: null,
+    email: null,
+    address: null,
+    latitude: null,
+    longitude: null,
+    hours: null,
+    booking_url: null,
+    website_url: null,
+    updated_at: '2026-10-20T12:00:00Z',
+  };
+
+  it('saves, reads back and clears the profile without touching preferences', async () => {
+    expect(await getCachedTenantProfile(db)).toBeNull();
+    await setCachedTenantProfile(db, profile);
+    expect(await getCachedTenantProfile(db)).toEqual(profile);
+    expect(await getPreferences(db)).toEqual({ language: 'system', distanceUnit: 'km', appearance: 'system' });
+    await setCachedTenantProfile(db, null);
+    expect(await getCachedTenantProfile(db)).toBeNull();
+  });
+
+  it('ignores a corrupt cache entry', async () => {
+    await db.runAsync("INSERT INTO settings (key, value) VALUES ('tenantProfile', '{not json')");
+    expect(await getCachedTenantProfile(db)).toBeNull();
   });
 });
 

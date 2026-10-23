@@ -2,7 +2,8 @@
   "tabs": {
     "garage": "Véhicules",
     "shops": "Garages",
-    "settings": "Réglages"
+    "settings": "Réglages",
+    "yourShop": "Votre garage"
   },
   "garage": {
     "title": "Mes véhicules",
@@ -16,7 +17,8 @@
     "benefitReminders": "Des rappels avant les échéances",
     "benefitHistory": "Tous vos entretiens et coûts au même endroit",
     "benefitGuide": "Un guide en langage clair pour chaque tâche",
-    "actionsHint": "Appui long pour modifier ou supprimer"
+    "actionsHint": "Appui long pour modifier ou supprimer",
+    "shopLogo": "Logo de {{name}}"
   },
   "shops": {
     "title": "Garages",
@@ -42,6 +44,26 @@
     "away": "à {{distance}}",
     "rated": "4 étoiles et plus",
     "noneMatch": "Aucun garage ne correspond à ces filtres."
+  },
+  "yourShop": {
+    "title": "Votre garage",
+    "logo": "Logo de {{name}}",
+    "openNow": "Ouvert",
+    "closed": "Fermé",
+    "openAllDay": "Ouvert 24 h sur 24",
+    "closesToday": "ferme à {{time}}",
+    "closesTomorrow": "ferme demain à {{time}}",
+    "closesOn": "ferme {{day}} à {{time}}",
+    "opensToday": "ouvre à {{time}}",
+    "opensTomorrow": "ouvre demain à {{time}}",
+    "opensOn": "ouvre {{day}} à {{time}}",
+    "hours": "Heures d'ouverture",
+    "today": "Aujourd'hui",
+    "closedAllDay": "Fermé",
+    "window": "{{opens}} – {{closes}}",
+    "noHours": "Ce garage n'a pas encore indiqué ses heures d'ouverture.",
+    "book": "Prendre rendez-vous",
+    "website": "Site Web"
   },
   "settings": {
     "title": "Réglages",
@@ -157,7 +179,9 @@
     "updatedToday": "mis à jour aujourd'hui",
     "updatedAgo": "mis à jour il y a {{ago}}",
     "logHint": "Ouvre le formulaire pour enregistrer cet entretien",
-    "nothingTracked": "Aucun suivi pour l’instant"
+    "nothingTracked": "Aucun suivi pour l’instant",
+    "loggedBy": "Ajouté par {{shop}}",
+    "editNotesHint": "Ouvre vos notes pour cet entretien"
   },
   "due": {
     "dueBy": "À faire d'ici {{limits}}",
@@ -402,5 +426,34 @@
     "neverSynced": "Pas encore synchronisé",
     "syncing": "Synchronisation…",
     "syncFailed": "échec, nouvel essai bientôt"
+  },
+  "notesForm": {
+    "title": "Notes",
+    "notes": "Vos notes",
+    "placeholder": "Ce que vous voulez retenir de cette visite",
+    "save": "Enregistrer les notes",
+    "shopRecord": "{{shop}} a ajouté cet entretien. Vous pouvez y ajouter vos notes; le reste demeure tel que le garage l’a inscrit."
+  },
+  "consent": {
+    "title": "Partage",
+    "question": "Partager vos véhicules et votre historique d’entretien avec {{shop}}?",
+    "sees": "Le garage voit vos véhicules, vos relevés d’odomètre, votre calendrier d’entretien et votre historique.",
+    "logs": "Il peut ajouter les travaux qu’il effectue à votre historique, marqués comme ajoutés par le garage.",
+    "messages": "Il peut vous envoyer des rappels d’entretien et des offres.",
+    "revoke": "Vous pouvez arrêter le partage en tout temps dans Réglages. Le garage perd l’accès dès que votre téléphone se synchronise.",
+    "private": "Votre adresse courriel et vos photos de reçus restent privées. Rien n’est partagé tant que vous ne choisissez pas Partager.",
+    "share": "Partager",
+    "notNow": "Pas maintenant"
+  },
+  "sharing": {
+    "title": "Partagé avec",
+    "none": "Aucun garage ne voit vos véhicules ni votre historique.",
+    "since": "Depuis le {{date}}",
+    "share": "Partager avec {{shop}}",
+    "revoke": "Arrêter le partage",
+    "revokeTitle": "Arrêter le partage avec {{shop}}?",
+    "revokeBody": "{{shop}} ne verra plus vos véhicules ni votre historique. Les entretiens qu’il a déjà ajoutés restent dans votre historique.",
+    "cancel": "Annuler",
+    "unknownShop": "un garage"
   }
 }

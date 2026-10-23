@@ -7,16 +7,6 @@ export function pushPlatform(os: string): PushPlatform | null {
   return os === 'ios' || os === 'android' ? os : null;
 }
 
-/**
- * The shop slug baked into a branded build (`expo.extra.tenant.slug`). The
- * unbranded app has no tenant or the `default` one, and registers its tokens
- * with no shop.
- */
-export function tenantSlugFromExtra(extra: unknown): string | null {
-  const slug = (extra as { tenant?: { slug?: unknown } } | null | undefined)?.tenant?.slug;
-  return typeof slug === 'string' && slug !== '' && slug !== 'default' ? slug : null;
-}
-
 /** Shop campaigns (reminders and promotions) carry `{ type: "campaign" }` in their data. */
 export function isCampaignNotification(data: unknown): boolean {
   return (data as { type?: unknown } | null | undefined)?.type === 'campaign';

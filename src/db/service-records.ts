@@ -12,6 +12,7 @@ interface ServiceRecordRow {
   currency: ServiceRecord['currency'] | null;
   shop_id: string | null;
   notes: string | null;
+  created_by_tenant_id: string | null;
 }
 
 function toServiceRecord(row: ServiceRecordRow): ServiceRecord {
@@ -25,12 +26,14 @@ function toServiceRecord(row: ServiceRecordRow): ServiceRecord {
     currency: row.currency ?? undefined,
     shopId: row.shop_id ?? undefined,
     notes: row.notes ?? undefined,
+    createdByTenantId: row.created_by_tenant_id ?? undefined,
   };
 }
 
 export async function listServiceRecords(db: Db, vehicleId: string): Promise<ServiceRecord[]> {
   const rows = await db.getAllAsync<ServiceRecordRow>(
-    `SELECT id, vehicle_id, item_ids, performed_on, odometer_km, cost_cents, currency, shop_id, notes
+    `SELECT id, vehicle_id, item_ids, performed_on, odometer_km, cost_cents, currency, shop_id, notes,
+       created_by_tenant_id
      FROM service_records
      WHERE vehicle_id = ? AND deleted_at IS NULL
      ORDER BY performed_on DESC, odometer_km DESC`,
@@ -39,10 +42,22 @@ export async function listServiceRecords(db: Db, vehicleId: string): Promise<Ser
   return rows.map(toServiceRecord);
 }
 
+export async function getServiceRecord(db: Db, id: string): Promise<ServiceRecord | null> {
+  const row = await db.getFirstAsync<ServiceRecordRow>(
+    `SELECT id, vehicle_id, item_ids, performed_on, odometer_km, cost_cents, currency, shop_id, notes,
+       created_by_tenant_id
+     FROM service_records
+     WHERE id = ? AND deleted_at IS NULL`,
+    id,
+  );
+  return row ? toServiceRecord(row) : null;
+}
+
 /** Every live service record across all vehicles, for export. */
 export async function listAllServiceRecords(db: Db): Promise<ServiceRecord[]> {
   const rows = await db.getAllAsync<ServiceRecordRow>(
-    `SELECT id, vehicle_id, item_ids, performed_on, odometer_km, cost_cents, currency, shop_id, notes
+    `SELECT id, vehicle_id, item_ids, performed_on, odometer_km, cost_cents, currency, shop_id, notes,
+       created_by_tenant_id
      FROM service_records
      WHERE deleted_at IS NULL
      ORDER BY performed_on DESC, odometer_km DESC`,
@@ -97,6 +112,16 @@ export async function deleteServiceRecord(db: Db, id: string, now: Date): Promis
     'UPDATE service_records SET deleted_at = ?, updated_at = ?, dirty = 1 WHERE id = ?',
     timestamp,
     timestamp,
+    id,
+  );
+}
+
+/** Changes only a service's notes, the one field a customer may edit on a record their shop logged. */
+export async function updateServiceNotes(db: Db, id: string, notes: string | undefined, now: Date): Promise<void> {
+  await db.runAsync(
+    'UPDATE service_records SET notes = ?, updated_at = ?, dirty = 1 WHERE id = ?',
+    notes?.trim() || null,
+    now.toISOString(),
     id,
   );
 }

@@ -4,8 +4,9 @@ import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
-import { pushPlatform, tenantSlugFromExtra } from '@/domain';
+import { pushPlatform } from '@/domain';
 import i18n from '@/i18n';
+import { bundledTenant, isBrandedBuild } from '@/lib/tenant-config';
 
 /** Android channel for messages a shop sends; `send-campaign` should target it. */
 export const SHOP_CHANNEL_ID = 'shop-messages';
@@ -26,9 +27,12 @@ function projectId(): string | undefined {
 
 /** The shop this build belongs to, or `null` in the unbranded app or when its slug has no active shop. */
 async function tenantId(client: SupabaseClient): Promise<string | null> {
-  const slug = tenantSlugFromExtra(Constants.expoConfig?.extra);
-  if (!slug) return null;
-  const { data, error } = await client.from('tenant_profiles').select('id').eq('slug', slug).maybeSingle();
+  if (!isBrandedBuild) return null;
+  const { data, error } = await client
+    .from('tenant_profiles')
+    .select('id')
+    .eq('slug', bundledTenant.slug)
+    .maybeSingle();
   if (error) throw error;
   return (data as { id?: string } | null)?.id ?? null;
 }

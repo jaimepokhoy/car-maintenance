@@ -93,6 +93,13 @@ export const MIGRATIONS: string[] = [
     dirty INTEGER NOT NULL DEFAULT 1
   );
   `,
+  // Shop names by tenant id, for "Shared with" and "Logged by". A cache of tenant_profiles; never synced.
+  `
+  CREATE TABLE tenant_names (
+    id TEXT PRIMARY KEY NOT NULL,
+    name TEXT NOT NULL
+  );
+  `,
 ];
 
 export async function migrate(db: Db): Promise<void> {

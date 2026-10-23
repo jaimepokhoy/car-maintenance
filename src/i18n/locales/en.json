@@ -2,7 +2,8 @@
   "tabs": {
     "garage": "Garage",
     "shops": "Shops",
-    "settings": "Settings"
+    "settings": "Settings",
+    "yourShop": "Your shop"
   },
   "garage": {
     "title": "Garage",
@@ -16,7 +17,8 @@
     "benefitReminders": "Reminders before things are due",
     "benefitHistory": "Every service and cost in one place",
     "benefitGuide": "A plain-language guide for every job",
-    "actionsHint": "Long press to edit or delete"
+    "actionsHint": "Long press to edit or delete",
+    "shopLogo": "{{name}} logo"
   },
   "shops": {
     "title": "Shops",
@@ -42,6 +44,26 @@
     "away": "{{distance}} away",
     "rated": "4+ stars",
     "noneMatch": "No shops match these filters."
+  },
+  "yourShop": {
+    "title": "Your shop",
+    "logo": "{{name}} logo",
+    "openNow": "Open now",
+    "closed": "Closed",
+    "openAllDay": "Open 24 hours",
+    "closesToday": "closes at {{time}}",
+    "closesTomorrow": "closes tomorrow at {{time}}",
+    "closesOn": "closes {{day}} at {{time}}",
+    "opensToday": "opens at {{time}}",
+    "opensTomorrow": "opens tomorrow at {{time}}",
+    "opensOn": "opens {{day}} at {{time}}",
+    "hours": "Hours",
+    "today": "Today",
+    "closedAllDay": "Closed",
+    "window": "{{opens}} – {{closes}}",
+    "noHours": "This shop hasn't shared its hours yet.",
+    "book": "Book a service",
+    "website": "Website"
   },
   "settings": {
     "title": "Settings",
@@ -157,7 +179,9 @@
     "updatedToday": "updated today",
     "updatedAgo": "updated {{ago}} ago",
     "logHint": "Opens the form to log this service",
-    "nothingTracked": "Nothing tracked yet"
+    "nothingTracked": "Nothing tracked yet",
+    "loggedBy": "Logged by {{shop}}",
+    "editNotesHint": "Opens your notes for this service"
   },
   "due": {
     "dueBy": "Due by {{limits}}",
@@ -402,5 +426,34 @@
     "neverSynced": "Not synced yet",
     "syncing": "Syncing…",
     "syncFailed": "couldn't sync, will retry"
+  },
+  "notesForm": {
+    "title": "Notes",
+    "notes": "Your notes",
+    "placeholder": "Anything to remember about this visit",
+    "save": "Save notes",
+    "shopRecord": "{{shop}} logged this service. You can add your own notes; the rest stays as the shop recorded it."
+  },
+  "consent": {
+    "title": "Sharing",
+    "question": "Share your vehicles and service history with {{shop}}?",
+    "sees": "The shop sees your vehicles, odometer readings, maintenance schedule and service history.",
+    "logs": "They can add the work they do to your history, marked as logged by the shop.",
+    "messages": "They can send you service reminders and offers.",
+    "revoke": "You can stop sharing at any time in Settings. The shop loses access as soon as your phone syncs.",
+    "private": "Your email address and receipt photos stay private. Nothing is shared until you choose Share.",
+    "share": "Share",
+    "notNow": "Not now"
+  },
+  "sharing": {
+    "title": "Shared with",
+    "none": "No shop can see your vehicles or service history.",
+    "since": "Since {{date}}",
+    "share": "Share with {{shop}}",
+    "revoke": "Stop sharing",
+    "revokeTitle": "Stop sharing with {{shop}}?",
+    "revokeBody": "{{shop}} will no longer see your vehicles or history. Services they already logged stay in your history.",
+    "cancel": "Cancel",
+    "unknownShop": "a shop"
   }
 }

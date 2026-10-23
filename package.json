@@ -63,6 +63,9 @@
     "check": "npm run typecheck && npm run lint && npm test"
   },
   "private": true,
+  "engines": {
+    "node": ">=22.18"
+  },
   "jest": {
     "preset": "jest-expo",
     "testPathIgnorePatterns": [

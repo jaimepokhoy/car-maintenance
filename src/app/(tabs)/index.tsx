@@ -8,6 +8,7 @@ import { DueStatusRow } from '@/components/due-status-row';
 import { Icon, type IconName } from '@/components/icon';
 import { IconButton } from '@/components/icon-button';
 import { Screen, SectionLabel } from '@/components/screen';
+import { ShopLogo } from '@/components/shop-logo';
 import { StatusPill } from '@/components/status-pill';
 import { ThemedText } from '@/components/themed-text';
 import { CardGlow, CarSilhouette } from '@/components/vehicle-art';
@@ -64,6 +65,7 @@ export default function GarageScreen() {
   return (
     <Screen
       title={t('garage.title')}
+      leading={<ShopLogo />}
       action={
         garage?.length ? (
           <Link href="/vehicles/new" asChild>

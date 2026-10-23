@@ -12,10 +12,12 @@ import { Icon } from '@/components/icon';
 import { IconButton } from '@/components/icon-button';
 import { Screen, SectionLabel } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
+import { YourShop } from '@/components/your-shop';
 import { Spacing } from '@/constants/theme';
 import { listSavedShops, saveShop, unsaveShop, type SavedShop } from '@/db/shops';
 import { useDbQuery } from '@/hooks/use-db-query';
 import { useFormat } from '@/hooks/use-format';
+import { useShopProfile } from '@/hooks/use-tenant-shop';
 import { useTheme } from '@/hooks/use-theme';
 import { PLACES_KEY, searchNearbyShops, type NearbyShop } from '@/lib/places';
 
@@ -34,6 +36,11 @@ function directionsUrl(shop: { name: string; placeId?: string; mapsUrl?: string 
 }
 
 export default function ShopsScreen() {
+  const shop = useShopProfile();
+  return shop ? <YourShop shop={shop} /> : <ShopFinder />;
+}
+
+function ShopFinder() {
   const { t, i18n } = useTranslation();
   const db = useSQLiteContext();
   const theme = useTheme();

@@ -11,13 +11,16 @@ import { useTranslation } from 'react-i18next';
 import { AppState, Platform } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { Colors, FontAssets, Fonts } from '@/constants/theme';
+import { FontAssets, Fonts } from '@/constants/theme';
 import { migrate } from '@/db/migrations';
 import { notificationTarget } from '@/domain';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { PreferencesProvider } from '@/hooks/use-preferences';
 import { SessionProvider } from '@/hooks/use-session';
+import { useConsentPrompt, useTenantNameSync } from '@/hooks/use-shop-sharing';
 import { SyncProvider } from '@/hooks/use-sync';
+import { TenantProvider } from '@/hooks/use-tenant';
+import { useTheme } from '@/hooks/use-theme';
 import { configureNotifications, refreshReminders } from '@/lib/reminders';
 
 SplashScreen.preventAutoHideAsync();
@@ -49,11 +52,13 @@ export default function RootLayout() {
       onInit={init}
       onError={retryIfLocked}>
       <PreferencesProvider>
-        <SessionProvider>
-          <SyncProvider>
-            <AppShell />
-          </SyncProvider>
-        </SessionProvider>
+        <TenantProvider>
+          <SessionProvider>
+            <SyncProvider>
+              <AppShell />
+            </SyncProvider>
+          </SessionProvider>
+        </TenantProvider>
       </PreferencesProvider>
     </SQLiteProvider>
   );
@@ -62,7 +67,7 @@ export default function RootLayout() {
 /** Theme, fonts and the navigation stack, all of which depend on the owner's stored preferences. */
 function AppShell() {
   const scheme = useColorScheme();
-  const colors = Colors[scheme];
+  const colors = useTheme();
   const { t } = useTranslation();
   const [fontsLoaded, fontError] = useFonts(FontAssets);
 
@@ -97,6 +102,7 @@ function AppShell() {
     <ThemeProvider value={navigationTheme}>
       {/* Mounted with the navigator so a tapped reminder never pushes before the router exists. */}
       {Platform.OS !== 'web' && <ReminderSync />}
+      <ShopSharing />
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <Stack
         screenOptions={{
@@ -120,12 +126,21 @@ function AppShell() {
           name="vehicles/[id]/odometer"
           options={{ presentation: 'modal', title: t('odometerForm.title') }}
         />
+        <Stack.Screen name="vehicles/[id]/notes" options={{ presentation: 'modal', title: t('notesForm.title') }} />
         <Stack.Screen name="guide/[item]" options={{ presentation: 'modal', title: '' }} />
         <Stack.Screen name="sign-in" options={{ presentation: 'modal', title: t('auth.title') }} />
         <Stack.Screen name="auth-callback" options={{ headerShown: false }} />
+        <Stack.Screen name="consent" options={{ presentation: 'modal', title: t('consent.title') }} />
       </Stack>
     </ThemeProvider>
   );
+}
+
+/** Shop names for shared data, and the one-time consent prompt in a shop's app. */
+function ShopSharing() {
+  useTenantNameSync();
+  useConsentPrompt();
+  return null;
 }
 
 /**

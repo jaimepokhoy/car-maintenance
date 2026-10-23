@@ -15,11 +15,13 @@ import http from 'node:http';
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
+import { listCustomerLinks, saveCustomerLink } from '@/db/customer-links';
 import { migrate } from '@/db/migrations';
 import { logService, deleteServiceRecord } from '@/db/service-records';
 import { saveShop } from '@/db/shops';
 import { syncOnce } from '@/db/sync';
 import type { Db } from '@/db/types';
+import { grantConsent, revokeConsent } from '@/domain';
 import { getVehicle, insertVehicle, listVehicles, updateOdometer, updateVehicleDetails } from '@/db/vehicles';
 import { createMemoryDb } from '@/test-utils/memory-db';
 
@@ -218,5 +220,37 @@ const count = async (db: Db, sql: string, ...params: string[]) =>
     for (const table of ['vehicles', 'shops', 'service_records', 'maintenance_intervals', 'customer_links']) {
       expect(await count(staffPhone.db, `SELECT * FROM ${table}`)).toBe(0);
     }
+  }, 60_000);
+
+  it('gives the shop access on consent, takes it away on revoke and reuses the link when shared again', async () => {
+    if (!reachable) return;
+    const owner = await account();
+    const phone = await device(owner);
+    const car = randomUUID();
+    await insertVehicle(phone.db, car, vehicleInput, new Date(), today());
+    const staffSees = async () => (await staff.client.from('vehicles').select('id').eq('id', car)).data?.length;
+
+    await phone.sync();
+    expect(await staffSees()).toBe(0);
+
+    await saveCustomerLink(phone.db, grantConsent([], tenantId!, randomUUID(), new Date()), new Date());
+    expect((await phone.sync()).rejected).toBe(0);
+    expect(await staffSees()).toBe(1);
+
+    const [link] = await listCustomerLinks(phone.db);
+    await saveCustomerLink(phone.db, revokeConsent(link, new Date()), new Date());
+    expect((await phone.sync()).rejected).toBe(0);
+    expect(await staffSees()).toBe(0);
+
+    // A new id would break the server's one-link-per-shop rule; sharing again reuses the row.
+    await saveCustomerLink(
+      phone.db,
+      grantConsent(await listCustomerLinks(phone.db), tenantId!, randomUUID(), new Date()),
+      new Date(),
+    );
+    expect((await phone.sync()).rejected).toBe(0);
+    expect(await staffSees()).toBe(1);
+    const links = await owner.client.from('customer_links').select('id, revoked_at').eq('user_id', owner.id);
+    expect(links.data).toEqual([{ id: link.id, revoked_at: null }]);
   }, 60_000);
 });
