@@ -18,6 +18,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { CardGlow } from '@/components/vehicle-art';
 import { Spacing } from '@/constants/theme';
+import { getTenantNames } from '@/db/customer-links';
 import { deleteServiceRecord, listServiceRecords } from '@/db/service-records';
 import { shopNames } from '@/db/shops';
 import type { Db } from '@/db/types';
@@ -31,6 +32,7 @@ import {
   nextTireReminder,
   remainingLimits,
   resolveSchedule,
+  serviceRecordPermissions,
   TIRE_SETS,
   summarizeCosts,
   toIsoDate,
@@ -59,7 +61,9 @@ export default function VehicleScreen() {
   const load = useCallback(
     async (db: Db) => {
       const vehicle = await getVehicle(db, id);
-      if (!vehicle) return { vehicle: null, statuses: [], records: [], shops: new Map<string, string>() };
+      if (!vehicle) {
+        return { vehicle: null, statuses: [], records: [], shops: new Map<string, string>(), tenants: new Map() };
+      }
       const records = await listServiceRecords(db, id);
       const statuses = computeVehicleDueStatuses(
         resolveSchedule(vehicle.powertrain),
@@ -67,7 +71,7 @@ export default function VehicleScreen() {
         records,
         toIsoDate(new Date()),
       );
-      return { vehicle, statuses, records, shops: await shopNames(db) };
+      return { vehicle, statuses, records, shops: await shopNames(db), tenants: await getTenantNames(db) };
     },
     [id],
   );
@@ -123,6 +127,8 @@ export default function VehicleScreen() {
       pathname: '/guide/[item]',
       params: { item: status.itemId, powertrain: vehicle.powertrain, id: vehicle.id },
     });
+  const openNotes = (record: ServiceRecord) =>
+    router.push({ pathname: '/vehicles/[id]/notes', params: { id: vehicle.id, record: record.id } });
   const openLog = (status?: DueStatus) =>
     router.push({ pathname: '/vehicles/[id]/log', params: { id: vehicle.id, item: status?.itemId } });
 
@@ -248,13 +254,31 @@ export default function VehicleScreen() {
               <Pressable
                 key={record.id}
                 accessibilityRole="button"
-                accessibilityHint={t('vehicle.deleteServiceTitle')}
-                onLongPress={() => confirmDeleteService(record)}>
+                {...(serviceRecordPermissions(record).delete
+                  ? {
+                      accessibilityHint: t('vehicle.deleteServiceTitle'),
+                      onLongPress: () => confirmDeleteService(record),
+                    }
+                  : {
+                      // The shop's record of the work stays as logged; only the customer's notes change.
+                      accessibilityHint: t('vehicle.editNotesHint'),
+                      onPress: () => openNotes(record),
+                    })}>
                 <CardRow last={index === records.length - 1}>
                   <View style={styles.flex}>
                     <ThemedText type="bodyStrong">
                       {record.itemIds.map((itemId) => t(`items.${itemId}`)).join(', ')}
                     </ThemedText>
+                    {record.createdByTenantId ? (
+                      <View style={styles.badge}>
+                        <Icon name="shop" size={12} color={theme.accent} />
+                        <ThemedText type="caption" themeColor="accent" numberOfLines={1}>
+                          {t('vehicle.loggedBy', {
+                            shop: data.tenants.get(record.createdByTenantId) ?? t('sharing.unknownShop'),
+                          })}
+                        </ThemedText>
+                      </View>
+                    ) : null}
                     <ThemedText type="caption" themeColor="textSecondary">
                       {[
                         format.date(record.performedOn),
@@ -437,6 +461,11 @@ const styles = StyleSheet.create({
   },
   span: {
     width: '100%',
+  },
+  badge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.one,
   },
   delete: {
     alignSelf: 'center',
