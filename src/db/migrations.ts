@@ -80,6 +80,19 @@ export const MIGRATIONS: string[] = [
   ALTER TABLE vehicles ADD COLUMN licence_plate TEXT;
   ALTER TABLE vehicles ADD COLUMN tire_size TEXT;
   `,
+  `
+  ALTER TABLE service_records ADD COLUMN created_by_tenant_id TEXT;
+
+  CREATE TABLE customer_links (
+    id TEXT PRIMARY KEY NOT NULL,
+    tenant_id TEXT NOT NULL,
+    consented_at TEXT NOT NULL,
+    revoked_at TEXT,
+    updated_at TEXT NOT NULL,
+    deleted_at TEXT,
+    dirty INTEGER NOT NULL DEFAULT 1
+  );
+  `,
 ];
 
 export async function migrate(db: Db): Promise<void> {

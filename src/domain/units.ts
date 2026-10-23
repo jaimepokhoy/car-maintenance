@@ -44,3 +44,10 @@ export function formatDate(date: IsoDate, locale: string): string {
     timeZone: 'UTC',
   }).format(new Date(`${date}T00:00:00Z`));
 }
+
+/** Formats an instant in the device's time zone, like "Oct 22, 2026, 2:05 p.m." (en-CA). */
+export function formatDateTime(timestamp: string, locale: string, timeZone?: string): string {
+  return new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short', timeZone }).format(
+    new Date(timestamp),
+  );
+}

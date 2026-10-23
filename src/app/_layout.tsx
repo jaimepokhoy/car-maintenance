@@ -16,6 +16,7 @@ import { migrate } from '@/db/migrations';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { PreferencesProvider } from '@/hooks/use-preferences';
 import { SessionProvider } from '@/hooks/use-session';
+import { SyncProvider } from '@/hooks/use-sync';
 import { configureNotifications, refreshReminders } from '@/lib/reminders';
 
 SplashScreen.preventAutoHideAsync();
@@ -41,10 +42,16 @@ async function init(db: SQLiteDatabase) {
 
 export default function RootLayout() {
   return (
-    <SQLiteProvider databaseName="car-maintenance.db" onInit={init} onError={retryIfLocked}>
+    <SQLiteProvider
+      databaseName="car-maintenance.db"
+      options={{ enableChangeListener: true }}
+      onInit={init}
+      onError={retryIfLocked}>
       <PreferencesProvider>
         <SessionProvider>
-          <AppShell />
+          <SyncProvider>
+            <AppShell />
+          </SyncProvider>
         </SessionProvider>
       </PreferencesProvider>
     </SQLiteProvider>

@@ -394,6 +394,10 @@
     "deleteConfirm": "Supprimer le compte",
     "cancel": "Annuler",
     "deleted": "Votre compte et ses données ont été supprimés.",
-    "deleteFailed": "Impossible de supprimer votre compte. Vérifiez votre connexion et réessayez."
+    "deleteFailed": "Impossible de supprimer votre compte. Vérifiez votre connexion et réessayez.",
+    "lastSynced": "Dernière synchronisation : {{time}}",
+    "neverSynced": "Pas encore synchronisé",
+    "syncing": "Synchronisation…",
+    "syncFailed": "échec, nouvel essai bientôt"
   }
 }
