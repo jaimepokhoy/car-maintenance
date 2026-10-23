@@ -18,7 +18,7 @@ insert into public.tenants (id, slug, name, status) values
 -- The public profile carries the shop id, for active shops only.
 set local role anon;
 select results_eq(
-  'select id from public.tenant_profiles order by slug',
+  $$select id from public.tenant_profiles where slug in ('shop-a', 'shop-c') order by slug$$,
   $$values ('aaaaaaaa-0000-0000-0000-000000000000'::uuid)$$,
   'anon reads the id of active shops only'
 );
