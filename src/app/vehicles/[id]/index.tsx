@@ -272,7 +272,8 @@ export default function VehicleScreen() {
                     {record.createdByTenantId ? (
                       <View style={styles.badge}>
                         <Icon name="shop" size={12} color={theme.accent} />
-                        <ThemedText type="caption" themeColor="accent" numberOfLines={1}>
+                        {/* The accent is for actions; as small text it fails contrast on light surfaces. */}
+                        <ThemedText type="caption" numberOfLines={1}>
                           {t('vehicle.loggedBy', {
                             shop: data.tenants.get(record.createdByTenantId) ?? t('sharing.unknownShop'),
                           })}
