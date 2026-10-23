@@ -13,6 +13,7 @@ import { AppState, Platform } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { Colors, FontAssets, Fonts } from '@/constants/theme';
 import { migrate } from '@/db/migrations';
+import { notificationTarget } from '@/domain';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { PreferencesProvider } from '@/hooks/use-preferences';
 import { SessionProvider } from '@/hooks/use-session';
@@ -127,7 +128,10 @@ function AppShell() {
   );
 }
 
-/** Reschedules reminders when the app comes to the foreground, and opens the screen a tapped reminder points to. */
+/**
+ * Reschedules reminders when the app comes to the foreground, and opens the screen a tapped
+ * reminder points to (or the home tab for a shop's message).
+ */
 function ReminderSync() {
   const db = useSQLiteContext();
 
@@ -138,8 +142,9 @@ function ReminderSync() {
     });
 
     function open(response: Notifications.NotificationResponse | null) {
-      const url = response?.notification.request.content.data?.url;
-      if (typeof url === 'string') router.push(url as Parameters<typeof router.push>[0]);
+      const target = notificationTarget(response?.notification.request.content.data);
+      if (target === '/') router.navigate('/');
+      else if (target) router.push(target as Parameters<typeof router.push>[0]);
     }
     Notifications.getLastNotificationResponseAsync().then(open);
     const tapped = Notifications.addNotificationResponseReceivedListener(open);
