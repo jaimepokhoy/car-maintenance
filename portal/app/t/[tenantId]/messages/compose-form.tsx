@@ -28,10 +28,11 @@ export function ComposeForm({ tenantId, shopName, remaining, localeTag, t }: Pro
     status: 'idle',
   });
   // Editing after a preview goes back to composing, so what is sent is what was previewed.
-  const [editedSincePreview, setEdited] = useState(false);
+  // The edit is tied to the state it was made on, so the old preview stays hidden until the new one arrives.
+  const [editedState, setEditedState] = useState<MessageState | null>(null);
   const [draft, setDraft] = useState<Partial<CampaignDraft>>({ audience: 'all' });
 
-  const previewing = state.status === 'preview' && !editedSincePreview;
+  const previewing = state.status === 'preview' && editedState !== state;
 
   const errors: Partial<Record<CampaignField, string>> = {};
   if (state.status === 'invalid') {
@@ -45,13 +46,12 @@ export function ComposeForm({ tenantId, shopName, remaining, localeTag, t }: Pro
     const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
     const data = new FormData(event.currentTarget);
     data.set('intent', submitter?.value ?? 'preview');
-    setEdited(false);
     startTransition(() => formAction(data));
   }
 
   function edit(field: CampaignField, value: string) {
     setDraft((current) => ({ ...current, [field]: value }));
-    setEdited(true);
+    setEditedState(state);
   }
 
   const fieldError = (field: CampaignField) =>
