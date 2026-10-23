@@ -8,7 +8,7 @@ Agreed with Jaime on 2026-10-11. The Notion PRD mirrors the product sections; th
 |---|---|
 | Platforms | iOS and Android at launch |
 | Accounts and cloud backup | Yes, in v1 |
-| Business model | Free (no paywall, no ads planned) |
+| Business model | Consumer app free (no paywall, no ads planned). Mechanic shops pay for their own branded app and a portal (section 9) |
 | Who builds | Jaime, working with Claude |
 | Launch market | Canada |
 | Shop finder | In v1 (booking stays out) |
@@ -53,7 +53,7 @@ A free mobile app where any Canadian car owner can keep every vehicle's service 
 - Offline-first: everything except the shop finder works with no signal; sync when back online.
 - Canada defaults: km, CAD, Canadian date format. Units and currency changeable per user.
 - **Language:** all UI strings go through an i18n layer from day one. English at launch; French before any push into Quebec, where French-language requirements likely apply.
-- **Privacy:** VIN, location and receipts are personal data. PIPEDA-aligned privacy policy, data hosted in Supabase's Canada region, no selling or sharing data, location used only while the shop finder is open.
+- **Privacy:** VIN, location and receipts are personal data. PIPEDA-aligned privacy policy, data hosted in Supabase's Canada region, no selling data, location used only while the shop finder is open. Data is shared only with a shop the owner explicitly chooses in that shop's app, and the owner can revoke it at any time (section 9).
 - **Cost:** a free app needs near-zero running cost. Stay within Supabase's free or lowest tier at launch; cap and cache places API calls.
 - Accessibility: dynamic type, screen reader labels, sufficient contrast.
 
@@ -96,3 +96,37 @@ With Jaime as the only builder, the setup is: Jaime is product owner and reviewe
 - Expo account (free tier is enough to start)
 - Supabase account (free tier to start)
 - Google Cloud account with Places API enabled (has a monthly free usage allowance)
+
+Each shop brings its own Apple and Google accounts for its app (section 9 and `docs/tenants.md`).
+
+## 9. Shops as customers (B2B)
+
+Agreed on 2026-10-22. The model is BiblioCommons for libraries: one platform and codebase, and each mechanic shop gets an app under its own name and colours, plus a web portal for its staff. The unbranded consumer app stays, free, as the default tenant.
+
+| Question | Decision |
+|---|---|
+| Who pays | Shops. Car owners never pay, in the consumer app or in a shop's app |
+| Distribution | A separate App Store and Play listing per shop, published from the shop's own developer accounts |
+| Onboarding and billing | Manual: Jaime sets each shop up (runbook in `docs/tenants.md`) and invoices it. No self-serve sign-up or billing yet |
+| Backend | One multi-tenant Supabase project in the Canada region, not one per shop |
+| Sharing | A customer's data reaches a shop only after they agree in that shop's app; they can revoke it in Settings |
+
+### What a shop gets (v1)
+
+| Area | What it does |
+|---|---|
+| Branded app | The shop's name, icon, splash and accent colour. A "Your shop" tab with hours, call, directions and booking link replaces the shop finder. The shop is pre-saved as the customer's shop |
+| Brand settings | In the portal: logo, accent colour (with a contrast check), contact details, hours, booking and website links. Changes reach the app without a store update |
+| Customers | Customers who agreed to share, with their vehicles and what is due soon or overdue |
+| Log a service | Staff add a service to a customer's history. It syncs to the customer's phone with a "Logged by <shop>" badge; the customer can change only its notes |
+| Messages | Push reminders and promotions to all customers or to those with service due soon or overdue, 4 sends per 30 days |
+
+### Consent and messages
+
+- Sharing is opt-in per shop, asked once in the shop's app ("Not now" is remembered on the device). Revoking stops the shop's access immediately; sharing again reuses the same link.
+- **CASL:** a promotion is a commercial electronic message, so it needs the customer's explicit opt-in to promotions, separate from their consent to share data. Service reminders about the customer's own vehicle are a separate category and don't need that opt-in. Every promotion names the shop and the customer can opt out in the app. Messages don't have a reminder or promotion type yet, and the app has no promotions opt-in, so shops must not send promotions until both ship.
+- **Privacy:** each shop signs a data-processing agreement before go-live, and the shop's app has its own privacy policy naming the shop as a recipient under consent. Data stays in the Canada region. Details in `docs/tenants.md` (Privacy).
+
+### Not in v1
+
+Self-serve shop sign-up and billing, staff management in the portal (Jaime adds staff at onboarding), saved message drafts, customer names in the portal (customers show as "Customer since <date>"), shop booking.
