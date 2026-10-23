@@ -1,0 +1,93 @@
+-- Sending shop campaigns through the send-campaign Edge Function.
+--
+-- The function (service role) creates the campaign row when it starts
+-- sending, so the row is the audit record and what the rate limit counts.
+-- Staff can no longer write campaigns directly: otherwise they could delete
+-- sent rows to get around the limit or mark a campaign sent that never went.
+
+alter table public.campaigns
+  -- Phones the campaign was addressed to, and how many Expo accepted or
+  -- rejected. sent_count stays null until delivery finishes.
+  add column recipient_count integer check (recipient_count >= 0),
+  add column sent_count integer check (sent_count >= 0),
+  add column failed_count integer check (failed_count >= 0);
+
+create index campaigns_tenant_sent_idx on public.campaigns (tenant_id, sent_at) where status = 'sent';
+
+drop policy "Staff manage their tenant's campaigns" on public.campaigns;
+
+revoke insert, update, delete on public.campaigns from anon, authenticated;
+
+create policy "Staff read their tenant's campaigns" on public.campaigns for select to authenticated
+  using (public.is_tenant_staff(tenant_id));
+
+-- Messages Expo did not accept. The push token is left out: staff don't need
+-- it, and a token is enough to send to that phone.
+create table public.campaign_failures (
+  id bigint generated always as identity primary key,
+  campaign_id uuid not null references public.campaigns (id) on delete cascade,
+  tenant_id uuid not null references public.tenants (id) on delete cascade,
+  user_id uuid references auth.users (id) on delete set null,
+  -- Expo's error code (DeviceNotRegistered, MessageRateExceeded, …) or
+  -- RequestFailed when a whole batch failed.
+  error text not null,
+  message text,
+  created_at timestamptz not null default now()
+);
+
+create index campaign_failures_campaign_idx on public.campaign_failures (campaign_id);
+
+alter table public.campaign_failures enable row level security;
+
+revoke all on public.campaign_failures from anon, authenticated;
+grant select on public.campaign_failures to authenticated;
+
+create policy "Staff read their tenant's campaign failures" on public.campaign_failures for select to authenticated
+  using (public.is_tenant_staff(tenant_id));
+
+-- Starts a send: checks the rate limit and records the campaign as sent in
+-- one transaction, holding a lock on the shop's row so two sends at once
+-- can't both slip under the limit. A campaign counts for p_window unless it
+-- reached nobody (sent_count = 0), matching campaignAllowance in
+-- src/domain/campaigns.ts. Returns the new campaign's id, or null when the
+-- limit is reached. Raises when the shop is missing or suspended.
+create function public.start_campaign(
+  p_tenant_id uuid,
+  p_title text,
+  p_body text,
+  p_audience text,
+  p_created_by uuid,
+  p_recipient_count integer,
+  p_limit integer,
+  p_window interval
+) returns uuid
+language plpgsql security definer set search_path = '' as $$
+declare
+  v_id uuid;
+begin
+  perform 1 from public.tenants where id = p_tenant_id and status = 'active' for update;
+  if not found then
+    raise exception 'shop % is missing or suspended', p_tenant_id using errcode = 'P0002';
+  end if;
+
+  if (
+    select count(*) from public.campaigns
+    where tenant_id = p_tenant_id
+      and status = 'sent'
+      and sent_at > now() - p_window
+      and coalesce(sent_count, 1) > 0
+  ) >= p_limit then
+    return null;
+  end if;
+
+  insert into public.campaigns (tenant_id, title, body, audience, status, sent_at, created_by, recipient_count)
+  values (p_tenant_id, p_title, p_body, p_audience, 'sent', now(), p_created_by, p_recipient_count)
+  returning id into v_id;
+  return v_id;
+end;
+$$;
+
+revoke execute on function public.start_campaign(uuid, text, text, text, uuid, integer, integer, interval)
+  from public, anon, authenticated;
+grant execute on function public.start_campaign(uuid, text, text, text, uuid, integer, integer, interval)
+  to service_role;
