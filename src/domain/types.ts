@@ -66,4 +66,6 @@ export interface ServiceRecord {
   currency?: CurrencyCode;
   shopId?: string;
   notes?: string;
+  /** The shop that logged this service from its portal; such records are read-only except notes. */
+  createdByTenantId?: string;
 }
