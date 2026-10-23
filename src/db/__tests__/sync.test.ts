@@ -59,7 +59,10 @@ class FakeServer implements SyncRemote {
     if (rows.some(this.reject)) throw Object.assign(new Error('violates check constraint'), { code: '23514' });
     return rows.map((row) => {
       const key = this.key(table, row);
-      const stored: RemoteRow = this.rows(table).has(key) ? { ...row, updated_at: this.tick() } : { ...row };
+      // Like the update trigger, and the column default when an insert leaves `updated_at` out.
+      const stored: RemoteRow = this.rows(table).has(key)
+        ? { ...row, updated_at: this.tick() }
+        : { updated_at: this.tick(), ...row };
       this.rows(table).set(key, stored);
       return Object.fromEntries([...SYNC_KEYS[table], 'updated_at'].map((column) => [column, stored[column]]));
     });
@@ -358,6 +361,24 @@ describe('cursors', () => {
     const since = server.pulls.find((pull) => pull.table === 'vehicles')?.since;
     expect(Date.parse(newest) - Date.parse(String(since))).toBe(60_000);
     expect(server.pulls.find((pull) => pull.table === 'shops')?.since).toBeNull();
+  });
+
+  it('lets the server time a new row, so one created offline still reaches devices past it', async () => {
+    server.put('vehicles', remoteVehicle());
+    await sync();
+    const cursor = String(await getSetting(db, 'sync.cursor.vehicles'));
+
+    // Another device created this car offline days ago and only now uploads it.
+    const other = createMemoryDb();
+    await migrate(other);
+    await insertVehicle(other, 'offline-car', vehicleInput, new Date('2026-10-15T09:00:00Z'), '2026-10-15');
+    const push = jest.spyOn(server, 'push');
+    await syncOnce(other, server, ME, new Date('2026-10-22T13:30:00Z'));
+    expect(push.mock.calls.flatMap(([, rows]) => rows).some((row) => 'updated_at' in row)).toBe(false);
+    expect(Date.parse(String(server.get('vehicles', 'offline-car')?.updated_at))).toBeGreaterThan(Date.parse(cursor));
+
+    await sync('2026-10-22T14:00:00Z');
+    expect((await listVehicles(db)).map((vehicle) => vehicle.id)).toContain('offline-car');
   });
 
   it('leaves the cursor where it was when a pull fails', async () => {
