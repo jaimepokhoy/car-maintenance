@@ -1,7 +1,7 @@
 import { createMemoryDb } from '@/test-utils/memory-db';
 
 import { migrate } from '../migrations';
-import { listSavedShops, saveShop, shopNames, unsaveShop } from '../shops';
+import { ensureTenantShop, listSavedShops, saveShop, shopNames, tenantPlaceId, unsaveShop } from '../shops';
 import type { Db } from '../types';
 
 const now = new Date('2026-10-11T12:00:00Z');
@@ -32,5 +32,48 @@ describe('shops', () => {
     await unsaveShop(db, 's1', now);
     expect(await listSavedShops(db)).toEqual([]);
     expect((await shopNames(db)).get('s1')).toBe('Garage');
+  });
+
+  describe('ensureTenantShop', () => {
+    const later = new Date('2026-10-12T12:00:00Z');
+    const shop = {
+      name: 'Demo Auto Service',
+      address: '100 Queen St W',
+      phone: '+1 416-555-0142',
+    };
+    const updatedAt = async (id: string) =>
+      (await db.getFirstAsync<{ updated_at: string }>('SELECT updated_at FROM shops WHERE id = ?', id))?.updated_at;
+
+    it("saves the app's own shop as a favourite on first launch", async () => {
+      expect(await ensureTenantShop(db, 's1', 'demo-shop', shop, now)).toBe('s1');
+      expect(await listSavedShops(db)).toEqual([
+        expect.objectContaining({
+          id: 's1',
+          placeId: tenantPlaceId('demo-shop'),
+          name: 'Demo Auto Service',
+        }),
+      ]);
+    });
+
+    it('keeps one row across launches and leaves it alone when nothing changed', async () => {
+      await ensureTenantShop(db, 's1', 'demo-shop', shop, now);
+      expect(await ensureTenantShop(db, 's2', 'demo-shop', shop, later)).toBe('s1');
+      expect(await listSavedShops(db)).toHaveLength(1);
+      expect(await updatedAt('s1')).toBe(now.toISOString());
+    });
+
+    it('refreshes the details when the shop changes them', async () => {
+      await ensureTenantShop(db, 's1', 'demo-shop', shop, now);
+      await ensureTenantShop(db, 's2', 'demo-shop', { ...shop, phone: '+1 416-555-0199' }, later);
+      expect(await listSavedShops(db)).toEqual([expect.objectContaining({ id: 's1', phone: '+1 416-555-0199' })]);
+      expect(await updatedAt('s1')).toBe(later.toISOString());
+    });
+
+    it('does not save it again once the owner removed it', async () => {
+      await ensureTenantShop(db, 's1', 'demo-shop', shop, now);
+      await unsaveShop(db, 's1', now);
+      await ensureTenantShop(db, 's2', 'demo-shop', shop, later);
+      expect(await listSavedShops(db)).toEqual([]);
+    });
   });
 });

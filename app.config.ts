@@ -30,6 +30,14 @@ if (tenant.slug !== slug) {
   throw new Error(`${tenantFile} has slug "${tenant.slug}" but lives in tenants/${slug}/`);
 }
 
+// The shop's details as of the build (name, contact, hours), so a branded app
+// works offline before it first reaches Supabase. Shape: a `tenant_profiles` row.
+const profileFile = path.join(tenantDir, 'profile.json');
+const tenantProfile = fs.existsSync(profileFile) ? JSON.parse(fs.readFileSync(profileFile, 'utf8')) : null;
+if (tenantProfile && tenantProfile.slug !== slug) {
+  throw new Error(`${profileFile} has slug "${tenantProfile.slug}" but lives in tenants/${slug}/`);
+}
+
 const asset = (name: string) => `./tenants/${slug}/assets/${name}`;
 const iosIcon = fs.existsSync(path.join(tenantDir, 'assets', 'expo.icon')) ? asset('expo.icon') : asset('icon.png');
 /** Only shows when an adaptive icon has no background image. */
@@ -89,5 +97,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   extra: {
     ...config.extra,
     tenant,
+    ...(tenantProfile ? { tenantProfile } : {}),
   },
 });
