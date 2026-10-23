@@ -1,68 +1,50 @@
-import { randomUUID } from "expo-crypto";
-import * as Location from "expo-location";
-import { useSQLiteContext } from "expo-sqlite";
-import { useCallback, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { ActivityIndicator, Linking, StyleSheet, View } from "react-native";
+import { randomUUID } from 'expo-crypto';
+import * as Location from 'expo-location';
+import { useSQLiteContext } from 'expo-sqlite';
+import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { ActivityIndicator, Linking, StyleSheet, View } from 'react-native';
 
-import { Button } from "@/components/button";
-import { Card } from "@/components/card";
-import { Chip } from "@/components/chip";
-import { Icon } from "@/components/icon";
-import { IconButton } from "@/components/icon-button";
-import { Screen, SectionLabel } from "@/components/screen";
-import { ThemedText } from "@/components/themed-text";
-import { YourShop } from "@/components/your-shop";
-import { Spacing } from "@/constants/theme";
-import {
-  listSavedShops,
-  saveShop,
-  unsaveShop,
-  type SavedShop,
-} from "@/db/shops";
-import { useDbQuery } from "@/hooks/use-db-query";
-import { useFormat } from "@/hooks/use-format";
-import { useShopProfile } from "@/hooks/use-tenant-shop";
-import { useTheme } from "@/hooks/use-theme";
-import { PLACES_KEY, searchNearbyShops, type NearbyShop } from "@/lib/places";
+import { Button } from '@/components/button';
+import { Card } from '@/components/card';
+import { Chip } from '@/components/chip';
+import { Icon } from '@/components/icon';
+import { IconButton } from '@/components/icon-button';
+import { Screen, SectionLabel } from '@/components/screen';
+import { ThemedText } from '@/components/themed-text';
+import { Spacing } from '@/constants/theme';
+import { listSavedShops, saveShop, unsaveShop, type SavedShop } from '@/db/shops';
+import { useDbQuery } from '@/hooks/use-db-query';
+import { useFormat } from '@/hooks/use-format';
+import { useTheme } from '@/hooks/use-theme';
+import { PLACES_KEY, searchNearbyShops, type NearbyShop } from '@/lib/places';
 
 type SearchState =
-  | { kind: "idle" }
-  | { kind: "searching" }
-  | { kind: "needsPermission" }
-  | { kind: "error" }
-  | { kind: "done"; shops: NearbyShop[] };
+  | { kind: 'idle' }
+  | { kind: 'searching' }
+  | { kind: 'needsPermission' }
+  | { kind: 'error' }
+  | { kind: 'done'; shops: NearbyShop[] };
 
-function directionsUrl(shop: {
-  name: string;
-  placeId?: string;
-  mapsUrl?: string;
-}) {
+function directionsUrl(shop: { name: string; placeId?: string; mapsUrl?: string }) {
   if (shop.mapsUrl) return shop.mapsUrl;
   const query = encodeURIComponent(shop.name);
-  const place = shop.placeId ? `&query_place_id=${shop.placeId}` : "";
+  const place = shop.placeId ? `&query_place_id=${shop.placeId}` : '';
   return `https://www.google.com/maps/search/?api=1&query=${query}${place}`;
 }
 
 export default function ShopsScreen() {
-  const shop = useShopProfile();
-  return shop ? <YourShop shop={shop} /> : <ShopFinder />;
-}
-
-function ShopFinder() {
   const { t, i18n } = useTranslation();
   const db = useSQLiteContext();
   const theme = useTheme();
   const { data: saved = [], reload } = useDbQuery(listSavedShops);
-  const [search, setSearch] = useState<SearchState>({ kind: "idle" });
+  const [search, setSearch] = useState<SearchState>({ kind: 'idle' });
   const [openOnly, setOpenOnly] = useState(false);
   const [ratedOnly, setRatedOnly] = useState(false);
   const nearby =
-    search.kind === "done"
+    search.kind === 'done'
       ? search.shops.filter(
-          (shop) =>
-            (!openOnly || shop.openNow === true) &&
-            (!ratedOnly || (shop.rating ?? 0) >= 4),
+          (shop) => (!openOnly || shop.openNow === true) && (!ratedOnly || (shop.rating ?? 0) >= 4),
         )
       : [];
 
@@ -72,23 +54,18 @@ function ShopFinder() {
         ? await Location.requestForegroundPermissionsAsync()
         : await Location.getForegroundPermissionsAsync();
       if (!permission.granted) {
-        setSearch({ kind: "needsPermission" });
+        setSearch({ kind: 'needsPermission' });
         return;
       }
-      setSearch({ kind: "searching" });
+      setSearch({ kind: 'searching' });
       try {
-        const position = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.Balanced,
-        });
+        const position = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
         const { latitude, longitude } = position.coords;
-        const shops = await searchNearbyShops(
-          { latitude, longitude },
-          i18n.language,
-        );
-        setSearch({ kind: "done", shops });
+        const shops = await searchNearbyShops({ latitude, longitude }, i18n.language);
+        setSearch({ kind: 'done', shops });
       } catch (error) {
-        console.warn("Shop search failed", error);
-        setSearch({ kind: "error" });
+        console.warn('Shop search failed', error);
+        setSearch({ kind: 'error' });
       }
     },
     [i18n.language],
@@ -126,12 +103,12 @@ function ShopFinder() {
   }
 
   return (
-    <Screen title={t("shops.title")}>
-      <SectionLabel>{t("shops.mine")}</SectionLabel>
+    <Screen title={t('shops.title')}>
+      <SectionLabel>{t('shops.mine')}</SectionLabel>
       {saved.length === 0 ? (
         <Card>
           <ThemedText type="small" themeColor="textSecondary">
-            {t("shops.noneSaved")}
+            {t('shops.noneSaved')}
           </ThemedText>
         </Card>
       ) : (
@@ -147,62 +124,48 @@ function ShopFinder() {
         ))
       )}
 
-      <SectionLabel>{t("shops.nearby")}</SectionLabel>
-      {search.kind === "done" && search.shops.length > 0 ? (
+      <SectionLabel>{t('shops.nearby')}</SectionLabel>
+      {search.kind === 'done' && search.shops.length > 0 ? (
         <View style={styles.filters}>
-          <Chip
-            label={t("shops.openNow")}
-            selected={openOnly}
-            onPress={() => setOpenOnly((on) => !on)}
-          />
-          <Chip
-            label={t("shops.rated")}
-            selected={ratedOnly}
-            onPress={() => setRatedOnly((on) => !on)}
-          />
+          <Chip label={t('shops.openNow')} selected={openOnly} onPress={() => setOpenOnly((on) => !on)} />
+          <Chip label={t('shops.rated')} selected={ratedOnly} onPress={() => setRatedOnly((on) => !on)} />
         </View>
       ) : null}
       {!PLACES_KEY ? (
         <Card>
           <ThemedText type="small" themeColor="textSecondary">
-            {t("shops.notConfigured")}
+            {t('shops.notConfigured')}
           </ThemedText>
         </Card>
-      ) : search.kind === "idle" || search.kind === "needsPermission" ? (
+      ) : search.kind === 'idle' || search.kind === 'needsPermission' ? (
         <Card>
           <ThemedText type="small" themeColor="textSecondary">
-            {t("shops.locationNeeded")}
+            {t('shops.locationNeeded')}
           </ThemedText>
           <Button
-            title={t("shops.allowLocation")}
+            title={t('shops.allowLocation')}
             icon={<Icon name="pin" size={18} color={theme.onAccent} />}
             onPress={() => find(true)}
           />
         </Card>
-      ) : search.kind === "searching" ? (
+      ) : search.kind === 'searching' ? (
         <Card style={styles.searching}>
           <ActivityIndicator color={theme.accent} />
           <ThemedText type="small" themeColor="textSecondary">
-            {t("shops.searching")}
+            {t('shops.searching')}
           </ThemedText>
         </Card>
-      ) : search.kind === "error" ? (
+      ) : search.kind === 'error' ? (
         <Card>
           <ThemedText type="small" themeColor="textSecondary">
-            {t("shops.error")}
+            {t('shops.error')}
           </ThemedText>
-          <Button
-            title={t("shops.retry")}
-            variant="secondary"
-            onPress={() => find(false)}
-          />
+          <Button title={t('shops.retry')} variant="secondary" onPress={() => find(false)} />
         </Card>
       ) : nearby.length === 0 ? (
         <Card>
           <ThemedText type="small" themeColor="textSecondary">
-            {search.shops.length === 0
-              ? t("shops.empty")
-              : t("shops.noneMatch")}
+            {search.shops.length === 0 ? t('shops.empty') : t('shops.noneMatch')}
           </ThemedText>
         </Card>
       ) : (
@@ -219,28 +182,22 @@ function ShopFinder() {
   );
 }
 
-function ShopActions({
-  phone,
-  directions,
-}: {
-  phone?: string;
-  directions: string;
-}) {
+function ShopActions({ phone, directions }: { phone?: string; directions: string }) {
   const { t } = useTranslation();
   const theme = useTheme();
   return (
     <View style={styles.actions}>
       {phone ? (
         <Button
-          title={t("shops.call")}
+          title={t('shops.call')}
           variant="secondary"
           size="small"
           icon={<Icon name="call" size={16} color={theme.text} />}
-          onPress={() => Linking.openURL(`tel:${phone.replace(/[^\d+]/g, "")}`)}
+          onPress={() => Linking.openURL(`tel:${phone.replace(/[^\d+]/g, '')}`)}
         />
       ) : null}
       <Button
-        title={t("shops.directions")}
+        title={t('shops.directions')}
         variant="secondary"
         size="small"
         icon={<Icon name="directions" size={16} color={theme.text} />}
@@ -250,13 +207,7 @@ function ShopActions({
   );
 }
 
-function SavedShopCard({
-  shop,
-  onRemove,
-}: {
-  shop: SavedShop;
-  onRemove: () => void;
-}) {
+function SavedShopCard({ shop, onRemove }: { shop: SavedShop; onRemove: () => void }) {
   const { t } = useTranslation();
   const theme = useTheme();
   return (
@@ -266,7 +217,7 @@ function SavedShopCard({
           <View style={styles.badge}>
             <Icon name="bookmarked" size={12} color={theme.textSecondary} />
             <ThemedText type="caption" themeColor="textSecondary">
-              {t("shops.myShop")}
+              {t('shops.myShop')}
             </ThemedText>
           </View>
           <ThemedText type="bodyStrong">{shop.name}</ThemedText>
@@ -276,12 +227,7 @@ function SavedShopCard({
             </ThemedText>
           ) : null}
         </View>
-        <IconButton
-          icon="bookmarked"
-          variant="outlined"
-          accessibilityLabel={t("shops.remove")}
-          onPress={onRemove}
-        />
+        <IconButton icon="bookmarked" variant="outlined" accessibilityLabel={t('shops.remove')} onPress={onRemove} />
       </View>
       <ShopActions phone={shop.phone} directions={directionsUrl(shop)} />
     </Card>
@@ -301,13 +247,8 @@ function NearbyShopCard({
   const format = useFormat();
   const theme = useTheme();
   const details = [
-    shop.rating !== undefined
-      ? t("shops.rating", {
-          rating: shop.rating.toFixed(1),
-          count: shop.ratingCount ?? 0,
-        })
-      : null,
-    t("shops.away", { distance: format.distance(shop.distanceKm) }),
+    shop.rating !== undefined ? t('shops.rating', { rating: shop.rating.toFixed(1), count: shop.ratingCount ?? 0 }) : null,
+    t('shops.away', { distance: format.distance(shop.distanceKm) }),
   ].filter(Boolean);
 
   return (
@@ -316,15 +257,10 @@ function NearbyShopCard({
         <View style={styles.flex}>
           <ThemedText type="bodyStrong">{shop.name}</ThemedText>
           <ThemedText type="caption" themeColor="textSecondary">
-            {details.join(" · ")}
+            {details.join(' · ')}
             {shop.openNow !== undefined ? (
-              <ThemedText
-                type="caption"
-                style={{
-                  color: shop.openNow ? theme.successText : theme.textSecondary,
-                }}
-              >
-                {` · ${shop.openNow ? t("shops.openNow") : t("shops.closed")}`}
+              <ThemedText type="caption" style={{ color: shop.openNow ? theme.successText : theme.textSecondary }}>
+                {` · ${shop.openNow ? t('shops.openNow') : t('shops.closed')}`}
               </ThemedText>
             ) : null}
           </ThemedText>
@@ -335,9 +271,9 @@ function NearbyShopCard({
           ) : null}
         </View>
         <IconButton
-          icon={saved ? "bookmarked" : "bookmark"}
-          variant={saved ? "inverse" : "outlined"}
-          accessibilityLabel={saved ? t("shops.saved") : t("shops.save")}
+          icon={saved ? 'bookmarked' : 'bookmark'}
+          variant={saved ? 'inverse' : 'outlined'}
+          accessibilityLabel={saved ? t('shops.saved') : t('shops.save')}
           accessibilityState={{ selected: saved }}
           onPress={onToggleSaved}
         />
@@ -354,28 +290,28 @@ const styles = StyleSheet.create({
     gap: Spacing.half,
   },
   titleRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
+    flexDirection: 'row',
+    alignItems: 'flex-start',
     gap: Spacing.two + Spacing.one,
   },
   badge: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: Spacing.one,
   },
   actions: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: Spacing.two,
   },
   searching: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: Spacing.two + Spacing.one,
   },
   filters: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: Spacing.two,
   },
 });
