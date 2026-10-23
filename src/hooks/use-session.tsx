@@ -2,6 +2,7 @@ import type { Session } from '@supabase/supabase-js';
 import { createContext, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react';
 import { AppState, Platform } from 'react-native';
 
+import { refreshPushToken } from '@/lib/push';
 import { supabase } from '@/lib/supabase';
 
 interface SessionContextValue {
@@ -42,6 +43,19 @@ export function SessionProvider({ children }: PropsWithChildren) {
       appState?.remove();
     };
   }, []);
+
+  // Register this device for shop messages once signed in, and again on return
+  // to the foreground in case notifications were allowed since.
+  const userId = session?.user.id;
+  useEffect(() => {
+    const client = supabase;
+    if (!client || !userId || Platform.OS === 'web') return;
+    refreshPushToken(client, userId);
+    const appState = AppState.addEventListener('change', (state) => {
+      if (state === 'active') refreshPushToken(client, userId);
+    });
+    return () => appState.remove();
+  }, [userId]);
 
   const value = useMemo(() => ({ session, ready }), [session, ready]);
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

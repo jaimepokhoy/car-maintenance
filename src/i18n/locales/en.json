@@ -305,6 +305,9 @@
     "tiresBody": "Book your changeover before shops get busy.",
     "tiresLegalBody": "Winter tires are required in Quebec from {{date}}."
   },
+  "push": {
+    "channelName": "Messages from your shop"
+  },
   "provinces": {
     "AB": "Alberta",
     "BC": "British Columbia",

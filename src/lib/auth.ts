@@ -14,6 +14,7 @@ import {
   type AuthErrorKey,
   type SignInProvider,
 } from '@/domain';
+import { removePushToken } from '@/lib/push';
 import { supabase } from '@/lib/supabase';
 
 /** `cancelled` means the owner backed out of a native or browser sheet; screens stay quiet about it. */
@@ -115,9 +116,14 @@ export async function signInWithGoogle(): Promise<AuthResult> {
   }
 }
 
-/** Signs out on this device only. The local session is cleared even when offline. */
+/**
+ * Signs out on this device only. The local session is cleared even when offline.
+ * The push token goes first, while the session can still delete it.
+ */
 export async function signOut(): Promise<void> {
-  await supabase?.auth.signOut({ scope: 'local' });
+  if (!supabase) return;
+  await removePushToken(supabase);
+  await supabase.auth.signOut({ scope: 'local' });
 }
 
 /**
