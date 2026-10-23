@@ -18,3 +18,14 @@ Scan the QR code with the Expo Go app on your phone. Sign-in and sync need a Sup
 ```bash
 npm run check   # typecheck, lint, unit tests
 ```
+
+### Database tests
+
+The row-level security rules in `supabase/migrations/` have pgTAP tests in `supabase/tests/`. They need Docker running.
+
+```bash
+npx supabase start     # local Postgres with every migration applied
+npx supabase test db   # run supabase/tests/*.sql
+npx supabase db reset  # re-apply migrations after adding one
+npx supabase stop
+```
