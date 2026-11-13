@@ -7,12 +7,12 @@ Agreed with Jaime on 2026-10-11. The Notion PRD mirrors the product sections; th
 | Question | Decision |
 |---|---|
 | Platforms | iOS and Android at launch |
-| Accounts and cloud backup | Yes, in v1 |
+| Accounts and cloud backup | None: no accounts, no server. Data stays on the device, and export is how you keep a copy |
 | Business model | Free (no paywall, no ads planned) |
 | Who builds | Jaime, working with Claude |
 | Launch market | Canada |
 | Shop finder | In v1 (booking stays out) |
-| Tech stack | Expo (React Native) + TypeScript, Supabase |
+| Tech stack | Expo (React Native) + TypeScript, on-device SQLite. No backend |
 
 From Notion: competitor is carmaintenance.app; intended strengths are best-practice guidance, tracking, finding shops, and EV coverage; known weakness is that manual input is a chore.
 
@@ -41,7 +41,7 @@ A free mobile app where any Canadian car owner can keep every vehicle's service 
 | Costs | Total and per-category spend per vehicle, per year. Every other ownership cost (fuel, insurance, registration, repairs, tires, parking, tolls, wash, other) can be logged with an optional odometer reading and is combined with service costs in the totals. |
 | Report card | A 0–100 care score and cost-of-ownership summary built from maintenance put in and money spent: up-to-date vs due soon vs overdue vs not logged, total invested, cost per 1,000 km. Clearly labelled as a maintenance score, not a market valuation. |
 | Export | Share a vehicle's service history as PDF or CSV (useful when selling). |
-| Account | Sign in with Apple, Google or email; data backed up to the cloud and synced across devices. Delete account and all data from inside the app. |
+| Backup | No account or server. Everything stays on the device; export a vehicle's history as PDF or CSV to keep a copy or hand it to a buyer. |
 
 ## 4. Not in v1 (candidates for later)
 
@@ -51,18 +51,18 @@ A free mobile app where any Canadian car owner can keep every vehicle's service 
 ## 5. Non-functional requirements
 
 - One codebase for iOS and Android.
-- Offline-first: everything except the shop finder works with no signal; sync when back online.
+- Offline-first: everything except the shop finder works with no signal, and nothing depends on a server.
 - Canada defaults: km, CAD, Canadian date format. Units and currency changeable per user.
 - **Language:** all UI strings go through an i18n layer from day one. English at launch; French before any push into Quebec, where French-language requirements likely apply.
-- **Privacy:** VIN, location and receipts are personal data. PIPEDA-aligned privacy policy, data hosted in Supabase's Canada region, no selling or sharing data, location used only while the shop finder is open.
-- **Cost:** a free app needs near-zero running cost. Stay within Supabase's free or lowest tier at launch; cap and cache places API calls.
+- **Privacy:** VIN, location and receipts are personal data. PIPEDA-aligned privacy policy, data never uploaded, no selling or sharing data, location used only while the shop finder is open.
+- **Cost:** no server to pay for, so the only running cost is the places API; cap and cache those calls.
 - Accessibility: dynamic type, screen reader labels, sufficient contrast.
 
 ## 6. Tech stack (agreed)
 
 - **App:** Expo (React Native) + TypeScript; EAS for cloud builds and store submission; Expo Go to try changes on your phone.
-- **Backend:** Supabase (Postgres, auth, storage for receipt photos, row-level security), Canada region.
-- **Local data:** SQLite on device, synced to Supabase.
+- **Backend:** none. No accounts, no sync, no server-side data.
+- **Local data:** SQLite on the device is the only store; it is the source of truth.
 - **Notifications:** Expo Notifications scheduled locally so reminders work offline.
 - **Maps and places:** react-native-maps plus Google Places API.
 - **Quality gates:** TypeScript strict, ESLint, Jest unit tests, Maestro end-to-end flows, GitHub Actions CI on every PR.
@@ -83,11 +83,11 @@ With Jaime as the only builder, the setup is: Jaime is product owner and reviewe
 | Phase | Output |
 |---|---|
 | 0. Align | This doc agreed ✅; GitHub repo created; Apple and Google developer accounts started (Apple's can take days). |
-| 1. Foundations | Expo + Supabase scaffold, auth, data model, i18n, CI, `CLAUDE.md`, design tokens. |
+| 1. Foundations | Expo + SQLite scaffold, data model, i18n, CI, `CLAUDE.md`, design tokens. |
 | 2. Core loop | Garage with VIN scan, service log, odometer updates, schedules and dashboard. |
 | 3. Reminders and guidance | Due/overdue logic (heavily unit-tested), push notifications, seasonal tires, guidance cards. |
 | 4. Shop finder | Map, list, details, saved shop, link to service log. |
-| 5. Polish | Costs, export, onboarding, settings, delete account, accessibility pass, privacy policy. |
+| 5. Polish | Costs, export, onboarding, settings, accessibility pass, privacy notes. |
 | 6. Ship | TestFlight and Play internal testing with real users, then store submission in Canada. |
 
 ## 8. Accounts Jaime will need
@@ -95,5 +95,4 @@ With Jaime as the only builder, the setup is: Jaime is product owner and reviewe
 - GitHub (repo for the code)
 - Apple Developer Program (US$99/year) and Google Play Console (US$25 one-time)
 - Expo account (free tier is enough to start)
-- Supabase account (free tier to start)
 - Google Cloud account with Places API enabled (has a monthly free usage allowance)

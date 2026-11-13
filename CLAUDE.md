@@ -15,7 +15,7 @@ Run `npm run check` (typecheck, lint, tests). CI runs the same plus an iOS and A
 - **Dates:** calendar dates are `YYYY-MM-DD` strings, handled with `src/domain/dates.ts`. Don't do date math with `Date` objects in local time.
 - **Text:** every user-facing string goes through i18n (`useTranslation`), with keys in both `src/i18n/locales/en.json` and `fr.json`. A test fails if they drift. Canadian English spelling (kilometres, favourite).
 - **Defaults are Canadian:** km, CAD, `en-CA` / `fr-CA` formatting.
-- **Data model:** Postgres schema lives in `supabase/migrations/`. Rows are user-owned with RLS, IDs are client-generated UUIDs, `updated_at` drives sync, `deleted_at` is a soft delete. Add a new migration file; never edit an applied one.
-- **Supabase is optional at runtime:** `src/lib/supabase.ts` exports `null` until env vars are set, and the app must work offline without it.
+- **Data model:** the only schema is on-device SQLite in `src/db/migrations.ts`. Append a new migration entry; never edit one that has shipped. Rows carry client-generated UUIDs, `created_at`/`updated_at`, and `deleted_at` for soft deletes.
+- **No server:** there is no backend, no accounts and no sync. Every feature reads and writes the device database; export is the only backup, and the shop finder is the only network call.
 - **Styling:** the visual system is recorded in `docs/DESIGN.md` (product truth in `docs/PRODUCT.md`). Screens compose `src/components/` (`Card`, `Button`, `IconButton`, `Chip`, `SegmentedControl`, `TextField`, `ThemedText`) and read every colour, radius, size and font from `src/constants/theme.ts` via `useTheme()`; no hard-coded values in screens. Light and dark mode both matter, and the owner can force either in Settings.
 - **Small PRs:** one issue, one PR, reviewable in a few minutes. Describe what changed for a user in the PR body.

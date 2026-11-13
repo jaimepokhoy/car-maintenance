@@ -9,20 +9,19 @@ src/domain/       Pure business rules: schedules, due status, tires, units, date
 src/i18n/         English and French strings, language detection
 src/db/           On-device SQLite: migrations and queries
 src/hooks/        Shared hooks (database queries that refresh on focus, locale)
-src/lib/          Integrations (Supabase client)
-supabase/         Database migrations and RLS policies
+src/lib/          Integrations and device services (shop search, export, reminders)
 ```
 
 Screens depend on domain and lib; domain depends on nothing. That keeps the rules that matter most (is my oil change overdue?) fast to test and easy to change.
 
-## Data flow (target)
+## Data flow
 
-1. The device is the source of truth for the UI: all reads and writes go to a local SQLite database, so the app works with no signal.
-2. When signed in and online, a sync step pushes local rows changed since the last sync and pulls remote rows with a newer `updated_at`. Deletes are soft (`deleted_at`) so they sync like any other change. Last write wins per row.
+1. The device is the only store: every read and write goes to the local SQLite database, so every feature works with no signal.
+2. Nothing is uploaded. There is no account, no sync and no server; rows keep `created_at`, `updated_at` and `deleted_at` so soft deletes stay reversible and a future export or backup has a complete picture.
 3. Reminders are computed on device from the local data (`computeVehicleDueStatuses`) and scheduled as local notifications, so they fire offline.
-4. Shop search is the one online-only feature: the device calls the places API directly and caches results.
+4. Shop search is the only network call: the device asks the places API directly and caches results.
 
-Status: domain rules, i18n, the Supabase schema and client, and local SQLite storage for vehicles, service records and expenses exist. Sync, notifications and the shop finder are upcoming slices.
+Status: domain rules, i18n, and local SQLite storage for vehicles, service records, shops and expenses exist. Notifications, export and the shop finder are upcoming slices.
 
 Data-layer functions in `src/db/` take a `Db` (a subset of expo-sqlite's API) so tests run them against Node's built-in SQLite via `src/test-utils/memory-db.ts`.
 

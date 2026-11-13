@@ -21,7 +21,7 @@ Plain-language best-practice guidance per maintenance item (what, why, typical i
 ## Operating Context
 
 - iOS and Android phones only, portrait, one Expo codebase. No web.
-- Offline-first: everything except the shop finder works with no signal. Local SQLite, optional Supabase sync.
+- Offline-first: everything except the shop finder works with no signal, and nothing needs a server. Data lives in SQLite on the phone; export is the backup.
 - Reminders arrive as local push notifications; tapping one opens the relevant screen.
 - Canada defaults: kilometres, CAD, en-CA and fr-CA formatting. English and French UI.
 - Known pain point: manual input is a chore. Low-effort entry (one-tap "done today", prefilled odometer, remembered shops) matters more than feature count.

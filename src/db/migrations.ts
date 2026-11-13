@@ -1,9 +1,9 @@
 import type { Db } from './types';
 
 /**
- * On-device schema, mirroring `supabase/migrations` plus a `dirty` flag that
- * marks rows changed since the last sync. Append new migrations; never edit
- * one that has shipped. `PRAGMA user_version` records how many have run.
+ * The app's only schema: on-device SQLite, owned by the phone. Append new
+ * migrations; never edit one that has shipped. `PRAGMA user_version` records
+ * how many have run.
  */
 export const MIGRATIONS: string[] = [
   `
