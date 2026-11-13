@@ -1,9 +1,10 @@
-import type { MaintenanceInterval, MaintenanceItemId, Powertrain } from './types';
+import { manufacturerSchedule } from './manufacturer-schedules';
+import type { MaintenanceInterval, MaintenanceItemId, Powertrain, Vehicle } from './types';
 
 /**
  * Default intervals by powertrain. These are general guidance for typical
- * Canadian driving, not manufacturer schedules; owners can override any of
- * them per vehicle.
+ * Canadian driving, used when the make has no manufacturer schedule on file;
+ * owners can override any of them per vehicle.
  */
 const GAS: MaintenanceInterval[] = [
   { itemId: 'oil_change', everyKm: 8_000, everyMonths: 6 },
@@ -41,13 +42,34 @@ export function defaultSchedule(powertrain: Powertrain): MaintenanceInterval[] {
   return DEFAULTS[powertrain].map((interval) => ({ ...interval }));
 }
 
-/** Applies per-vehicle overrides on top of the default schedule. */
+/** Applies per-vehicle overrides on top of a base schedule. */
 export function resolveSchedule(
   powertrain: Powertrain,
   overrides: MaintenanceInterval[] = [],
 ): MaintenanceInterval[] {
   const byItem = new Map<MaintenanceItemId, MaintenanceInterval>(
     defaultSchedule(powertrain).map((interval) => [interval.itemId, interval]),
+  );
+  for (const override of overrides) {
+    byItem.set(override.itemId, { ...override });
+  }
+  return [...byItem.values()];
+}
+
+/**
+ * The schedule the app should actually use: the manufacturer's for this make
+ * and powertrain when one is on file, otherwise the general defaults, then
+ * any per-vehicle overrides on top.
+ */
+export function resolveVehicleSchedule(
+  vehicle: Pick<Vehicle, 'make' | 'powertrain'>,
+  overrides: MaintenanceInterval[] = [],
+): MaintenanceInterval[] {
+  const manufacturer = manufacturerSchedule(vehicle)?.powertrains[vehicle.powertrain];
+  if (!manufacturer) return resolveSchedule(vehicle.powertrain, overrides);
+
+  const byItem = new Map<MaintenanceItemId, MaintenanceInterval>(
+    manufacturer.map((interval) => [interval.itemId, { ...interval }]),
   );
   for (const override of overrides) {
     byItem.set(override.itemId, { ...override });

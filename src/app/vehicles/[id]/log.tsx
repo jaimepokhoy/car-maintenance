@@ -19,7 +19,7 @@ import type { Db } from '@/db/types';
 import { getVehicle } from '@/db/vehicles';
 import {
   addDays,
-  resolveSchedule,
+  resolveVehicleSchedule,
   toIsoDate,
   validateServiceForm,
   type MaintenanceItemId,
@@ -122,7 +122,7 @@ function LogServiceForm({
           {t('serviceForm.items')}
         </ThemedText>
         <View style={styles.chips}>
-          {resolveSchedule(vehicle.powertrain).map(({ itemId }) => (
+          {resolveVehicleSchedule(vehicle).map(({ itemId }) => (
             <Chip
               key={itemId}
               label={t(`items.${itemId}`)}

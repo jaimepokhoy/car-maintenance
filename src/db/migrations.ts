@@ -1,9 +1,9 @@
 import type { Db } from './types';
 
 /**
- * On-device schema, mirroring `supabase/migrations` plus a `dirty` flag that
- * marks rows changed since the last sync. Append new migrations; never edit
- * one that has shipped. `PRAGMA user_version` records how many have run.
+ * The app's only schema: on-device SQLite, owned by the phone. Append new
+ * migrations; never edit one that has shipped. `PRAGMA user_version` records
+ * how many have run.
  */
 export const MIGRATIONS: string[] = [
   `
@@ -79,6 +79,25 @@ export const MIGRATIONS: string[] = [
   ALTER TABLE vehicles ADD COLUMN trim_level TEXT;
   ALTER TABLE vehicles ADD COLUMN licence_plate TEXT;
   ALTER TABLE vehicles ADD COLUMN tire_size TEXT;
+  `,
+  `
+  CREATE TABLE expenses (
+    id TEXT PRIMARY KEY NOT NULL,
+    vehicle_id TEXT NOT NULL REFERENCES vehicles (id) ON DELETE CASCADE,
+    category TEXT NOT NULL,
+    incurred_on TEXT NOT NULL,
+    amount_cents INTEGER NOT NULL,
+    currency TEXT,
+    odometer_km INTEGER,
+    shop_id TEXT REFERENCES shops (id) ON DELETE SET NULL,
+    notes TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    deleted_at TEXT,
+    dirty INTEGER NOT NULL DEFAULT 1
+  );
+
+  CREATE INDEX expenses_vehicle_idx ON expenses (vehicle_id, incurred_on DESC);
   `,
 ];
 
