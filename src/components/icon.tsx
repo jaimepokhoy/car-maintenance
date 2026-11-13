@@ -13,6 +13,7 @@ export const ICONS = {
   check: { ios: 'checkmark', android: 'check' },
   close: { ios: 'xmark', android: 'close' },
   edit: { ios: 'pencil', android: 'edit' },
+  trash: { ios: 'trash', android: 'delete' },
   info: { ios: 'info.circle', android: 'info' },
   list: { ios: 'list.bullet', android: 'list_alt' },
   car: { ios: 'car.fill', android: 'directions_car' },
@@ -76,7 +77,7 @@ export function Icon({
   const theme = useTheme();
   return (
     <SymbolView
-      name={ICONS[name]}
+      name={{ ...ICONS[name], web: ICONS[name].android }}
       size={size}
       tintColor={color ?? theme.text}
       weight={weight}

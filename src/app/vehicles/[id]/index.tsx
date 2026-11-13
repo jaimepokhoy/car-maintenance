@@ -2,7 +2,7 @@ import { Link, router, Stack, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
@@ -104,17 +104,19 @@ export default function VehicleScreen() {
         })();
 
   function confirmDeleteService(record: ServiceRecord) {
+    const remove = async () => {
+      await deleteServiceRecord(db, record.id, new Date());
+      refreshReminders(db);
+      reload();
+    };
+    // Alert.alert is a no-op on react-native-web.
+    if (Platform.OS === 'web') {
+      if (window.confirm(t('vehicle.deleteServiceTitle'))) remove();
+      return;
+    }
     Alert.alert(t('vehicle.deleteServiceTitle'), undefined, [
       { text: t('vehicle.cancel'), style: 'cancel' },
-      {
-        text: t('vehicle.deleteService'),
-        style: 'destructive',
-        onPress: async () => {
-          await deleteServiceRecord(db, record.id, new Date());
-          refreshReminders(db);
-          reload();
-        },
-      },
+      { text: t('vehicle.deleteService'), style: 'destructive', onPress: remove },
     ]);
   }
 
@@ -245,32 +247,32 @@ export default function VehicleScreen() {
             </CardRow>
           ) : (
             records.map((record, index) => (
-              <Pressable
-                key={record.id}
-                accessibilityRole="button"
-                accessibilityHint={t('vehicle.deleteServiceTitle')}
-                onLongPress={() => confirmDeleteService(record)}>
-                <CardRow last={index === records.length - 1}>
-                  <View style={styles.flex}>
-                    <ThemedText type="bodyStrong">
-                      {record.itemIds.map((itemId) => t(`items.${itemId}`)).join(', ')}
-                    </ThemedText>
-                    <ThemedText type="caption" themeColor="textSecondary">
-                      {[
-                        format.date(record.performedOn),
-                        format.distance(record.odometerKm),
-                        record.shopId ? data.shops.get(record.shopId) : undefined,
-                        record.notes,
-                      ]
-                        .filter(Boolean)
-                        .join(' · ')}
-                    </ThemedText>
-                  </View>
-                  {record.costCents !== undefined ? (
-                    <ThemedText type="numeralCompact">{format.money(record.costCents, record.currency)}</ThemedText>
-                  ) : null}
-                </CardRow>
-              </Pressable>
+              <CardRow key={record.id} last={index === records.length - 1}>
+                <View style={styles.flex}>
+                  <ThemedText type="bodyStrong">
+                    {record.itemIds.map((itemId) => t(`items.${itemId}`)).join(', ')}
+                  </ThemedText>
+                  <ThemedText type="caption" themeColor="textSecondary">
+                    {[
+                      format.date(record.performedOn),
+                      format.distance(record.odometerKm),
+                      record.shopId ? data.shops.get(record.shopId) : undefined,
+                      record.notes,
+                    ]
+                      .filter(Boolean)
+                      .join(' · ')}
+                  </ThemedText>
+                </View>
+                {record.costCents !== undefined ? (
+                  <ThemedText type="numeralCompact">{format.money(record.costCents, record.currency)}</ThemedText>
+                ) : null}
+                <IconButton
+                  icon="trash"
+                  color={theme.textSecondary}
+                  accessibilityLabel={t('vehicle.deleteServiceTitle')}
+                  onPress={() => confirmDeleteService(record)}
+                />
+              </CardRow>
             ))
           )}
         </Card>
