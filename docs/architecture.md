@@ -19,7 +19,7 @@ Screens depend on domain and lib; domain depends on nothing. That keeps the rule
 1. The device is the only store: every read and write goes to the local SQLite database, so every feature works with no signal.
 2. Nothing is uploaded. There is no account, no sync and no server; rows keep `created_at`, `updated_at` and `deleted_at` so soft deletes stay reversible and a future export or backup has a complete picture.
 3. Reminders are computed on device from the local data (`computeVehicleDueStatuses`) and scheduled as local notifications, so they fire offline.
-4. Shop search is the only network call: the device asks the places API directly and caches results.
+4. Two optional features use the network, nothing else: the vehicle form asks the free NHTSA vPIC API for model lists and VIN decoding (typing a model by hand still works), and shop search asks the places API directly and caches results.
 
 Status: domain rules, i18n, and local SQLite storage for vehicles, service records, shops and expenses exist. Notifications, export and the shop finder are upcoming slices.
 
