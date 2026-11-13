@@ -19,7 +19,7 @@ import {
   compareDueStatuses,
   computeVehicleDueStatuses,
   describeVehicle,
-  resolveSchedule,
+  resolveVehicleSchedule,
   toIsoDate,
   type DueStatus,
   type Vehicle,
@@ -41,7 +41,7 @@ async function loadGarage(db: Db): Promise<GarageEntry[]> {
   return Promise.all(
     vehicles.map(async (vehicle) => {
       const records = await listServiceRecords(db, vehicle.id);
-      const statuses = computeVehicleDueStatuses(resolveSchedule(vehicle.powertrain), vehicle, records, today);
+      const statuses = computeVehicleDueStatuses(resolveVehicleSchedule(vehicle), vehicle, records, today);
       return { vehicle, statuses };
     }),
   );

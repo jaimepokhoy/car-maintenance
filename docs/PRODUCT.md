@@ -28,7 +28,7 @@ Plain-language best-practice guidance per maintenance item (what, why, typical i
 
 ## Capabilities and Constraints
 
-Confirmed and built: multi-vehicle garage (VIN decode via NHTSA vPIC, year/make/model pickers, nickname, trim, plate, tire size, gas/hybrid/EV), service log with cost and shop, default maintenance schedule per powertrain with due status (overdue, due soon, OK, not logged), seasonal tire set and provincial changeover reminders, guidance card per item, cost summaries, CSV export, saved shops and nearby shop search (Google Places, needs an API key), language and unit preferences.
+Confirmed and built: multi-vehicle garage (VIN decode via NHTSA vPIC, year/make/model pickers, nickname, trim, plate, tire size, gas/hybrid/EV), service log with cost and shop, default maintenance schedule per powertrain with due status (overdue, due soon, OK, not logged) and manufacturer normal-duty schedules for major makes, seasonal tire set and provincial changeover reminders, guidance card per item, an expenses ledger covering all ownership costs, cost summaries and a vehicle report card, CSV export, saved shops and nearby shop search (Google Places, needs an API key), language and unit preferences.
 
 Not built (do not imply in UI): camera VIN scanning, receipt photos or OCR, account sign-in or cloud backup, booking, in-app search of shops, filter chips for shops, recall alerts.
 

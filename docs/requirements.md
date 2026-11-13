@@ -31,21 +31,22 @@ A free mobile app where any Canadian car owner can keep every vehicle's service 
 |---|---|
 | Garage | Add multiple vehicles by VIN (camera barcode scan or typed, decoded via the free NHTSA vPIC API, which covers most North American vehicles) or by year/make/model. Nickname, photo, current odometer. Gas, hybrid or EV. |
 | Service log | Record a service: type, date, odometer, cost, shop or DIY, notes, receipt photo. Edit and delete. |
-| Maintenance schedule | Default schedule per powertrain with editable intervals in km and/or months. Gas: oil, tire rotation, brakes, filters, fluids, battery. EV: no oil; tires, brake fluid, cabin filter, coolant, 12V battery, HV battery health checks. |
+| Maintenance schedule | Default schedule per powertrain with editable intervals in km and/or months. Where the make is on file, the manufacturer's normal-duty schedule replaces the generic one (with the owner's manual named as the final word). Gas: oil, tire rotation, brakes, filters, fluids, battery. EV: no oil; tires, brake fluid, cabin filter, coolant, 12V battery, HV battery health checks. |
 | Seasonal tires | Spring and fall reminders for winter tire changeover, with which set is on the car. (Quebec requires winter tires Dec 1 to Mar 15.) |
 | Best-practice guidance | A short plain-language card for each maintenance item: what it is, why it matters, typical interval, rough cost in CAD, DIY or shop. Main differentiator from a plain logbook. |
 | Low-effort input | VIN scan, one-tap "done today" on a due item, remembered shops and typical costs. |
 | Reminders | Push notification when an item is due soon or overdue, whichever of date or km comes first. Periodic nudge to update the odometer. |
 | Dashboard | Per vehicle: due next, overdue, last service of each type. |
 | Shop finder | Map and list of nearby auto repair shops with rating, hours, distance; call, get directions, save as "my shop", and link a logged service to a shop. Data from a places API (Google Places by default), with results cached to keep a free app's API bill low. No booking. |
-| Costs | Total and per-category spend per vehicle, per year. |
+| Costs | Total and per-category spend per vehicle, per year. Every other ownership cost (fuel, insurance, registration, repairs, tires, parking, tolls, wash, other) can be logged with an optional odometer reading and is combined with service costs in the totals. |
+| Report card | A 0–100 care score and cost-of-ownership summary built from maintenance put in and money spent: up-to-date vs due soon vs overdue vs not logged, total invested, cost per 1,000 km. Clearly labelled as a maintenance score, not a market valuation. |
 | Export | Share a vehicle's service history as PDF or CSV (useful when selling). |
 | Account | Sign in with Apple, Google or email; data backed up to the cloud and synced across devices. Delete account and all data from inside the app. |
 
 ## 4. Not in v1 (candidates for later)
 
 - **v1.1:** receipt OCR auto-fill (answers the manual-input concern), recall alerts (Transport Canada recalls database), French UI.
-- **Later:** shop booking (needs shop partnerships), OBD-II / connected-car odometer sync, manufacturer-exact schedules, fuel and efficiency tracking, shared garages for families, web app, US launch.
+- **Later:** shop booking (needs shop partnerships), OBD-II / connected-car odometer sync, fuel and efficiency tracking, shared garages for families, web app, US launch.
 
 ## 5. Non-functional requirements
 

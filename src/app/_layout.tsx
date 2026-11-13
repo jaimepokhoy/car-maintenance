@@ -109,6 +109,18 @@ function AppShell() {
           name="vehicles/[id]/odometer"
           options={{ presentation: 'modal', title: t('odometerForm.title') }}
         />
+        <Stack.Screen
+          name="vehicles/[id]/expenses"
+          options={{ title: t('expenses.title') }}
+        />
+        <Stack.Screen
+          name="vehicles/[id]/expense"
+          options={{ presentation: 'modal', title: t('expenses.add') }}
+        />
+        <Stack.Screen
+          name="vehicles/[id]/report"
+          options={{ title: t('report.title') }}
+        />
         <Stack.Screen name="guide/[item]" options={{ presentation: 'modal', title: '' }} />
       </Stack>
     </ThemeProvider>

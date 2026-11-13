@@ -17,8 +17,10 @@ import type { Db } from '@/db/types';
 import { getVehicle } from '@/db/vehicles';
 import {
   computeDueStatus,
+  defaultSchedule,
   GUIDANCE,
-  resolveSchedule,
+  manufacturerSchedule,
+  resolveVehicleSchedule,
   toIsoDate,
   type DiyLevel,
   type MaintenanceItemId,
@@ -46,17 +48,22 @@ export default function GuideScreen() {
     async (db: Db) => {
       const vehicle = id ? await getVehicle(db, id) : null;
       if (!vehicle) return null;
-      const owned = resolveSchedule(vehicle.powertrain).find((i) => i.itemId === item);
+      const owned = resolveVehicleSchedule(vehicle).find((i) => i.itemId === item);
       if (!owned) return null;
       const records = await listServiceRecords(db, vehicle.id);
-      return { vehicle, status: computeDueStatus(owned, vehicle, records, toIsoDate(new Date())) };
+      return {
+        vehicle,
+        interval: owned,
+        status: computeDueStatus(owned, vehicle, records, toIsoDate(new Date())),
+      };
     },
     [id, item],
   );
   const { data: owned } = useDbQuery(load);
   const ownedColors = useDueStateColors(owned?.status.state ?? 'ok');
   const guidance = GUIDANCE[item];
-  const interval = resolveSchedule(powertrain).find((i) => i.itemId === item);
+  const interval = owned?.interval ?? defaultSchedule(powertrain).find((i) => i.itemId === item);
+  const maker = owned ? manufacturerSchedule(owned.vehicle) : undefined;
   if (!guidance) return <ThemedView style={styles.flex} />;
 
   const limits = [
@@ -135,6 +142,11 @@ export default function GuideScreen() {
         <ThemedText type="caption" themeColor="textSecondary">
           {t('guidance.disclaimer')}
         </ThemedText>
+        {maker ? (
+          <ThemedText type="caption" themeColor="textSecondary">
+            {t('guidance.scheduleSource', { make: maker.label, source: maker.source })}
+          </ThemedText>
+        ) : null}
 
         {owned ? (
           <Card style={styles.owned}>
