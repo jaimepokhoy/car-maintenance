@@ -135,14 +135,22 @@ export async function updateTireSet(db: Db, id: string, tireSet: TireSet, now: D
 }
 
 /**
- * Soft deletes the vehicle and its service history, so the deletion can sync
- * to other devices and the history drops out of totals and exports.
+ * Soft deletes the vehicle, its service history and its expenses, so the
+ * deletion can sync to other devices and the history drops out of totals and
+ * exports.
  */
 export async function deleteVehicle(db: Db, id: string, now: Date): Promise<void> {
   const timestamp = now.toISOString();
   await db.withTransactionAsync(async () => {
     await db.runAsync(
       `UPDATE service_records SET deleted_at = ?, updated_at = ?, dirty = 1
+       WHERE vehicle_id = ? AND deleted_at IS NULL`,
+      timestamp,
+      timestamp,
+      id,
+    );
+    await db.runAsync(
+      `UPDATE expenses SET deleted_at = ?, updated_at = ?, dirty = 1
        WHERE vehicle_id = ? AND deleted_at IS NULL`,
       timestamp,
       timestamp,

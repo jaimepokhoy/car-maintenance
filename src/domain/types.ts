@@ -67,3 +67,32 @@ export interface ServiceRecord {
   shopId?: string;
   notes?: string;
 }
+
+/**
+ * Everything an owner pays for that isn't a logged maintenance job: fuel,
+ * insurance, plates, parking and the rest. Services stay in service records;
+ * spend summaries read both so the totals cover the whole cost of ownership.
+ */
+export type ExpenseCategory =
+  | 'fuel'
+  | 'insurance'
+  | 'registration'
+  | 'repairs'
+  | 'tires'
+  | 'parking'
+  | 'tolls'
+  | 'wash'
+  | 'other';
+
+export interface Expense {
+  id: string;
+  vehicleId: string;
+  category: ExpenseCategory;
+  incurredOn: IsoDate;
+  amountCents: number;
+  currency?: CurrencyCode;
+  /** Optional, but it keeps distance-based costs and reminders accurate. */
+  odometerKm?: number;
+  shopId?: string;
+  notes?: string;
+}
