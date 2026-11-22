@@ -37,7 +37,6 @@ A free mobile app where any Canadian car owner can keep every vehicle's service 
 | Low-effort input | VIN scan, one-tap "done today" on a due item, remembered shops and typical costs. |
 | Reminders | Push notification when an item is due soon or overdue, whichever of date or km comes first. Periodic nudge to update the odometer. |
 | Dashboard | Per vehicle: due next, overdue, last service of each type. |
-| Shop finder | Map and list of nearby auto repair shops with rating, hours, distance; call, get directions, save as "my shop", and link a logged service to a shop. Data from a places API (Google Places by default), with results cached to keep a free app's API bill low. No booking. |
 | Costs | Total and per-category spend per vehicle, per year. Every other ownership cost (fuel, insurance, registration, repairs, tires, parking, tolls, wash, other) can be logged with an optional odometer reading and is combined with service costs in the totals. |
 | Report card | A 0–100 care score and cost-of-ownership summary built from maintenance put in and money spent: up-to-date vs due soon vs overdue vs not logged, total invested, cost per 1,000 km. Clearly labelled as a maintenance score, not a market valuation. |
 | Export | Share a vehicle's service history as PDF or CSV (useful when selling). |
@@ -46,16 +45,17 @@ A free mobile app where any Canadian car owner can keep every vehicle's service 
 ## 4. Not in v1 (candidates for later)
 
 - **v1.1:** receipt OCR auto-fill (answers the manual-input concern), recall alerts (Transport Canada recalls database), French UI.
+- **Cut:** the shop finder (nearby shops via Google Places, saved "my shop"). The owner decided not to ship it; logged services keep any shop already linked to them.
 - **Later:** shop booking (needs shop partnerships), OBD-II / connected-car odometer sync, fuel and efficiency tracking, shared garages for families, web app, US launch.
 
 ## 5. Non-functional requirements
 
 - One codebase for iOS and Android.
-- Offline-first: everything except the shop finder works with no signal, and nothing depends on a server.
+- Offline-first: everything works with no signal except the optional vPIC model and VIN lookups, and nothing depends on a server.
 - Canada defaults: km, CAD, Canadian date format. Units and currency changeable per user.
 - **Language:** all UI strings go through an i18n layer from day one. English at launch; French before any push into Quebec, where French-language requirements likely apply.
-- **Privacy:** VIN, location and receipts are personal data. PIPEDA-aligned privacy policy, data never uploaded, no selling or sharing data, location used only while the shop finder is open.
-- **Cost:** no server to pay for, so the only running cost is the places API; cap and cache those calls.
+- **Privacy:** VIN and receipts are personal data. PIPEDA-aligned privacy policy, data never uploaded, no selling or sharing data.
+- **Cost:** no server and no paid APIs, so running cost is near zero.
 - Accessibility: dynamic type, screen reader labels, sufficient contrast.
 
 ## 6. Tech stack (agreed)
@@ -64,7 +64,6 @@ A free mobile app where any Canadian car owner can keep every vehicle's service 
 - **Backend:** none. No accounts, no sync, no server-side data.
 - **Local data:** SQLite on the device is the only store; it is the source of truth.
 - **Notifications:** Expo Notifications scheduled locally so reminders work offline.
-- **Maps and places:** react-native-maps plus Google Places API.
 - **Quality gates:** TypeScript strict, ESLint, Jest unit tests, Maestro end-to-end flows, GitHub Actions CI on every PR.
 
 ## 7. How we build it with AI
@@ -95,4 +94,3 @@ With Jaime as the only builder, the setup is: Jaime is product owner and reviewe
 - GitHub (repo for the code)
 - Apple Developer Program (US$99/year) and Google Play Console (US$25 one-time)
 - Expo account (free tier is enough to start)
-- Google Cloud account with Places API enabled (has a monthly free usage allowance)

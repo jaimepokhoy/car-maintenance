@@ -19,9 +19,9 @@ Screens depend on domain and lib; domain depends on nothing. That keeps the rule
 1. The device is the only store: every read and write goes to the local SQLite database, so every feature works with no signal.
 2. Nothing is uploaded. There is no account, no sync and no server; rows keep `created_at`, `updated_at` and `deleted_at` so soft deletes stay reversible and a future export or backup has a complete picture.
 3. Reminders are computed on device from the local data (`computeVehicleDueStatuses`) and scheduled as local notifications, so they fire offline.
-4. Two optional features use the network, nothing else: the vehicle form asks the free NHTSA vPIC API for model lists and VIN decoding (typing a model by hand still works), and shop search asks the places API directly and caches results.
+4. One optional feature uses the network, nothing else: the vehicle form asks the free NHTSA vPIC API for model lists and VIN decoding (typing a model by hand still works). The nearby shop finder was cut (see Shops below).
 
-Status: domain rules, i18n, and local SQLite storage for vehicles, service records, shops and expenses exist. Notifications, export and the shop finder are upcoming slices.
+Status: domain rules, i18n, and local SQLite storage for vehicles, service records, shops and expenses exist. Notifications and export are upcoming slices.
 
 Data-layer functions in `src/db/` take a `Db` (a subset of expo-sqlite's API) so tests run them against Node's built-in SQLite via `src/test-utils/memory-db.ts`.
 
@@ -45,8 +45,7 @@ Data-layer functions in `src/db/` take a `Db` (a subset of expo-sqlite's API) so
 - `evaluateVehicle` in `src/domain/evaluation.ts` turns the logged history into a 0–100 care score: half for keeping tracked items up to date (an item due soon counts half) and half for how much of the schedule has any history. A vehicle with nothing logged has no score.
 - It also reports the spend totals, the distance covered by the logged readings, cost per 1,000 km, and the most urgent tracked item. It is a maintenance-hygiene score, not a market valuation, and the screen says so.
 
-## Shop finder
+## Shops
 
-- Nearby search uses Google Places API (New) `searchNearby` with type `car_repair`, 10 km around the phone's location (`src/lib/places.ts`). Results are cached in memory for 30 minutes per ~1 km area to keep API costs down; nothing from search is written to disk.
-- Saving a shop stores its place ID plus the name, address and phone the owner chose to keep (`shops` table). Service records link to a saved shop through `shop_id`.
-- Location permission is asked only when the owner taps "Allow location"; the app never reads location in the background.
+- **The shop finder has been cut and is not shipping.** The Shops tab, nearby search (Google Places) and the guide's "Find a shop" button were removed.
+- The `shops` table and `src/db/shops.ts` stay: service records still link to a saved shop through `shop_id`, and the vehicle history and CSV export show that shop's name. The service form still offers any shops an owner saved before the cut.

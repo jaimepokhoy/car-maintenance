@@ -11,7 +11,7 @@ npm install
 npx expo start
 ```
 
-Scan the QR code with the Expo Go app on your phone. Nearby shop search needs a Google Places key: copy `.env.example` to `.env.local` and fill it in. Everything else works offline with nothing configured.
+Scan the QR code with the Expo Go app on your phone. Nothing needs configuring: everything is stored on the device.
 
 ## Checks
 

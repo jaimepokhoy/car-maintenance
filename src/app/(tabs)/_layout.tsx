@@ -5,9 +5,8 @@ import { Icon, type IconName } from '@/components/icon';
 import { TabBar } from '@/components/tab-bar';
 import { useTheme } from '@/hooks/use-theme';
 
-const TABS: { name: string; label: 'tabs.garage' | 'tabs.shops' | 'tabs.settings'; icon: IconName }[] = [
+const TABS: { name: string; label: 'tabs.garage' | 'tabs.settings'; icon: IconName }[] = [
   { name: 'index', label: 'tabs.garage', icon: 'car' },
-  { name: 'shops', label: 'tabs.shops', icon: 'pin' },
   { name: 'settings', label: 'tabs.settings', icon: 'settings' },
 ];
 
