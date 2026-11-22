@@ -2,7 +2,7 @@ import { Link, router, Stack, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
@@ -18,6 +18,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { CardGlow } from '@/components/vehicle-art';
 import { Spacing } from '@/constants/theme';
+import { listExpenses } from '@/db/expenses';
 import { deleteServiceRecord, listServiceRecords } from '@/db/service-records';
 import { shopNames } from '@/db/shops';
 import type { Db } from '@/db/types';
@@ -27,12 +28,12 @@ import {
   daysBetween,
   describeDuration,
   describeVehicle,
+  evaluateVehicle,
   intervalProgress,
   nextTireReminder,
   remainingLimits,
-  resolveSchedule,
+  resolveVehicleSchedule,
   TIRE_SETS,
-  summarizeCosts,
   toIsoDate,
   type DueStatus,
   type ServiceRecord,
@@ -59,15 +60,22 @@ export default function VehicleScreen() {
   const load = useCallback(
     async (db: Db) => {
       const vehicle = await getVehicle(db, id);
-      if (!vehicle) return { vehicle: null, statuses: [], records: [], shops: new Map<string, string>() };
-      const records = await listServiceRecords(db, id);
+      if (!vehicle)
+        return {
+          vehicle: null,
+          statuses: [],
+          records: [],
+          expenses: [],
+          shops: new Map<string, string>(),
+        };
+      const [records, expenses] = await Promise.all([listServiceRecords(db, id), listExpenses(db, id)]);
       const statuses = computeVehicleDueStatuses(
-        resolveSchedule(vehicle.powertrain),
+        resolveVehicleSchedule(vehicle),
         vehicle,
         records,
         toIsoDate(new Date()),
       );
-      return { vehicle, statuses, records, shops: await shopNames(db) };
+      return { vehicle, statuses, records, expenses, shops: await shopNames(db) };
     },
     [id],
   );
@@ -82,8 +90,10 @@ export default function VehicleScreen() {
     );
   }
 
-  const { vehicle, statuses, records } = data;
-  const costs = summarizeCosts(records, toIsoDate(new Date()));
+  const { vehicle, statuses, records, expenses } = data;
+  const today = toIsoDate(new Date());
+  const evaluation = evaluateVehicle(vehicle, statuses, records, expenses, today);
+  const costs = evaluation.spend;
   const urgent = statuses.find((s) => s.state === 'overdue' || s.state === 'due_soon');
 
   async function changeTires(tireSet: TireSet) {
@@ -104,17 +114,19 @@ export default function VehicleScreen() {
         })();
 
   function confirmDeleteService(record: ServiceRecord) {
+    const remove = async () => {
+      await deleteServiceRecord(db, record.id, new Date());
+      refreshReminders(db);
+      reload();
+    };
+    // Alert.alert is a no-op on react-native-web.
+    if (Platform.OS === 'web') {
+      if (window.confirm(t('vehicle.deleteServiceTitle'))) remove();
+      return;
+    }
     Alert.alert(t('vehicle.deleteServiceTitle'), undefined, [
       { text: t('vehicle.cancel'), style: 'cancel' },
-      {
-        text: t('vehicle.deleteService'),
-        style: 'destructive',
-        onPress: async () => {
-          await deleteServiceRecord(db, record.id, new Date());
-          refreshReminders(db);
-          reload();
-        },
-      },
+      { text: t('vehicle.deleteService'), style: 'destructive', onPress: remove },
     ]);
   }
 
@@ -208,6 +220,21 @@ export default function VehicleScreen() {
           ) : null}
         </Card>
 
+        <Card style={styles.between}>
+          <View style={styles.flex}>
+            <ThemedText type="label" themeColor="textSecondary">
+              {t('report.score')}
+            </ThemedText>
+            <ThemedText type="numeral">{evaluation.score ?? '–'}</ThemedText>
+            <ThemedText type="caption" themeColor="textSecondary">
+              {evaluation.grade ? t(`report.grade.${evaluation.grade}`) : t('report.noHistory')}
+            </ThemedText>
+          </View>
+          <Link href={{ pathname: '/vehicles/[id]/report', params: { id: vehicle.id } }} asChild>
+            <Button title={t('report.viewReport')} variant="secondary" size="small" />
+          </Link>
+        </Card>
+
         <SectionLabel>{t('vehicle.maintenance')}</SectionLabel>
         <Card variant="list">
           {statuses.map((status, index) => (
@@ -245,60 +272,73 @@ export default function VehicleScreen() {
             </CardRow>
           ) : (
             records.map((record, index) => (
-              <Pressable
-                key={record.id}
-                accessibilityRole="button"
-                accessibilityHint={t('vehicle.deleteServiceTitle')}
-                onLongPress={() => confirmDeleteService(record)}>
-                <CardRow last={index === records.length - 1}>
-                  <View style={styles.flex}>
-                    <ThemedText type="bodyStrong">
-                      {record.itemIds.map((itemId) => t(`items.${itemId}`)).join(', ')}
-                    </ThemedText>
-                    <ThemedText type="caption" themeColor="textSecondary">
-                      {[
-                        format.date(record.performedOn),
-                        format.distance(record.odometerKm),
-                        record.shopId ? data.shops.get(record.shopId) : undefined,
-                        record.notes,
-                      ]
-                        .filter(Boolean)
-                        .join(' · ')}
-                    </ThemedText>
-                  </View>
-                  {record.costCents !== undefined ? (
-                    <ThemedText type="numeralCompact">{format.money(record.costCents, record.currency)}</ThemedText>
-                  ) : null}
-                </CardRow>
-              </Pressable>
+              <CardRow key={record.id} last={index === records.length - 1}>
+                <View style={styles.flex}>
+                  <ThemedText type="bodyStrong">
+                    {record.itemIds.map((itemId) => t(`items.${itemId}`)).join(', ')}
+                  </ThemedText>
+                  <ThemedText type="caption" themeColor="textSecondary">
+                    {[
+                      format.date(record.performedOn),
+                      format.distance(record.odometerKm),
+                      record.shopId ? data.shops.get(record.shopId) : undefined,
+                      record.notes,
+                    ]
+                      .filter(Boolean)
+                      .join(' · ')}
+                  </ThemedText>
+                </View>
+                {record.costCents !== undefined ? (
+                  <ThemedText type="numeralCompact">{format.money(record.costCents, record.currency)}</ThemedText>
+                ) : null}
+                <IconButton
+                  icon="trash"
+                  color={theme.textSecondary}
+                  accessibilityLabel={t('vehicle.deleteServiceTitle')}
+                  onPress={() => confirmDeleteService(record)}
+                />
+              </CardRow>
             ))
           )}
         </Card>
 
-        {costs.pricedCount > 0 ? (
-          <Card style={styles.grid}>
-            {(
-              [
-                ['costs.thisYear', costs.thisYearCents],
-                ['costs.last12Months', costs.last12MonthsCents],
-                ['costs.monthlyAverage', costs.monthlyAverageCents],
-                ['costs.allTime', costs.totalCents],
-              ] as const
-            ).map(([label, cents]) => (
-              <View key={label} style={styles.cell}>
-                <ThemedText type="label" themeColor="textSecondary">
-                  {t(label)}
+        <Card>
+          {costs.pricedCount > 0 ? (
+            <View style={styles.grid}>
+              {(
+                [
+                  ['costs.thisYear', costs.thisYearCents],
+                  ['costs.last12Months', costs.last12MonthsCents],
+                  ['costs.monthlyAverage', costs.monthlyAverageCents],
+                  ['costs.allTime', costs.totalCents],
+                ] as const
+              ).map(([label, cents]) => (
+                <View key={label} style={styles.cell}>
+                  <ThemedText type="label" themeColor="textSecondary">
+                    {t(label)}
+                  </ThemedText>
+                  <ThemedText type="numeralCompact">{format.money(cents, 'CAD')}</ThemedText>
+                </View>
+              ))}
+              {costs.unpricedCount > 0 ? (
+                <ThemedText type="caption" themeColor="textSecondary" style={styles.span}>
+                  {t('costs.unpriced', { count: costs.unpricedCount })}
                 </ThemedText>
-                <ThemedText type="numeralCompact">{format.money(cents, 'CAD')}</ThemedText>
-              </View>
-            ))}
-            {costs.unpricedCount > 0 ? (
-              <ThemedText type="caption" themeColor="textSecondary" style={styles.span}>
-                {t('costs.unpriced', { count: costs.unpricedCount })}
-              </ThemedText>
-            ) : null}
-          </Card>
-        ) : null}
+              ) : null}
+            </View>
+          ) : (
+            <ThemedText type="caption" themeColor="textSecondary">
+              {t('costs.empty')}
+            </ThemedText>
+          )}
+          <Link href={{ pathname: '/vehicles/[id]/expenses', params: { id: vehicle.id } }} asChild>
+            <Button
+              title={t('expenses.viewAll')}
+              variant="secondary"
+              icon={<Icon name="receipt" size={18} color={theme.text} />}
+            />
+          </Link>
+        </Card>
 
         {vehicle.licencePlate || vehicle.tireSize ? (
           <Card style={styles.grid}>
