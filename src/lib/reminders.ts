@@ -10,7 +10,7 @@ import {
   formatDate,
   formatDistance,
   planReminders,
-  resolveSchedule,
+  resolveVehicleSchedule,
   toIsoDate,
   type DistanceUnit,
   type IsoDate,
@@ -113,7 +113,7 @@ export async function syncReminders(db: Db): Promise<void> {
   const inputs = await Promise.all(
     vehicles.map(async (vehicle) => {
       const records = await listServiceRecords(db, vehicle.id);
-      const statuses = computeVehicleDueStatuses(resolveSchedule(vehicle.powertrain), vehicle, records, today);
+      const statuses = computeVehicleDueStatuses(resolveVehicleSchedule(vehicle), vehicle, records, today);
       return { vehicle, statuses, records };
     }),
   );
