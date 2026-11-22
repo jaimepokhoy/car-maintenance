@@ -1,6 +1,7 @@
 /**
- * Model names for a make and model year, from NHTSA's free vPIC service. It
- * covers vehicles sold in North America, so Canadian models are included.
+ * Model names for a make, optionally narrowed to a model year, from NHTSA's
+ * free vPIC service. It covers vehicles sold in North America, so Canadian
+ * models are included.
  * Results are cached for the session. Callers fall back to typing the model
  * when this fails (no signal, or an unusual make).
  */
@@ -24,11 +25,21 @@ export function parseModelsResponse(body: unknown): string[] {
   return [...names].sort((a, b) => a.localeCompare(b, 'en', { numeric: true, sensitivity: 'base' }));
 }
 
-export async function fetchModels(make: string, year: number, fetchImpl: typeof fetch = fetch): Promise<string[]> {
-  const key = `${make.toLowerCase()}|${year}`;
+/**
+ * Every model vPIC knows for the make, or only that year's when `year` is
+ * given. The make-only lookup means owners see suggestions as soon as they
+ * pick a make, before they enter a year.
+ */
+export async function fetchModels(
+  make: string,
+  year: number | null = null,
+  fetchImpl: typeof fetch = fetch,
+): Promise<string[]> {
+  const key = `${make.toLowerCase()}|${year ?? ''}`;
   const cached = cache.get(key);
   if (cached) return cached;
-  const base = `${VPIC_URL}/make/${encodeURIComponent(make)}/modelyear/${year}/vehicletype`;
+  const yearPart = year === null ? '' : `/modelyear/${year}`;
+  const base = `${VPIC_URL}/make/${encodeURIComponent(make)}${yearPart}/vehicletype`;
   const settled = await Promise.allSettled(
     VEHICLE_TYPES.map(async (type) => {
       const response = await fetchImpl(`${base}/${type}?format=json`);

@@ -121,9 +121,9 @@
     "tireSizeHint": "Tire size is printed on the sidewall. Handy when you shop for winter tires.",
     "saveChanges": "Save changes",
     "models": {
-      "needsYear": "Enter the year and make to see models. You can also type yours.",
+      "needsMake": "Choose a make to see its models. You can also type yours.",
       "failed": "Couldn't load models. Check your connection, or type yours.",
-      "none": "No models found for this year. Type yours."
+      "none": "No models found. Type yours."
     }
   },
   "powertrain": {

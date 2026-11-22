@@ -47,6 +47,20 @@ describe('fetchModels', () => {
     );
   });
 
+  it('looks up every model for the make when there is no year', async () => {
+    const fetchImpl = jest.fn(async (_url: string) => response(body));
+    expect(await fetchModels('Honda', null, fetchImpl as unknown as typeof fetch)).toEqual(['CX-5', 'CX-50', 'Mazda3']);
+    expect(fetchImpl).toHaveBeenCalledWith(
+      'https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMakeYear/make/Honda/vehicletype/car?format=json',
+    );
+    expect(fetchImpl.mock.calls.every(([url]) => !url.includes('modelyear'))).toBe(true);
+    // Cached apart from any single year.
+    await fetchModels('honda', undefined, fetchImpl as unknown as typeof fetch);
+    expect(fetchImpl).toHaveBeenCalledTimes(3);
+    await fetchModels('Honda', 2024, fetchImpl as unknown as typeof fetch);
+    expect(fetchImpl).toHaveBeenCalledTimes(6);
+  });
+
   it('uses what it got when one type fails, without caching it', async () => {
     const fetchImpl = jest.fn(async (url: string) => response(body, !url.includes('/truck')));
     expect(await fetchModels('Mazda', 2023, fetchImpl as unknown as typeof fetch)).toEqual([

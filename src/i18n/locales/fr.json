@@ -121,9 +121,9 @@
     "tireSizeHint": "La dimension est inscrite sur le flanc du pneu. Pratique pour magasiner des pneus d'hiver.",
     "saveChanges": "Enregistrer les modifications",
     "models": {
-      "needsYear": "Entrez l'année et la marque pour voir les modèles. Vous pouvez aussi taper le vôtre.",
+      "needsMake": "Choisissez une marque pour voir ses modèles. Vous pouvez aussi taper le vôtre.",
       "failed": "Impossible de charger les modèles. Vérifiez votre connexion ou tapez le vôtre.",
-      "none": "Aucun modèle trouvé pour cette année. Tapez le vôtre."
+      "none": "Aucun modèle trouvé. Tapez le vôtre."
     }
   },
   "powertrain": {
