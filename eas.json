@@ -1,0 +1,54 @@
+{
+  "cli": {
+    "version": ">= 16.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "channel": "default-development",
+      "env": {
+        "TENANT": "default"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "channel": "default-preview",
+      "env": {
+        "TENANT": "default"
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "channel": "default",
+      "env": {
+        "TENANT": "default"
+      }
+    },
+    "demo-shop-development": {
+      "extends": "development",
+      "channel": "demo-shop-development",
+      "env": {
+        "TENANT": "demo-shop"
+      }
+    },
+    "demo-shop-preview": {
+      "extends": "preview",
+      "channel": "demo-shop-preview",
+      "env": {
+        "TENANT": "demo-shop"
+      }
+    },
+    "demo-shop-production": {
+      "extends": "production",
+      "channel": "demo-shop",
+      "env": {
+        "TENANT": "demo-shop"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

@@ -21,5 +21,9 @@ jobs:
         run: npm run lint
       - name: Test
         run: npm test -- --ci
-      - name: Bundle (iOS and Android)
+      - name: Bundle default tenant (iOS and Android)
         run: npx expo export --platform ios --platform android --output-dir dist
+      - name: Bundle demo-shop tenant (iOS and Android)
+        run: npx expo export --platform ios --platform android --output-dir dist/demo-shop
+        env:
+          TENANT: demo-shop
